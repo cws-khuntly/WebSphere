@@ -353,17 +353,37 @@ function logoutUser
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Distributing profile changes...";
 
         ## fix this shit
-        for HOST in $(/usr/bin/env cat ${HOME}/.ssh/config | grep HostName | /usr/bin/env awk '{print $NF}')
-        do
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST -> ${HOST}";
+        if [ -d ${HOME}/.ssh/config.d ]
+        then
+            for SSH_CONFIG_FILE in $(/usr/bin/env ls ${HOME}/.ssh/config.d/ | awk '{print $NF}')
+            do
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SSH_CONFIG_FILE -> ${SSH_CONFIG_FILE}";
 
-            /usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10 --temp-dir=/var/tmp \
-                --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" ${HOME} ${HOST}:/home;
+                for HOST in $(/usr/bin/env grep HostName ${HOME}/.ssh/config.d/${SSH_CONFIG_FILE} | /usr/bin/env grep -v network | /usr/bin/env awk '{print $NF}')
+                do
+                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST -> ${HOST}";
 
-            /usr/bin/env ssh -qtl ${HOST} "[ ! -d ~/.log ] && mkdir ~/.log; ~/.dotfiles/bin/install 2>&1 | tee -a ~/.log/install.out"
+                    /usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10 --temp-dir=/var/tmp \
+                        --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" ${HOME} ${HOST}:/home;
 
-            [ ! -z "${HOST}" ] && unset -v HOST;
-        done
+                    /usr/bin/env ssh -qtl ${HOST} "[ ! -d ~/.log ] && mkdir ~/.log; ~/.dotfiles/bin/install 2>&1 | tee -a ~/.log/install.out"
+
+                    [ ! -z "${HOST}" ] && unset -v HOST;
+                done
+            done
+        else
+            for HOST in $(/usr/bin/env grep HostName ${HOME}/.ssh/config | /usr/bin/env grep -v network | /usr/bin/env awk '{print $NF}')
+            do
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST -> ${HOST}";
+
+                /usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10 --temp-dir=/var/tmp \
+                    --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" ${HOME} ${HOST}:/home;
+
+                /usr/bin/env ssh -qtl ${HOST} "[ ! -d ~/.log ] && mkdir ~/.log; ~/.dotfiles/bin/install 2>&1 | tee -a ~/.log/install.out"
+
+                [ ! -z "${HOST}" ] && unset -v HOST;
+            done
+        fi
     fi
 
     ## clear terminal scrollback
