@@ -30,7 +30,7 @@
 [alias]
 
 [commit]
-	#gpgsign = true
+	gpgsign = true
 
 [credential]
 	username = cws-khuntly
