@@ -46,13 +46,13 @@ alias ff='/usr/bin/env find . -type f';
 alias fd='/usr/bin/env find . -type d';
 alias clearScroll='/usr/bin/env printf "\033c"';
 alias cpuTimeSlice="/usr/bin/env sar -p | /usr/bin/env tail -11 | /usr/bin/env head -10 | /usr/bin/env awk '{print $NF}' | /usr/bin/env awk '{total += $1; count++} END {print total / count}'";
-alias icanhazip='/usr/bin/env dig +short @resolver1.opensdns.com myip.opendns.com';
-# dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/"//g'
+alias icanhazip='/usr/bin/env dig +short @resolver1.opendns.com myip.opendns.com';
 alias sshd='/usr/bin/env ssh -F ~/.ssh/config.dev';
 alias scpd='/usr/bin/env scp -F ~/.ssh/config.dev';
 alias fortune='/usr/bin/env fortune -a -e -o';
 alias bofh='/usr/bin/env fortune -a -e -o bofh-excuses';
 alias ipv4sort='/usr/bin/env sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4';
+alias minicom='/usr/bin/env sudo -u root minicom -s /dev/ttyS0';
 alias reload='. ${HOME}/.profile';
 
 ## script tracing
