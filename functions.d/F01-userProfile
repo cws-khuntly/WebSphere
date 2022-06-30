@@ -21,7 +21,7 @@ function showHostInfo
 
     ## system information
     typeset HOST_SYSTEM_NAME="$(/usr/bin/env hostname -f | /usr/bin/env tr '[A-Z]' '[a-z]')";
-    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | grep "inet" | egrep -v "inet6|127.0.0.1" | awk '{print $2}')";
+    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | /usr/bin/env grep "inet" | /usr/bin/env egrep -v "inet6|127.0.0.1" | /usr/bin/env awk '{print $2}')";
     typeset HOST_KERNEL_VERSION="$(/usr/bin/env uname -r)";
     typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env wc -l);
     typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
