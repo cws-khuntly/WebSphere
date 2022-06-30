@@ -1,7 +1,7 @@
 [user]
 	name = Kevin Huntly
 	email = kmhuntly@gmail.com
-	signingkey = 0x91DD8DB2B17C2CE1
+	signingkey = 0x0A5D32432C7C02ED
 
 [core]
 	autocrlf = true
@@ -30,7 +30,7 @@
 [alias]
 
 [commit]
-	#gpgsign = true
+	gpgsign = true
 
 [credential]
 	username = cws-khuntly
