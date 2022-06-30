@@ -339,6 +339,7 @@ function logoutUser
     [ ! -z "$(/usr/bin/env ps -ef | grep keychain | grep -v grep)" ] && /usr/bin/env keychain -k all;
 
     [ -f ${HOME}/.mysql_history ] && /usr/bin/env rm -f ${HOME}/.mysql_history
+    [ -f ${HOME}/.ssh/ssh-agent.env ] && /usr/bin/rm -f ${HOME}/.ssh/ssh-agent.env;
     [ -f ${HOME}/.keychain/${HOSTNAME}-sh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-sh;
     [ -f ${HOME}/.keychain/${HOSTNAME}-csh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-csh;
     [ -f ${HOME}/.keychain/${HOSTNAME}-fsh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-fish;
