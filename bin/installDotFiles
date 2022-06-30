@@ -136,7 +136,7 @@ function cleanAndDeployFiles
     do
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
 
-    	[ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME};
+    	[ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
     	typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
