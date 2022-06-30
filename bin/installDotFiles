@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #==============================================================================
 #
-#          FILE:  profile
-#         USAGE:  . ~/profile
+#          FILE:  installDotFiles
+#         USAGE:  ./installDotFiles <hostname> <username>
 #   DESCRIPTION:
 #
 #       OPTIONS:  ---
@@ -134,12 +134,19 @@ function cleanAndDeployFiles
     fi
 
     ## copy ssh keys
-    /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/id_rsa.pub ${1};
+    [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/id_rsa.pub ${HOSTNAME} || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/id_rsa.pub ${USERNAME}@${HOSTNAME};
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
     cd ${HOME}/.dotfiles; /usr/bin/env tar cf ${HOME}/dotfiles.tar *; ## create the archive
-    /usr/bin/env ssh -ql ${LOGNAME} ${1} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
-    /usr/bin/env scp -q ${HOME}/dotfiles.tar ${LOGNAME}@${1}:${HOME}/dotfiles.tar; ## send the new one
+    if [ -z "${USERNAME}" ]
+    then
+        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
+        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${LOGNAME}@${HOSTNAME}:${HOME}/dotfiles.tar; ## send the new one
+    else
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
+        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${USERNAME}@${HOSTNAME}:${HOME}/dotfiles.tar; ## send the new one
+    fi
+
     typeset -i RET_CODE=${?};
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
@@ -171,8 +178,15 @@ function cleanAndDeployFiles
     fi
 
     ## ok, files should be out there. lets go
-    /usr/bin/env ssh -ql ${LOGNAME} ${1} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env rm -rf ${HOME}/.dotfiles; /usr/bin/env mkdir ${HOME}/.dotfiles; cd ${HOME}/.dotfiles; \
-        /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles install;";
+    if [ -z "${USERNAME}" ]
+    then
+        /usr/bin/env ssh -ql ${LOGNAME} ${1} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env rm -rf ${HOME}/.dotfiles; /usr/bin/env mkdir ${HOME}/.dotfiles; cd ${HOME}/.dotfiles; \
+            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles install;";
+    else
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env rm -rf ${HOME}/.dotfiles; /usr/bin/env mkdir ${HOME}/.dotfiles; cd ${HOME}/.dotfiles; \
+            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles install;";
+    fi
+
     typeset -i RET_CODE=${?};
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
@@ -342,9 +356,9 @@ function installFiles
 
     ## ssh keys (if they don't already exist AND this host requires them)
     [ ! -f ${HOME}/.ssh/known_hosts ] && touch -f ${HOME}/.ssh/known_hosts;
-    [ ! -f ${HOME}/.ssh/id_rsa -a -f ${HOME}/.ssh/known_hosts ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
-    [ ! -f ${HOME}/.ssh/id_dsa -a -f ${HOME}/.ssh/known_hosts ] && /usr/bin/env ssh-keygen -t dsa -b 1024 -N "" -C "" -f ${HOME}/.ssh/id_dsa;
-    [ ! -f ${HOME}/.ssh/id_ecdsa -a -f ${HOME}/.ssh/known_hosts ] && /usr/bin/env ssh-keygen -t ecdsa -b 521 -N "" -C "" -f ${HOME}/.ssh/id_ecdsa;
+    [ ! -f ${HOME}/.ssh/id_rsa ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
+    [ ! -f ${HOME}/.ssh/id_dsa ] && /usr/bin/env ssh-keygen -t dsa -b 1024 -N "" -C "" -f ${HOME}/.ssh/id_dsa;
+    [ ! -f ${HOME}/.ssh/id_ecdsa ] && /usr/bin/env ssh-keygen -t ecdsa -b 521 -N "" -C "" -f ${HOME}/.ssh/id_ecdsa;
 
     ## remove tarfile
     [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar";
@@ -369,8 +383,8 @@ function installFiles
     return ${RETURN_CODE};
 }
 
-if [ ${#} -eq 0 ]
-then
+function usage
+{
     typeset -i RETURN_CODE=3;
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
@@ -393,9 +407,39 @@ then
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
     exit ${RETURN_CODE};
-fi
+}
 
-case "${1}" in
-    "install") installFiles; [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar"; exit ${?}; ;;
-    *) cleanAndDeployFiles ${1}; [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar"; exit ${?}; ;;
-esac
+[ ${#} -eq 0 ] && usage;
+
+while getopts h:u: OPTIONS
+do
+    case "${OPTIONS}" in
+        h)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting HOSTNAME..";
+
+            typeset HOSTNAME=${OPTARG};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "HOSTNAME -> ${HOSTNAME}";
+            ;;
+        u)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting USERNAME..";
+
+            typeset USERNAME=${OPTARG};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "USERNAME -> ${USERNAME}";
+            ;;
+        *)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "${METHOD_NAME} -> exit";
+
+            usage;
+            ;;
+    esac
+done
+
+shift $(( ${OPTIND} - 1 ))
+
+[ ! -z "${HOSTNAME}" ] && cleanAndDeployFiles ${HOSTNAME} ${USERNAME} || installFiles;
+
+[ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar";
