@@ -1,7 +1,7 @@
 [user]
 	name = Kevin Huntly
 	email = kmhuntly@gmail.com
-	signingkey = 0x0A5D32432C7C02ED
+	signingkey = 0xE89E8DCDC02E35B0
 
 [core]
 	autocrlf = true
@@ -50,3 +50,4 @@
 
 [push]
 	default = simple
+
