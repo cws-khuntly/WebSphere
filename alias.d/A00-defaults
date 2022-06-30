@@ -50,8 +50,8 @@ alias curl='/usr/bin/env curl --dump-header ${HOME}/.log/curl-headers';
 alias xlaunch='nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.xlaunch &';
 
 ## make some customizations IF the command exists
-[ $(command -v vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
-[ $(command -v colordiff > /dev/null; echo ${?}) -eq 0 ] && alias diff='/usr/bin/env colordiff';
+[ $(/usr/bin/env command -v vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
+[ $(/usr/bin/env command -v colordiff > /dev/null; echo ${?}) -eq 0 ] && alias diff='/usr/bin/env colordiff';
 
 case $(uname) in
     [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
