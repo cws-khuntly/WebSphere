@@ -21,7 +21,7 @@ function showHostInfo
 
     ## system information
     typeset HOST_SYSTEM_NAME="$(/usr/bin/env hostname -f | /usr/bin/env tr '[A-Z]' '[a-z]')";
-    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | /usr/bin/env egrep inet | /usr/bin/env egrep -v "127.0.0.1/8" | /usr/bin/env head -1 | /usr/bin/env awk '{print $2}')";
+    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | grep "inet" | egrep -v "inet6|127.0.0.1" | awk '{print $2}')";
     typeset HOST_KERNEL_VERSION="$(/usr/bin/env uname -r)";
     typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env wc -l);
     typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
@@ -59,7 +59,7 @@ function showHostInfo
     printf "\n" >&2;
     printf "%s\n" "+----------------------- User Information --------------------------+" >&2;
     printf "%-14s : %-10s\n" "+ Username" "${LOGNAME}" >&2;
-    printf "%-14s : %-10s %sMB %s\n" "+ Disk Usage" "You're currently using" "${USER_DISKUSAGE}" "in ${HOME}" >&2;
+    printf "%-14s : %-10s %sMB %s\n" "+ Disk Usage" "You're currently using" "${USER_DISK_USAGE}" "in ${HOME}" >&2;
     printf "%-14s : %s of which %s are yours\n" "+ Processes" "${SYSTEM_PROCESS_COUNT}" "${USER_PROCESS_COUNT}" >&2;
     printf "+-------------------------------------------------------------------+" >&2;
     printf "\n" >&2;
