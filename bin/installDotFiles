@@ -136,8 +136,8 @@ function cleanAndDeployFiles
     do
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
 
-    	[ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
-    	typeset -i RET_CODE=${?};
+        [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
+        typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
 
@@ -161,8 +161,8 @@ function cleanAndDeployFiles
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
         /usr/bin/env scp -q ${HOME}/dotfiles.tar ${LOGNAME}@${HOSTNAME}:${HOME}/dotfiles.tar; ## send the new one
     else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
-        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${USERNAME}@${HOSTNAME}:${HOME}/dotfiles.tar; ## send the new one
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && /usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar"; ## remove it if it exists
+        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${USERNAME}@${HOSTNAME}:/home/${USERNAME}/dotfiles.tar; ## send the new one
     fi
 
     typeset -i RET_CODE=${?};
@@ -201,8 +201,8 @@ function cleanAndDeployFiles
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; cd ${HOME}/.dotfiles; \
             /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
     else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; cd ${HOME}/.dotfiles; \
-            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; cd /home/${USERNAME}/.dotfiles; \
+            /usr/bin/env tar xf /home/${USERNAME}/dotfiles.tar; /home/${USERNAME}/.dotfiles/bin/installDotFiles -a install;";
     fi
 
     typeset -i RET_CODE=${?};
