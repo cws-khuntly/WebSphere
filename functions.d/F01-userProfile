@@ -352,6 +352,7 @@ function logoutUser
     then
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Distributing profile changes...";
 
+        ## fix this shit
         for HOST in $(/usr/bin/env cat ${HOME}/.ssh/config | grep HostName | /usr/bin/env awk '{print $NF}')
         do
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST -> ${HOST}";
@@ -383,7 +384,10 @@ function logoutUser
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
     ## if screen is running, detach
-    [ $(/usr/bin/env screen -ls | grep -q pts) ] && /usr/bin/env screen -d;
+    if [ ! -z "$(/usr/bin/env which screen 2>/dev/null)" ]
+    then
+        [ $(/usr/bin/env screen -ls | grep -q pts) ] && /usr/bin/env screen -d;
+    fi
 
     ## terminate the session
     ## SOME OF US DONT WANT KSH AS A SHELL BUT ARE FORCED.

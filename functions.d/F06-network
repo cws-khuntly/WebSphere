@@ -131,12 +131,12 @@ function wake
 }
 
 #=====  FUNCTION  =============================================================
-#          NAME:  validateServerAvailability
+#          NAME:  validateHostAvailability
 #   DESCRIPTION:  Validates that a given host exists in DNS and is alive
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function validateServerAvailability
+function validateHostAvailability
 {
     typeset SCRIPT_NAME="F06-network";
     typeset FUNCTION_NAME="${FUNCNAME[0]}";
@@ -203,11 +203,21 @@ function validateServerAvailability
                             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping \"${VALIDATE_HOSTNAME}\" 1 > /dev/null 2>&1";
 
                             /usr/bin/env ping "${VALIDATE_HOSTNAME}" 1 > /dev/null 2>&1;
+                            typeset -i RET_CODE=${?};
+
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                            return ${RET_CODE};
                             ;;
                         *)
                             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1";
 
                             /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
+                            typeset -i RET_CODE=${?};
+
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                            return ${RET_CODE};
                             ;;
                     esac
                     ;;
@@ -308,12 +318,12 @@ function validateServerAvailability
 
                                 [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
 
-                                continue;
+                                break;
                             fi
                             ;;
                         *)
-                            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table. Unable to determine availability.";
-                            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table. Unable to determine availability.";
+                            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table or within local DNS. Unable to determine availability.";
+                            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table or within local DNS. Unable to determine availability.";
 
                             (( ERROR_COUNT += 1 ));
 
@@ -327,8 +337,8 @@ function validateServerAvailability
                     then
                         typeset RETURN_CODE=1;
 
-                        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
-                        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
+                        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to locate a valid entry for ${VALIDATE_HOSTNAME}. Unable to determine availability.";
+                        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to locate a valid entry for ${VALIDATE_HOSTNAME}. Unable to determine availability.";
 
                         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
                         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
@@ -1332,7 +1342,7 @@ function checkSslExpiry
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        validateServerAvailability "${SITE_HOSTNAME}" ${SITE_PORT};
+        validateHostAvailability "${SITE_HOSTNAME}" ${SITE_PORT};
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;

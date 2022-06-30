@@ -53,6 +53,7 @@ alias scpd='/usr/bin/env scp -F ~/.ssh/config.dev';
 alias fortune='/usr/bin/env fortune -a -e -o';
 alias bofh='/usr/bin/env fortune -a -e -o bofh-excuses';
 alias ipv4sort='/usr/bin/env sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4';
+alias reload='. ${HOME}/.profile';
 
 ## script tracing
 alias debug='typeset -x ENABLE_DEBUG="true"';
@@ -65,23 +66,21 @@ alias notrace='typeset -x ENABLE_TRACE="false"';
 alias noperf='typeset -x ENABLE_PERFORMANCE="false"';
 
 ## expect
-alias scp.exp="${HOME}/.lib/scp.exp";
-alias ssh.exp="${HOME}/.lib/ssh.exp";
-alias ssh-copy-id.exp="${HOME}/.lib/sshCopyIdentity.exp";
-alias sudo.exp="${HOME}/.lib/sudo.exp";
-alias rsync.exp="${HOME}/.lib/rsync.exp";
-alias gpg.exp="${HOME}/.lib/gpg.exp";
-alias keychain.exp="${HOME}/.lib/keychain.exp";
-alias telnet.exp="${HOME}/.lib/telnet.exp";
+alias scp.exp='${HOME}/.lib/scp.exp';
+alias ssh.exp='${HOME}/.lib/ssh.exp';
+alias ssh-copy-id.exp='${HOME}/.lib/sshCopyIdentity.exp';
+alias sudo.exp='${HOME}/.lib/sudo.exp';
+alias rsync.exp='${HOME}/.lib/rsync.exp';
+alias gpg.exp='${HOME}/.lib/gpg.exp';
+alias keychain.exp='${HOME}/.lib/keychain.exp';
+alias telnet.exp='${HOME}/.lib/telnet.exp';
 
 case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
     [Kk][Ss][Hh])
-        alias reload='. ${HOME}/.kshrc';
         alias shell='selectProfile';
         alias listFunctions="typeset -f | grep function | awk '{print \$NF}'";
         ;;
     [Bb][Aa][Ss][Hh])
-        alias reload='. ${HOME}/.bash_profile';
         alias shell='selectProfile';
         alias listFunctions="compgen -A function";
         ;;

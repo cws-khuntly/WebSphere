@@ -79,9 +79,7 @@ function cleanAndDeployFiles
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
 
-        writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} - Clean and transfer dotfiles";
-        writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Usage: ${METHOD_NAME} [ host ]
-                -> The host to connect to";
+        usage;
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -102,7 +100,7 @@ function cleanAndDeployFiles
     [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
-    validateServerAvailability ${1};
+    validateHostAvailability ${HOSTNAME};
     typeset -i RET_CODE=${?};
 
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
@@ -113,8 +111,8 @@ function cleanAndDeployFiles
     then
         typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${1} does not appear to exist in DNS. Unable to determine availability.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${1} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -134,10 +132,30 @@ function cleanAndDeployFiles
     fi
 
     ## copy ssh keys
-    [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/id_rsa.pub ${HOSTNAME} || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/id_rsa.pub ${USERNAME}@${HOSTNAME};
+    for KEYFILE in id_rsa id_dsa id_ecdsa ## handle all, not just rsa
+    do
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
+
+    	[ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME};
+    	typeset -i RET_CODE=${?};
+
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
+
+        if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
+        then
+            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${HOSTNAME}";
+            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${HOSTNAME}";
+
+            typeset -i RET_CODE=0;
+
+            continue;
+        fi
+    done
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    cd ${HOME}/.dotfiles; /usr/bin/env tar cf ${HOME}/dotfiles.tar *; ## create the archive
+    ## for some stupid ass reason /usr/bin/env cd breaks this fucking line
+    cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
+
     if [ -z "${USERNAME}" ]
     then
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
@@ -157,8 +175,8 @@ function cleanAndDeployFiles
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to create or copy dotfiles to remote host.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to create or copy dotfiles to remote host.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -180,11 +198,11 @@ function cleanAndDeployFiles
     ## ok, files should be out there. lets go
     if [ -z "${USERNAME}" ]
     then
-        /usr/bin/env ssh -ql ${LOGNAME} ${1} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env rm -rf ${HOME}/.dotfiles; /usr/bin/env mkdir ${HOME}/.dotfiles; cd ${HOME}/.dotfiles; \
-            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles install;";
+        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; cd ${HOME}/.dotfiles; \
+            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
     else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env rm -rf ${HOME}/.dotfiles; /usr/bin/env mkdir ${HOME}/.dotfiles; cd ${HOME}/.dotfiles; \
-            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles install;";
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; cd ${HOME}/.dotfiles; \
+            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
     fi
 
     typeset -i RET_CODE=${?};
@@ -316,7 +334,7 @@ function installFiles
                 [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Directory ${ENTRY_SOURCE} created";
                 ;;
             "ln")
-                echo "${ENTRY_TARGET}"
+
                 [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Removing symbolic link ${ENTRY_TARGET}";
 
                 [ -L $(eval echo "${ENTRY_TARGET}") ] && /usr/bin/env unlink $(eval echo "${ENTRY_TARGET}");
@@ -356,10 +374,13 @@ function installFiles
     typeset -x IFS="${IFS}";
 
     ## ssh keys (if they don't already exist AND this host requires them)
-    [ ! -f ${HOME}/.ssh/known_hosts ] && touch -f ${HOME}/.ssh/known_hosts;
-    [ ! -f ${HOME}/.ssh/id_rsa ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
-    [ ! -f ${HOME}/.ssh/id_dsa ] && /usr/bin/env ssh-keygen -t dsa -b 1024 -N "" -C "" -f ${HOME}/.ssh/id_dsa;
-    [ ! -f ${HOME}/.ssh/id_ecdsa ] && /usr/bin/env ssh-keygen -t ecdsa -b 521 -N "" -C "" -f ${HOME}/.ssh/id_ecdsa;
+    if [ -z "${HOSTNAME}" ]
+    then
+        [ ! -f ${HOME}/.ssh/known_hosts ] && touch -f ${HOME}/.ssh/known_hosts;
+        [ ! -f ${HOME}/.ssh/id_rsa ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
+        [ ! -f ${HOME}/.ssh/id_dsa ] && /usr/bin/env ssh-keygen -t dsa -b 1024 -N "" -C "" -f ${HOME}/.ssh/id_dsa;
+        [ ! -f ${HOME}/.ssh/id_ecdsa ] && /usr/bin/env ssh-keygen -t ecdsa -b 521 -N "" -C "" -f ${HOME}/.ssh/id_ecdsa;
+    fi
 
     ## remove tarfile
     [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar";
@@ -412,7 +433,7 @@ function usage
 
 [ ${#} -eq 0 ] && usage;
 
-while getopts h:u: OPTIONS
+while getopts h:u:l:a: OPTIONS
 do
     case "${OPTIONS}" in
         h)
@@ -431,9 +452,23 @@ do
 
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "USERNAME -> ${USERNAME}";
             ;;
-        *)
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "${METHOD_NAME} -> exit";
+        l)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting DOTFILES_LOCATION..";
 
+            typeset DOTFILES_LOCATION=${OPTARG};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "DOTFILES_LOCATION -> ${DOTFILES_LOCATION}";
+            ;;
+        a)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting ACTION..";
+
+            typeset ACTION=${OPTARG};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "ACTION -> ${ACTION}";
+            ;;
+        *)
             usage;
             ;;
     esac
@@ -441,6 +476,13 @@ done
 
 shift $(( ${OPTIND} - 1 ))
 
-[ ! -z "${HOSTNAME}" ] && cleanAndDeployFiles ${HOSTNAME} ${USERNAME} || installFiles;
+[ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Beginning installation of dotfiles...";
 
-[ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar";
+if [ ! -z "${ACTION}" -a "${ACTION}" == "install" ]
+then
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing installFiles";
+
+    installFiles;
+else
+    [ ! -z "${HOSTNAME}" ] && cleanAndDeployFiles "${HOSTNAME}" "${USERNAME}" || usage;
+fi
