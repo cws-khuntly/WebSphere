@@ -21,7 +21,13 @@
 
 [ ! -d /var/named ] && return;
 
-alias dnsadm="/usr/bin/env sudo -u root su - dnsadm";
+alias dnsadm='/usr/bin/env sudo -u root su - named';
+alias freeze='/usr/bin/env sudo -u named /usr/sbin/rndc freeze';
+alias thaw='/usr/bin/env sudo -u named /usr/sbin/rndc thaw';
+alias notify='/usr/bin/env sudo -u named /usr/sbin/rndc notify';
+alias reconfig='/usr/bin/env sudo -u named /usr/sbin/rndc reconfig';
+alias reload='/usr/bin/env sudo -u named /usr/sbin/rndc reload';
+alias editConfig='/usr/bin/env sudo /usr/bin/vi /etc/named.conf';
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
+[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = '${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

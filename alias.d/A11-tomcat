@@ -1,8 +1,8 @@
 #==============================================================================
 #
-#          FILE:  A08-db2
-#         USAGE:  . A08-db2
-#   DESCRIPTION:  Sets db2 functions and aliases
+#          FILE:  A09-named
+#         USAGE:  . A09-named
+#   DESCRIPTION:  Sets named functions and aliases
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -19,9 +19,9 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ ! -d /opt/ibm/db2 ] && return;
+[ ! -d /opt/Apache/tomcat ] && return;
 
-alias db2admin='/usr/bin/env sudo -u root su - db2adm';
+alias appadm='/usr/bin/env sudo su - appadm';
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

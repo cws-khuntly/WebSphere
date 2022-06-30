@@ -21,11 +21,11 @@
 
 [ ! -d /opt/ibm/ldap ] && return;
 
-alias ldapadmin="/usr/bin/env sudo -u root su - dvldids1";
-alias startldap="/usr/bin/env sudo -u root /usr/bin/env systemctl start ibm-directory-server";
-alias stopldap="/usr/bin/env sudo -u root /usr/bin/env systemctl stop ibm-directory-server";
-alias startadmin="/usr/bin/env sudo -u root /usr/bin/env systemctl start ibm-directory-admin";
-alias stopadmin="/usr/bin/env sudo -u root /usr/bin/env systemctl stop ibm-directory-admin";
+alias ldapadmin='/usr/bin/env sudo -u root su - ldapadm';
+alias startldap='/usr/bin/env sudo -u root /usr/bin/env systemctl start ibm-directory-server';
+alias stopldap='/usr/bin/env sudo -u root /usr/bin/env systemctl stop ibm-directory-server';
+alias startadmin='/usr/bin/env sudo -u root /usr/bin/env systemctl start ibm-directory-admin';
+alias stopadmin='/usr/bin/env sudo -u root /usr/bin/env systemctl stop ibm-directory-admin';
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
