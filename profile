@@ -18,6 +18,7 @@
 
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
+[ -f /etc/bashrc ] && . /etc/bashrc;
 [ -f "${HOME}/.etc/logging.properties" ] && . "${HOME}/.etc/logging.properties";
 [ -f "${HOME}/.lib/logger.sh" ] && . "${HOME}/.lib/logger.sh";
 
