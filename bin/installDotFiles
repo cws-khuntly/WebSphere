@@ -284,8 +284,8 @@ function installFiles
     /usr/bin/env find ${HOME}/.dotfiles -type d -exec /usr/bin/env chmod 755 {} \; ;
     /usr/bin/env find ${HOME}/.dotfiles -type f -exec /usr/bin/env chmod 644 {} \; ;
     /usr/bin/env chmod 755 ${HOME}/.dotfiles/bin/*; ## 755 on all files in bin
-    [ ! -d ${HOME}/.ssh ] && /usr/bin/env mkdir -pv ${HOME}/.ssh; /usr/bin/env chmod 700 ${HOME}/.ssh; ## ssh wants 700
-    [ ! -d ${HOME}/.gnupg ] && /usr/bin/env mkdir -pv ${HOME}/.gnupg; /usr/bin/env chmod 700 ${HOME}/.gnupg
+    [ ! -d ${HOME}/.ssh ] && /usr/bin/env mkdir -p ${HOME}/.ssh; /usr/bin/env chmod 700 ${HOME}/.ssh; ## ssh wants 700
+    [ ! -d ${HOME}/.gnupg ] && /usr/bin/env mkdir -p ${HOME}/.gnupg; /usr/bin/env chmod 700 ${HOME}/.gnupg
     /usr/bin/env chmod 600 ${HOME}/.dotfiles/m2/settings.xml ${HOME}/.dotfiles/etc/ldaprc ${HOME}/.dotfiles/etc/curlrc ${HOME}/.dotfiles/etc/netrc ${HOME}/.dotfiles/etc/wgetrc; ## 600 on all security related files
     /usr/bin/env chmod 600 ${HOME}/.dotfiles/etc/SecurityService/config/ServiceConfig.xml ${HOME}/.dotfiles/etc/eSolutionsCore/config/ServiceConfig.xml; ## 600 on all security related files
     /usr/bin/env chmod 600 ${HOME}/.dotfiles/config/subversion/servers ${HOME}/.dotfiles/config/subversion/config; ## 600 on all security related files
