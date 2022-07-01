@@ -887,7 +887,7 @@ function getSshKeys
                 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
                 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-                validateServerAvailability "${FULLY_QUALIFIED_NAME}" 22;
+                validateHostAvailability "${FULLY_QUALIFIED_NAME}" 22;
                 typeset -i RET_CODE=${?};
 
                 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
@@ -1789,7 +1789,7 @@ function fssh
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        validateServerAvailability "${TARGET_HOST}" 22 > /dev/null 2>&1;
+        validateHostAvailability "${TARGET_HOST}" 22 > /dev/null 2>&1;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
@@ -1960,7 +1960,7 @@ function fscp
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        validateServerAvailability "${TARGET_HOST}" 22;
+        validateHostAvailability "${TARGET_HOST}" 22;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;

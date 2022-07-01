@@ -852,12 +852,12 @@ function modifyAccountPassword
 
         if [ ! -z "${SETUP_NEW_SYSTEM}" ]
         then
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RUN COMMAND -> validateServerAvailability \"${TARGET_HOST}\" 22;";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RUN COMMAND -> validateHostAvailability \"${TARGET_HOST}\" 22;";
 
             [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
             [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-            validateServerAvailability "${TARGET_HOST}" 22;
+            validateHostAvailability "${TARGET_HOST}" 22;
             typeset -i RET_CODE=${?};
 
             [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
