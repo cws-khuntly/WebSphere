@@ -107,7 +107,7 @@ if { [ info exists CFGFILE ] } {
 } else {
     if { [ info exists EXEC ] } {
         if { [ string match -nocase $EXEC "shell" ] } {
-            set _SSH_COMMAND "/usr/bin/env ssh -qaCktl $USERNAME";
+            set _SSH_COMMAND "/usr/bin/env ssh -qaCktl $USERNAME $HOSTNAME";
         } else {
             set _SSH_COMMAND "/usr/bin/env ssh -qaCktl $USERNAME $HOSTNAME \"$EXEC\"";
         }
