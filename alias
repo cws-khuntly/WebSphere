@@ -58,6 +58,7 @@ then
     done
 fi
 
+[ ! -z "${DISTRIBUTION_NAME}" ] && unset -v DISTRIBUTION_NAME;
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
