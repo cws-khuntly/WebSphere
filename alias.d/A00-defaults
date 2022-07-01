@@ -35,6 +35,7 @@ alias rsync-tools='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links -
 alias rsync-remotes='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" --log-file=${HOME}/.log/rsync-remote.log'
 alias mailx='/usr/bin/env mailx';
 alias du='/usr/bin/env du -sh';
+alias df='/usr/bin/env df -h';
 alias netstat='/usr/bin/env netstat -an';
 alias ldapsearch='/usr/bin/env ldapsearch -W';
 alias ping='/usr/bin/env ping -c 4 -q -W ${THREAD_TIMEOUT}';
