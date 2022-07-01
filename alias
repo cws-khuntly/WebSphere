@@ -34,47 +34,18 @@ done
 
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
-case $(/usr/bin/env lsb_release -a | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}') in
-    Fedora)
-        for ALIAS in ${HOME}/.alias.d/Fedora/*
-        do
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
+## distribution specific aliases
+for ALIAS in ${HOME}/.alias.d/$(/usr/bin/env lsb_release -a 2>/dev/null | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}')/*
+do
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
 
-            [ -z "${ALIAS}" ] && continue;
-            [ -d "${ALIAS}" ] && continue;
+    [ -z "${ALIAS}" ] && continue;
+    [ -d "${ALIAS}" ] && continue;
 
-            [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
+    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
 
-            [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-        done
-        ;;
-    RedHat|RedHatEnterprise)
-        for ALIAS in ${HOME}/.alias.d/RedHat/*
-        do
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
-
-            [ -z "${ALIAS}" ] && continue;
-            [ -d "${ALIAS}" ] && continue;
-
-            [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
-
-            [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-        done
-        ;;
-    Arch)
-        for ALIAS in ${HOME}/.alias.d/Arch/*
-        do
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
-
-            [ -z "${ALIAS}" ] && continue;
-            [ -d "${ALIAS}" ] && continue;
-
-            [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
-
-            [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-        done
-        ;;
-esac
+    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
+done
 
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
