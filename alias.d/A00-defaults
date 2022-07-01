@@ -21,6 +21,7 @@
 
 ## defaults
 alias mountt='/usr/bin/env mount | column -t';
+alias mnt='/usrbin/env mount | /usr/bin/env awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | /usr/bin/env column -t | /usr/bin/env egrep ^/dev/ | /usr/bin/env sort'
 alias ls='/usr/bin/env ls -lhpF --color=auto';
 alias grep='/usr/bin/env grep --color=auto';
 alias egrep='/usr/bin/env egrep --color=auto';
@@ -49,6 +50,7 @@ alias sshfs='/usr/bin/env sshfs -o sshfs_sync,reconnect,no_readahead,idmap=user,
 alias apg='/usr/bin/env apg -M SNCL';
 alias curl='/usr/bin/env curl --dump-header ${HOME}/.log/curl-headers';
 alias xlaunch='/usr/bin/env nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.xlaunch &';
+alias ip='/usr/bin/env ip -br -c a';
 
 ## make some customizations IF the command exists
 [ $(/usr/bin/env command -v vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
