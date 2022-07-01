@@ -21,11 +21,11 @@
 
 [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] || [ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && return;
 
-[ ! -d "${HOME}/.keychain" ] && mkdir ${HOME}/.keychain;
+[ ! -d "${HOME}/.keychain" ] && /usr/bin/env mkdir ${HOME}/.keychain;
 
-[ -f "${HOME}/.keychain/${HOSTNAME}-sh" ] && rm -f "${HOME}/.keychain/${HOSTNAME}-sh";
-[ -f "${HOME}/.keychain/${HOSTNAME}-fish" ] && rm -f "${HOME}/.keychain/${HOSTNAME}-fish";
-[ -f "${HOME}/.keychain/${HOSTNAME}-csh" ] && rm -f "${HOME}/.keychain/${HOSTNAME}-csh";
+[ -f "${HOME}/.keychain/${HOSTNAME}-sh" ] && /usr/bin/env rm -f "${HOME}/.keychain/${HOSTNAME}-sh";
+[ -f "${HOME}/.keychain/${HOSTNAME}-fish" ] && /usr/bin/env rm -f "${HOME}/.keychain/${HOSTNAME}-fish";
+[ -f "${HOME}/.keychain/${HOSTNAME}-csh" ] && /usr/bin/env rm -f "${HOME}/.keychain/${HOSTNAME}-csh";
 
 case $(/usr/bin/env type keychain > /dev/null 2>&1; echo ${?}) in
     0)
