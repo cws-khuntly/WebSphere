@@ -34,26 +34,30 @@ done
 
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
-## look for any directories that might contain specifics
-for ALIAS in ${HOME}/.alias.d/*
-do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
+case $(/usr/bin/env lsb_release -a | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}') in
+    Fedora)
+        typeset DISTRIBUTION_NAME="Fedora"
+        ;;
+    Arch)
+        typeset DISTRIBUTION_NAME="Arch"
+        ;;
+esac
 
-    [ -z "${ALIAS}" ] && continue;
-    [ ! -d "${ALIAS}" ] && continue;
-
-    for ALIAS1 in ${ALIAS}/*
+if [ ! -z "${DISTRIBUTION_NAME}" ]
+then
+    for ALIAS in ${HOME}/.alias.d/${DISTRIBUTION_NAME}/*
     do
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS1} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS1}).${DATE_PATTERN}.log || . ${ALIAS1};
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
 
-        [ ! -z "${ALIAS1}" ] && unset -v ALIAS1;
+        [ -z "${ALIAS}" ] && continue;
+        [ -d "${ALIAS}" ] && continue;
+
+        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
+
+        [ ! -z "${ALIAS}" ] && unset -v ALIAS;
     done
+fi
 
-    [ ! -z "${ALIAS1}" ] && unset -v ALIAS1;
-    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-done
-
-[ ! -z "${ALIAS1}" ] && unset -v ALIAS1;
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;

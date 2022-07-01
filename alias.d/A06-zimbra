@@ -22,7 +22,6 @@
 [ ! -d /opt/zimbra ] && return;
 
 alias zimbra='/usr/bin/env sudo su - zimbra';
-alias ecuser='/usr/bin/env sudo su - ecuser';
 alias zmcontrol="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/zmcontrol < ~/.etc/sudo";
 alias zmprov="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/zmprov";
 alias zmysql="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/mysql -u zimbra < ~/.etc/sudo";

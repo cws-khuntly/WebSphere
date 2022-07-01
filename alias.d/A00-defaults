@@ -36,18 +36,18 @@ alias rsync-remotes='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links
 alias mailx='/usr/bin/env mailx';
 alias du='/usr/bin/env du -sh';
 alias netstat='/usr/bin/env netstat -an';
-alias ldapsearch="/usr/bin/env ldapsearch -W";
-alias ping="/usr/bin/env ping -c 4 -q -W ${THREAD_TIMEOUT}";
-alias mysql="/usr/bin/env mysql --protocol tcp -u ${LOGNAME} -p";
-alias nc="/usr/bin/env nc -w ${THREAD_TIMEOUT}";
+alias ldapsearch='/usr/bin/env ldapsearch -W';
+alias ping='/usr/bin/env ping -c 4 -q -W ${THREAD_TIMEOUT}';
+alias mysql='/usr/bin/env mysql --protocol tcp -u ${LOGNAME} -p';
+alias nc='/usr/bin/env nc -w ${THREAD_TIMEOUT}';
 alias jmap='/usr/bin/env jmap -dump:format=b,file=/var/tmp/dump.hprof';
-alias pssh="/usr/bin/env pssh -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -P -l ${LOGNAME} -h ~/.etc/pssh/hosts";
-alias prsync="/usr/bin/env prsync -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -l ${LOGNAME} -h ~/.etc/pssh/hosts";
+alias pssh='/usr/bin/env pssh -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -P -l ${LOGNAME} -h ~/.etc/pssh/hosts';
+alias prsync='/usr/bin/env prsync -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -l ${LOGNAME} -h ~/.etc/pssh/hosts';
 alias recode='/usr/bin/env recode -qt';
-alias sshfs="/usr/bin/env sshfs -o sshfs_sync,reconnect,no_readahead,idmap=user,umask=644,uid=$(/usr/bin/env id -u),gid=$(/usr/bin/env id -g)";
+alias sshfs='/usr/bin/env sshfs -o sshfs_sync,reconnect,no_readahead,idmap=user,umask=644,uid=$(/usr/bin/env id -u),gid=$(/usr/bin/env id -g)';
 alias apg='/usr/bin/env apg -M SNCL';
 alias curl='/usr/bin/env curl --dump-header ${HOME}/.log/curl-headers';
-alias xlaunch='nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.xlaunch &';
+alias xlaunch='/usr/bin/env nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.xlaunch &';
 
 ## make some customizations IF the command exists
 [ $(/usr/bin/env command -v vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
