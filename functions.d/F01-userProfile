@@ -497,7 +497,7 @@ function setupNewServer
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        validateServerAvailability "${ADD_HOST_NAME}" 22;
+        validateHostAvailability "${ADD_HOST_NAME}" 22;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
