@@ -20,7 +20,8 @@
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
 alias openssl='/usr/bin/env openssl';
-alias sha512sum='/usr/bin/env openssl sha512'
+alias sha512sum='/usr/bin/env openssl sha512';
+alias checkCSR='/usr/bin/env openssl req -text -noout -verify -in';
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

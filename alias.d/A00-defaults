@@ -21,7 +21,6 @@
 
 ## defaults
 alias mountt='/usr/bin/env mount | column -t';
-alias mnt='/usrbin/env mount | /usr/bin/env awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | /usr/bin/env column -t | /usr/bin/env egrep ^/dev/ | /usr/bin/env sort'
 alias ls='/usr/bin/env ls -lhpF --color=auto';
 alias grep='/usr/bin/env grep --color=auto';
 alias egrep='/usr/bin/env egrep --color=auto';
