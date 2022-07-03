@@ -156,13 +156,20 @@ function cleanAndDeployFiles
     ## for some stupid ass reason /usr/bin/env cd breaks this fucking line
     cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
 
+    ## make a temp file to store sftp commands in
+    typeset SFTP_BATCH="$(/usr/bin/env mktemp)";
+
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "SFTP_BATCH -> ${SFTP_BATCH}";
+
+    echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH}";
+
     if [ -z "${USERNAME}" ]
     then
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
-        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${LOGNAME}@${HOSTNAME}:${HOME}/dotfiles.tar; ## send the new one
+        /usr/bin/env sftp -b "${SFTP_BATCH}" ${LOGNAME}@${HOSTNAME};
     else
         /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && /usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar"; ## remove it if it exists
-        /usr/bin/env scp -q ${HOME}/dotfiles.tar ${USERNAME}@${HOSTNAME}:/home/${USERNAME}/dotfiles.tar; ## send the new one
+        /usr/bin/env sftp -b "${SFTP_BATCH}" ${USERNAME}@${HOSTNAME};
     fi
 
     typeset -i RET_CODE=${?};
