@@ -258,6 +258,9 @@ function cleanAndDeployFiles
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
+    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
+
+    [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
