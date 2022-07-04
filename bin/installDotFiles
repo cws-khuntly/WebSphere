@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #==============================================================================
 #
-#          FILE:  profile
-#         USAGE:  . ~/profile
+#          FILE:  installDotFiles
+#         USAGE:  See usage section
 #   DESCRIPTION:
 #
 #       OPTIONS:  ---
