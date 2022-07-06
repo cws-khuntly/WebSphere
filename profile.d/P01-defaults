@@ -42,10 +42,10 @@ typeset -x ENTROPY_FILE="${HOME}/.etc/entropy";
 typeset -ix ENTROPY_FILE_SIZE=16384;
 typeset -x SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
 
-case "$(uname)" in
+case "$(/usr/bin/env uname -s)" in
     [Cc][Yy][Gg]][Ww][Ii][Nn]*)
-        typeset -x PATHSEP=";";
         typeset -x TERM="ansi";
+        typeset -x PATHSEP=";";
         ;;
     [Ll][Ii]][Nn][Uu][Xx])
         typeset -x TERM="linux";

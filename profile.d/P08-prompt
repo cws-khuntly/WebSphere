@@ -32,7 +32,7 @@ typeset -x PS2="continue -> ";
 typeset -x PS3="Enter selection: ";
 typeset -x PS4="[ Line: ${LINENO} ] [ File: ${0} ] [ Function: ${FUNCNAME[0]:-${SHELL}} ] [ Level: TRACE ] - ";
 
-case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
+case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
     [Kk][Ss][Hh])
         PS1="";
 

@@ -27,8 +27,6 @@ alias ll.='/usr/bin/env ls -ltrdhpF .* --color=auto';
 alias li='/usr/bin/env ls -iltrhpF --color=auto';
 alias li.='/usr/bin/env ls -iltrahpF --color=auto';
 alias ld='/usr/bin/env ls -ldhpF --color=auto';
-alias kshn='/usr/bin/env ksh -n';
-alias kshnv='/usr/bin/env ksh -n -v';
 alias sizeof='/usr/bin/env du -sk';
 alias mktd='pushd $(/usr/bin/env mktemp)';
 alias listd='for inode in *; do [ -d ${inode} ] && echo "${inode}"; done';
@@ -70,7 +68,7 @@ alias gpg.exp='${HOME}/.lib/gpg.exp';
 alias keychain.exp='${HOME}/.lib/keychain.exp';
 alias telnet.exp='${HOME}/.lib/telnet.exp';
 
-case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
+case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
     [Kk][Ss][Hh])
         alias shell='selectProfile';
         alias listFunctions="typeset -f | grep function | awk '{print \$NF}'";

@@ -19,7 +19,7 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ -s "${HOME}/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" "${HOME}/.ssh/config" | grep -v "[?*]" | cut -d " " -f 2- | tr ' ' '\n')" scp sftp ssh;
+[ -s "${HOME}/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(/usr/bin/env grep "^Host" "${HOME}/.ssh/config" | /usr/bin/env grep -v "[?*]" | /usr/bin/env cut -d " " -f 2- | /usr/bin/env tr ' ' '\n')" scp sftp ssh;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

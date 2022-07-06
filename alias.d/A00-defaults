@@ -20,7 +20,7 @@
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
 ## defaults
-alias mountt='/usr/bin/env mount | column -t';
+alias mountt='/usr/bin/env mount | /usr/bin/env column -t';
 alias ls='/usr/bin/env ls -lhpF --color=auto';
 alias grep='/usr/bin/env grep --color=auto';
 alias egrep='/usr/bin/env grep -E --color=auto';

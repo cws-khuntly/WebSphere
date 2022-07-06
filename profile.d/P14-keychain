@@ -27,19 +27,17 @@
 [ -f "${HOME}/.keychain/${HOSTNAME}-fish" ] && /usr/bin/env rm -f "${HOME}/.keychain/${HOSTNAME}-fish";
 [ -f "${HOME}/.keychain/${HOSTNAME}-csh" ] && /usr/bin/env rm -f "${HOME}/.keychain/${HOSTNAME}-csh";
 
-case $(/usr/bin/env type keychain > /dev/null 2>&1; echo ${?}) in
-    0)
-        /usr/bin/env keychain --timeout 86400 --nocolor --nogui --quiet --quick --agents "ssh,gpg";
-        ;;
-    1)
-        /usr/bin/env ssh-agent > ~/.ssh/ssh-agent.env;
-        source ~/.ssh/ssh-agent.env;
+if [ ! -z "$(builtin command -v keychain)" ]
+then
+    /usr/bin/env keychain --timeout 86400 --nocolor --nogui --quiet --quick --agents "ssh,gpg";
+else
+    /usr/bin/env ssh-agent > ~/.ssh/ssh-agent.env;
+    source ~/.ssh/ssh-agent.env;
 
-        /usr/bin/env gpg-agent --daemon;
-        ;;
-esac
+    /usr/bin/env gpg-agent --daemon;
+fi
 
-case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
+case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
     [Ff][Ii][Ss][Hh])
         [ -f "${HOME}/.keychain/${HOSTNAME}-fish" ] && . "${HOME}/.keychain/${HOSTNAME}-fish";
         ;;
@@ -51,8 +49,7 @@ case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
         ;;
 esac
 
-[ ! -z "$(/usr/bin/env type expect > /dev/null 2>&1; echo ${?})" ] && /usr/bin/env expect -d -f ${HOME}/.lib/keychain 2>/dev/null;
+[ ! -z "$(builtin command -v expect)" ] && /usr/bin/env expect -d -f ${HOME}/.lib/keychain 2>/dev/null;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
-
