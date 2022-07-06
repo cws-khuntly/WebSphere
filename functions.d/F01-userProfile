@@ -21,9 +21,9 @@ function showHostInfo
 
     ## system information
     typeset HOST_SYSTEM_NAME="$(/usr/bin/env hostname -f | /usr/bin/env tr '[A-Z]' '[a-z]')";
-    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | /usr/bin/env grep "inet" | /usr/bin/env egrep -v "inet6|127.0.0.1" | /usr/bin/env awk '{print $2}')";
+    typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | /usr/bin/env grep "inet" | /usr/bin/env grep -E -v "inet6|127.0.0.1" | /usr/bin/env awk '{print $2}')";
     typeset HOST_KERNEL_VERSION="$(/usr/bin/env uname -r)";
-    typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env wc -l);
+    typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env grep "model name" | /usr/bin/env wc -l);
     typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
     typeset HOST_MEMORY_SIZE="$(echo $(( $(( $(/usr/bin/env egrep MemTotal /proc/meminfo | /usr/bin/env awk '{print $2}') / 1024 ^ 2 )) / 2 )) ) MB";
 
@@ -38,7 +38,7 @@ function showHostInfo
     ## user information
     typeset -i USER_DISK_USAGE=$(/usr/bin/env du -ms ${HOME}/ 2>/dev/null | /usr/bin/env awk '{print $1}');
     typeset -i SYSTEM_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env wc -l | /usr/bin/env awk '{print $1}');
-    typeset -i USER_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env egrep "${LOGNAME}" | /usr/bin/env wc -l);
+    typeset -i USER_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env grep "${LOGNAME}" | /usr/bin/env wc -l);
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "USER_DISK_USAGE -> ${USER_DISK_USAGE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SYSTEM_PROCESS_COUNT -> ${SYSTEM_PROCESS_COUNT}";
@@ -60,7 +60,7 @@ function showHostInfo
 
     /usr/bin/env printf "%s\n" "+---------------------- System Information -------------------------+" >&2;
     /usr/bin/env printf "%-16s : %-10s\n" "+ IP Address" "${HOST_IP_ADDRESS}" >&2;
-    /usr/bin/env printf "%-16s : %-10s\n" "+ Kernel version" "$(/usr/bin/env uname -r)" >&2;
+    /usr/bin/env printf "%-16s : %-10s\n" "+ Kernel version" "${HOST_KERNEL_VERSION}" >&2;
     /usr/bin/env printf "%-16s : %-10s\n" "+ CPU" "${HOST_CPU_COUNT} / ${HOST_CPU_INFO}" >&2;
     /usr/bin/env printf "%-16s : %-10s\n" "+ Memory" "${HOST_MEMORY_SIZE}" >&2;
     /usr/bin/env printf "%s\n" "+-------------------------------------------------------------------+" >&2;
@@ -123,69 +123,78 @@ function reloadDotfiles
 
     typeset -i ERROR_COUNT=0;
     typeset DOTFILES_HOME="${HOME}/.dotfiles";
-    typeset INSTALL_YAML="${DOTFILES_HOME}/etc/install.conf.yaml";
+    typeset INSTALL_CONF="${DOTFILES_HOME}/etc/install.conf";
     typeset CURR_IFS="${IFS}";
     typeset IFS=$'\n'
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "DOTFILES_HOME -> ${DOTFILES_HOME}";
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "INSTALL_YAML -> ${INSTALL_YAML}";
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "INSTALL_CONF -> ${INSTALL_CONF}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "CURR_IFS -> ${CURR_IFS}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "IFS -> ${IFS}";
 
-    for DIRECTORY_ENTRY in $(cat "${INSTALL_YAML}" | grep "mkdir" | cut -d "," -f 1 | cut -d "[" -f 2)
+    for ENTRY in $(<${INSTALL_CONF})
     do
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "DIRECTORY_ENTRY -> ${DIRECTORY_ENTRY}";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "ENTRY -> ${ENTRY}";
 
-        [ -z "${DIRECTORY_ENTRY}" ] && continue;
+        [[ "${ENTRY}" =~ ^\# ]] && continue;
 
-        writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Creating directory ${DIRECTORY_ENTRY}...";
+        typeset ENTRY_COMMAND="$(/usr/bin/env cut -d "|" -f 1 <<< "${ENTRY}")";
+        typeset ENTRY_SOURCE="$(/usr/bin/env cut -d "|" -f 2 <<< "${ENTRY}")";
+        typeset ENTRY_TARGET="$(/usr/bin/env cut -d "|" -f 3 <<< "${ENTRY}")";
 
-        if [ ! -d "${DIRECTORY_ENTRY}" ]
-        then
-            writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${DIRECTORY_ENTRY} does not currently exist. Creating.";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "ENTRY_COMMAND -> ${ENTRY_COMMAND}";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "ENTRY_SOURCE -> ${ENTRY_SOURCE}";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "ENTRY_TARGET -> ${ENTRY_TARGET}";
 
-            mkdir -p ${DIRECTORY_ENTRY} 1>>/${HOME}/.log/mkdir.out 2>${HOME}/.log/mkdir.err;
+        case "${ENTRY_COMMAND}" in
+            "mkdir")
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Creating directory ${ENTRY_SOURCE}";
 
-            if [ -d "${DIRECTORY_ENTRY}" ]
-            then
-                writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${DIRECTORY_ENTRY} created.";
-            else
-                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Failed to create directory ${DIRECTORY_ENTRY}";
-                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Failed to create directory ${DIRECTORY_ENTRY}";
+                /usr/bin/env mkdir -pv $(eval echo "${ENTRY_SOURCE}");
+                typeset RET_CODE=${?};
 
-                (( ERROR_COUNT += 1 ));
-            fi
-        fi
-    done
+                if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
+                then
+                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
 
-    for LINKED_ENTRY in $(cat "${INSTALL_YAML}" | grep "~/" | egrep -v "mkdir|dotfiles" | sed -e "s/^ *//g;s/ *$//g")
-    do
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "LINKED_ENTRY -> ${LINKED_ENTRY}";
+                    (( ERROR_COUNT += 1 ));
 
-        [ -z "${LINKED_ENTRY}" ] && continue;
+                    continue;
+                fi
 
-        typeset LINK_TARGET="$(cut -d ":" -f 1 <<< ${LINKED_ENTRY})";
-        typeset LINK_SOURCE="${DOTFILES_HOME}/$(cut -d ":" -f 2 <<< ${LINKED_ENTRY})";
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Directory ${ENTRY_SOURCE} created";
+                ;;
+            "ln")
 
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "LINKED_TARGET -> ${LINKED_TARGET}";
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "LINKED_SOURCE -> ${LINKED_SOURCE}";
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Removing symbolic link ${ENTRY_TARGET}";
 
-        if [ ! -L "${LINK_TARGET}" ]
-        then
-            writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Creating symbolic link for ${LINKED_SOURCE} to ${LINK_TARGET}..";
+                [ -L $(eval echo "${ENTRY_TARGET}") ] && /usr/bin/env unlink $(eval echo "${ENTRY_TARGET}");
+                [ -f $(eval echo "${ENTRY_TARGET}") ] && /usr/bin/env rm -f $(eval echo "${ENTRY_TARGET}");
 
-            ln -s ${LINKED_SOURCE} ${LINKED_TARGET} 1>>${HOME}/.log/link.out 2>>${HOME}/.log/link.err;
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Creating symbolic link ${ENTRY_SOURCE} -> ${ENTRY_TARGET}";
 
-            if [ -L "${LINKED_SOURCE}" ]
-            then
-                writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${LINKED_SOURCE} successfully linked to ${LINK_TARGET}";
-            else
-                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Failed to link ${LINKED_SOURCE} to ${LINK_TARGET}";
-                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Failed to link ${LINKED_SOURCE} to ${LINK_TARGET}";
+                /usr/bin/env ln -s $(eval echo "${ENTRY_SOURCE}") $(eval echo "${ENTRY_TARGET}");
+                typeset RET_CODE=${?};
 
-                (( ERROR_COUNT += 1 ));
-            fi
-        fi
+                if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
+                then
+                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
+
+                    (( ERROR_COUNT += 1 ));
+
+                    continue;
+                fi
+
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Symbolic link ${ENTRY_SOURCE} -> ${ENTRY_TARGET} created.";
+                ;;
+            *)
+                writeLogEntry "INFO" "${METHOD_NAME}" "${0}" "${LINENO}" "Skipping entry ${ENTRY_COMMAND}.";
+
+                continue;
+                ;;
+        esac
     done
 
     [ ${ERROR_COUNT} -ne 0 ] && typeset -i RETURN_CODE=${ERROR_COUNT} || typeset -i RETURN_CODE=0;
