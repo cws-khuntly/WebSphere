@@ -54,7 +54,7 @@ alias xlaunch='/usr/bin/env nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.
 [ $(builtin command -v vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
 [ $(builtin command -v colordiff > /dev/null; echo ${?}) -eq 0 ] && alias diff='/usr/bin/env colordiff';
 
-case $(uname) in
+case $(/usr/bin/env uname -s) in
     [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
         unalias ls; alias ls='/usr/ucb/ls';
         unalias ps; alias ps='/usr/ucb/ps -auxww';
@@ -62,6 +62,9 @@ case $(uname) in
         unalias grep; alias grep='/usr/xpg4/bin/grep -v grep';
         unalias egrep; alias egrep='/usr/xpg4/bin/egrep -v grep';
         unalias fgrep; alias fgrep='/usr/xpg4/bin/fgrep -v grep';
+        ;;
+    [Cc][Yy][Gg][Ww][Ii][Nn]*)
+        alias sudo='/usr/bin/env cygstart --action=runas';
         ;;
 esac
 

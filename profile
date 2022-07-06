@@ -67,7 +67,7 @@ fi
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.alias 2>&1 | tee -a ${LOG_ROOT}/load-aliases.${DATE_PATTERN}.log || . ${HOME}/.alias;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.functions 2>&1 | tee -a ${LOG_ROOT}/load-functions.${DATE_PATTERN}.log || . ${HOME}/.functions;
 
-[ ! -f /etc/profile.d/cws.sh ] && showHostInfo;
+showHostInfo;
 
 ## trap logout
 trap 'source ~/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
