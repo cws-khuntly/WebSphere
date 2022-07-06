@@ -322,11 +322,6 @@ function installFiles
 
         case "${ENTRY_COMMAND}" in
             "mkdir")
-                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Removing directory ${ENTRY_SOURCE}";
-
-                [ -d $(eval echo "${ENTRY_SOURCE}") ] && /usr/bin/env rm -rf $(eval echo "${ENTRY_SOURCE}");
-                [ -f $(eval echo "${ENTRY_SOURCE}") ] && /usr/bin/env rm -f $(eval echo "${ENTRY_SOURCE}");
-
                 [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Creating directory ${ENTRY_SOURCE}";
 
                 /usr/bin/env mkdir -p $(eval echo "${ENTRY_SOURCE}");
