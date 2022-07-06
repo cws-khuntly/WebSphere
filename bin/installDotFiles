@@ -324,12 +324,13 @@ function installFiles
             "mkdir")
                 [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Creating directory ${ENTRY_SOURCE}";
 
-                /usr/bin/env mkdir -p $(eval echo "${ENTRY_SOURCE}");
+                /usr/bin/env mkdir -pv $(eval echo "${ENTRY_SOURCE}");
                 typeset RET_CODE=${?};
 
                 if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
                 then
                     writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
 
                     (( ERROR_COUNT += 1 ));
 
@@ -353,6 +354,7 @@ function installFiles
                 if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
                 then
                     writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
 
                     (( ERROR_COUNT += 1 ));
 
