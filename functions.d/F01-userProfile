@@ -368,7 +368,7 @@ function logoutUser
     ## if screen is running, detach
     if [ ! -z "$(/usr/bin/env which screen 2>/dev/null)" ]
     then
-        [ $(/usr/bin/env screen -ls | grep -q pts) ] && /usr/bin/env screen -d;
+        /usr/bin/env screen -d;
     fi
 
     ## terminate the session
