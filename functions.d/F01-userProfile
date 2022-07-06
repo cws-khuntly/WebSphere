@@ -50,6 +50,9 @@ function showHostInfo
     printf "%s\n" "+-------------------------------------------------------------------+" >&2;
     printf "%40s\n" "Welcome to ${HOST_SYSTEM_NAME}" >&2;
     printf "%s\n" "+-------------------------------------------------------------------+" >&2;
+    printf "\n" >&2;
+    [ -f /etc/motd ] && /usr/bin/env cat /etc/motd;
+    printf "\n" >&2;
     printf "%s\n" "+---------------------- System Information -------------------------+" >&2;
     printf "%-16s : %-10s\n" "+ IP Address" "${HOST_IP_ADDRESS}" >&2;
     printf "%-16s : %-10s\n" "+ Kernel version" "$(uname -r)" >&2;
