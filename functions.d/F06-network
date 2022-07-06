@@ -222,7 +222,7 @@ function validateHostAvailability
                     esac
                     ;;
                 2)
-                    if [ ! -z "$(type nc 2>/dev/null | grep -v alias)" ]
+                    if [ ! -z "$(builtin type nc 2>/dev/null | /usr/bin/env grep -v alias)" ]
                     then
                         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
 
@@ -943,7 +943,7 @@ function setProxy
 
     while true
     do
-        reset; clear;
+        /usr/bin/env reset; /usr/bin/env clear;
 
         /usr/bin/env printf "\n";
         /usr/bin/env printf "%s\n" "+-------------------------------------------------------------------+";

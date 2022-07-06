@@ -31,7 +31,7 @@ typeset -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## Application constants
 typeset CNAME="$(/usr/bin/env basename "${0}")";
-typeset SCRIPT_ABSOLUTE_PATH="$(cd "${0%/*}" 2>/dev/null; echo "${PWD}/${0##*/}")";
+typeset SCRIPT_ABSOLUTE_PATH="$(builtin cd "${0%/*}" 2>/dev/null; echo "${PWD}/${0##*/}")";
 typeset SCRIPT_ROOT="$(/usr/bin/env dirname "${SCRIPT_ABSOLUTE_PATH}")";
 typeset METHOD_NAME="${CNAME}#startup";
 typeset -i ERROR_COUNT=0;
@@ -154,7 +154,7 @@ function cleanAndDeployFiles
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
     ## for some stupid ass reason /usr/bin/env cd breaks this fucking line
-    cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
+    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
     typeset SFTP_BATCH="$(/usr/bin/env mktemp)";
@@ -205,10 +205,10 @@ function cleanAndDeployFiles
     ## ok, files should be out there. lets go
     if [ -z "${USERNAME}" ]
     then
-        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; cd ${HOME}/.dotfiles; \
+        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; builtin cd ${HOME}/.dotfiles; \
             /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
     else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; cd /home/${USERNAME}/.dotfiles; \
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; builtin cd /home/${USERNAME}/.dotfiles; \
             /usr/bin/env tar xf /home/${USERNAME}/dotfiles.tar; /home/${USERNAME}/.dotfiles/bin/installDotFiles -a install;";
     fi
 

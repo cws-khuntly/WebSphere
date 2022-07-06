@@ -29,7 +29,7 @@ trap 'set -o bgnice; set +v; set +x' INT TERM EXIT;
 
 ## Application constants
 typeset CNAME="$(/usr/bin/env basename "${0}")";
-typeset SCRIPT_ABSOLUTE_PATH="$(cd "${0%/*}" 2>/dev/null; echo "${PWD}/${0##*/}")";
+typeset SCRIPT_ABSOLUTE_PATH="$(builtin cd "${0%/*}" 2>/dev/null; echo "${PWD}/${0##*/}")";
 typeset SCRIPT_ROOT="$(/usr/bin/env dirname "${SCRIPT_ABSOLUTE_PATH}")";
 typeset METHOD_NAME="${CNAME}#startup";
 

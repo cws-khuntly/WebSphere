@@ -257,7 +257,7 @@ function shred
 
     /usr/bin/env cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${FILENAME};
     /usr/bin/env shred -vzn 0 /dev/mapper/delete;
-    sync && sleep 4;
+    /usr/bin/env sync && sleep 4;
     /usr/bin/env cryptsetup remove delete;
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -444,16 +444,16 @@ function mktemp
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "TEMPORARY_DIRECTORY -> ${TEMPORARY_DIRECTORY}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "IS_MKTEMP_AVAILABLE -> ${IS_MKTEMP_AVAILABLE}";
 
-    case $(which mktemp > /dev/null 2>&1; echo ${?}) in
+    case $(builtin command mktemp > /dev/null 2>&1; echo ${?}) in
         0)
             /usr/bin/env mktemp;
             ;;
         *)
-            typeset FNAME=$(cat /dev/urandom | tr -dc "a-zA-Z0-9-_" | fold -w 9 | head -1);
+            typeset FNAME=$(/usr/bin/env cat /dev/urandom | /usr/bin/env tr -dc "a-zA-Z0-9-_" | /usr/bin/env fold -w 9 | /usr/bin/env head -1);
 
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "FNAME -> ${FNAME}";
 
-            touch ${TEMPORARY_DIRECTORY}/tmp.${FNAME};
+            /usr/bin/env touch ${TEMPORARY_DIRECTORY}/tmp.${FNAME};
 
             [ -f ${TEMPORARY_DIRECTORY}/tmp.${FNAME} ] && echo ${TEMPORARY_DIRECTORY}/tmp.${FNAME};
             ;;
@@ -560,7 +560,7 @@ function up
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "DIRECTORY -> ${DIRECTORY}";
     fi
 
-    cd "${DIRECTORY}";
+    builtin cd "${DIRECTORY}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -605,7 +605,7 @@ function tree
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> enter";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Provided arguments: ${*}";
 
-    [ "${1}" != "" ] && cd "${1}";
+    [ "${1}" != "" ] && builtin cd "${1}";
 
     pwd; find . -print | sed -e '/^\.$/d' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'; printf;
 
@@ -788,8 +788,8 @@ function mkcd
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "DIRECTORY -> ${DIRECTORY}";
 
-    mkdir -p "${DIRECTORY}";
-    cd "${DIRECTORY}";
+    /usrbin/env mkdir -p "${DIRECTORY}";
+    builtin cd "${DIRECTORY}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -1451,7 +1451,7 @@ function extract
             ;;
     esac
 
-    [ -d "${TARGET}" ] && cd "${TARGET}";
+    [ -d "${TARGET}" ] && builtin cd "${TARGET}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -1837,7 +1837,7 @@ function listProcessForPort
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "PID -> ${PID}";
 
         case $(uname) in
-            SunOS)
+            [Ss][Uu][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
                 /usr/bin/env pfiles ${PID} 2>/dev/null | /usr/xpg4/bin/grep -q "port: ${PORT_NUMBER}";
                 ;;
             *)
@@ -1948,9 +1948,9 @@ function returnEpochTime
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Nov -> ${Nov}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Dec -> ${Dec}";
 
-    typeset YEAR="$(awk '{print $1}' <<< "${1}")";
+    typeset YEAR="$(/usr/bin/env awk '{print $1}' <<< "${1}")";
     typeset MONTH="$(typeset MONTH_NAME="$(awk '{print $2}' <<< "2015 Apr 01")"; /usr/bin/env sed -e "s/${MONTH_NAME}/$(eval echo \${${MONTH_NAME}})/" <<< "${MONTH_NAME}")";
-    typeset DAY="$(awk '{print $3}' <<< "${1}")";
+    typeset DAY="$(/usr/bin/env awk '{print $3}' <<< "${1}")";
     [ ${#} -eq 2 ] && typeset -i FUTURE=${2};
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "YEAR -> ${YEAR}";

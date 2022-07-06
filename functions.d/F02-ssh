@@ -118,9 +118,9 @@ function buildSshConfig
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SYSTEM_HOST_NAME -> ${SYSTEM_HOST_NAME}";
 
         ## build management names
-        typeset MGMT_FULL_HOST_NAME="$(sed -e "s/o\./s\./;s/o-/s-/;s/-crs/-mgt/" <<< ${SYSTEM_HOST_NAME}).${HOST_DOMAIN_NAME}";
-        typeset MGMT_SHORT_HOST_NAME="$(sed -e "s/o\./s\./;s/o-/s-/;s/-crs/-mgt/" <<< ${SYSTEM_HOST_NAME})";
-        typeset MGMT_IP_ADDRESS="$(/usr/bin/env dig +short +noidentify -t a "${MGMT_FULL_HOST_NAME}" 2>/dev/null | sed -e "s/\.$//" | tr '\n' ' ' | sed -e "s/\.$//")";
+        typeset MGMT_FULL_HOST_NAME="$(/usr/bin/env sed -e "s/o\./s\./;s/o-/s-/;s/-crs/-mgt/" <<< ${SYSTEM_HOST_NAME}).${HOST_DOMAIN_NAME}";
+        typeset MGMT_SHORT_HOST_NAME="$(/usr/bin/env sed -e "s/o\./s\./;s/o-/s-/;s/-crs/-mgt/" <<< ${SYSTEM_HOST_NAME})";
+        typeset MGMT_IP_ADDRESS="$(/usr/bin/env dig +short +noidentify -t a "${MGMT_FULL_HOST_NAME}" 2>/dev/null | /usr/bin/env sed -e "s/\.$//" | tr '\n' ' ' | /usr/bin/env sed -e "s/\.$//")";
         [ "$(/usr/bin/env cut -d "-" -f 1 <<< "${MGMT_FULL_HOST_NAME}")" != "${MGMT_FULL_HOST_NAME}" ] && typeset MGMT_TERT_HOST_NAME="$(/usr/bin/env cut -d "-" -f 1 <<< "${MGMT_SHORT_HOST_NAME}")";
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "MGMT_FULL_HOST_NAME -> ${MGMT_FULL_HOST_NAME}";
@@ -136,9 +136,9 @@ function buildSshConfig
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ADD_HOST_NAMES -> ${ADD_HOST_NAMES[*]}";
 
         ## build operational names
-        typeset OPER_FULL_HOST_NAME="$(sed -e "s/s\./o\./;s/s-/o-/;s/-mgt/-crs/" <<< ${SYSTEM_HOST_NAME}).${HOST_DOMAIN_NAME}";
-        typeset OPER_SHORT_HOST_NAME="$(sed -e "s/s\./o\./;s/s-/o-/;s/-mgt/-crs/" <<< ${SYSTEM_HOST_NAME})";
-        typeset MGMT_IP_ADDRESS="$(/usr/bin/env dig +short +noidentify -t a "${OPER_FULL_HOST_NAME}" 2>/dev/null | sed -e "s/\.$//" | tr '\n' ' ' | sed -e "s/\.$//")";
+        typeset OPER_FULL_HOST_NAME="$(/usr/bin/env sed -e "s/s\./o\./;s/s-/o-/;s/-mgt/-crs/" <<< ${SYSTEM_HOST_NAME}).${HOST_DOMAIN_NAME}";
+        typeset OPER_SHORT_HOST_NAME="$(/usr/bin/env sed -e "s/s\./o\./;s/s-/o-/;s/-mgt/-crs/" <<< ${SYSTEM_HOST_NAME})";
+        typeset MGMT_IP_ADDRESS="$(/usr/bin/env dig +short +noidentify -t a "${OPER_FULL_HOST_NAME}" 2>/dev/null | /usr/bin/env sed -e "s/\.$//" | /usr/bin/env tr '\n' ' ' | /usr/bin/env sed -e "s/\.$//")";
         [ "$(/usr/bin/env cut -d "-" -f 1 <<< "${OPER_FULL_HOST_NAME}")" != "${OPER_FULL_HOST_NAME}" ] && typeset OPER_TERT_HOST_NAME="$(/usr/bin/env cut -d "-" -f 1 <<< "${OPER_SHORT_HOST_NAME}")";
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "OPER_FULL_HOST_NAME -> ${OPER_FULL_HOST_NAME}";
@@ -174,12 +174,12 @@ function buildSshConfig
     done
 
     ## combine and finalize
-    /usr/bin/env cat "${TEMPFILE}" "${SSH_CONFIG_TEMPLATE}" | sed -e "s/%USERNAME%/${USER_NAME}/" >> "${SSH_CONFIG_FILE}";
+    /usr/bin/env cat "${TEMPFILE}" "${SSH_CONFIG_TEMPLATE}" | /usr/bin/env sed -e "s/%USERNAME%/${USER_NAME}/" >> "${SSH_CONFIG_FILE}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
 
-    [ ! -z "${TEMPFILE}" -a -f "${TEMPFILE}" ] && rm -f "${TEMPFILE}";
+    [ ! -z "${TEMPFILE}" -a -f "${TEMPFILE}" ] && /usr/bin/env rm -f "${TEMPFILE}";
 
     [ ! -z "${TEMPFILE}" ] && unset -v TEMPFILE;
     [ ! -z "${SSH_CONFIG_TEMPLATE}" ] && unset -v SSH_CONFIG_TEMPLATE;
@@ -272,7 +272,7 @@ function changeSshPassphrase
 
     typeset ARCHIVE_DIRECTORY="${HOME}/.ssh/archive";
     typeset FILE_NAME="${1}";
-    typeset CURRENT_PASSPHRASE="$(grep $(basename ${HOME}/.ssh/id_rsa) ${HOME}/.etc/passphrase | cut -d ":" -f 2)";
+    typeset CURRENT_PASSPHRASE="$(/usr/bin/env grep $(/usr/bin/env basename ${HOME}/.ssh/id_rsa) ${HOME}/.etc/passphrase | /usr/bin/env cut -d ":" -f 2)";
     typeset NEW_PASSPHRASE=$(returnRandomCharacters 64);
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ARCHIVE_DIRECTORY -> ${ARCHIVE_DIRECTORY}";
@@ -280,7 +280,7 @@ function changeSshPassphrase
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "CURRENT_PASSPHRASE -> ${CURRENT_PASSPHRASE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "NEW_PASSPHRASE -> ${NEW_PASSPHRASE}";
 
-    [ ! -d ${ARCHIVE_DIRECTORY} ] && mkdir ${ARCHIVE_DIRECTORY};
+    [ ! -d ${ARCHIVE_DIRECTORY} ] && /usr/bin/env mkdir -pv ${ARCHIVE_DIRECTORY};
 
     if [ ! -r "${FILE_NAME}" ]
     then
@@ -382,7 +382,7 @@ function changeSshPassphrase
     fi
 
     ## back up the keyfile
-    cp "${FILE_NAME}" "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")";
+    /usr/bin/env cp "${FILE_NAME}" "${ARCHIVE_DIRECTORY}/$(/usr/bin/env basename "${FILE_NAME}")";
 
     if [ ! -f "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")" ]
     then
@@ -468,7 +468,7 @@ function changeSshPassphrase
     ## validate
     if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
     then
-        mv "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")" "${FILE_NAME}";
+        /usr/bin/env mv "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")" "${FILE_NAME}";
 
         RETURN_CODE=1;
 
@@ -506,9 +506,9 @@ function changeSshPassphrase
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TEMPFILE -> ${TEMPFILE}";
 
-    sed -e "s/${CURRENT_PASSPHRASE}/${NEW_PASSPHRASE}/" ${HOME}/.etc/passphrase > ${TEMPFILE};
+    /usr/bin/env sed -e "s/${CURRENT_PASSPHRASE}/${NEW_PASSPHRASE}/" ${HOME}/.etc/passphrase > ${TEMPFILE};
 
-    if [ ! -z "$(grep "${CURRENT_PASSPHRASE}" ${TEMPFILE})" ]
+    if [ ! -z "$(/usr/bin/env grep "${CURRENT_PASSPHRASE}" ${TEMPFILE})" ]
     then
         mv "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")" "${FILE_NAME}";
 
@@ -519,9 +519,9 @@ function changeSshPassphrase
         writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "KEYFILE: ${FILE_NAME}, NEW PASSPHRASE: ${NEW_PASSPHRASE}";
     fi
 
-    mv "${TEMPFILE}" "${HOME}/.etc/passphrase";
+    /usr/bin/env mv "${TEMPFILE}" "${HOME}/.etc/passphrase";
 
-    if [ -z "$(grep "${NEW_PASSPHRASE}" ${HOME}/.etc/passphrase)" ]
+    if [ -z "$(/usr/bin/env grep "${NEW_PASSPHRASE}" ${HOME}/.etc/passphrase)" ]
     then
         RETURN_CODE=1;
 
