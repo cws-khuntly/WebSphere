@@ -201,7 +201,7 @@ function shred
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> enter";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Provided arguments: ${*}";
 
-    if [ ${#} -ne 2 ]
+    if [ ${#} -eq 0 ]
     then
         RETURN_CODE=3;
 
@@ -228,7 +228,7 @@ function shred
         return ${RETURN_CODE};
     fi
 
-    typeset -i FILENAME="${1}"
+    typeset FILENAME="${1}"
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "FILENAME -> ${FILENAME}";
 
