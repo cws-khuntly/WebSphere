@@ -6,7 +6,7 @@
 #==============================================================================
 function buildSshConfig
 {
-    [ -z "$(type mktemp 2>/dev/null)" ] && . ${HOME}/.functions.d/F04-misc;
+    [ -z "$(builtin command -v mktemp)" ] && . ${HOME}/.functions.d/F04-misc;
 
     typeset SCRIPT_NAME="F02-ssh";
     typeset FUNCTION_NAME="${FUNCNAME[0]}";
@@ -564,7 +564,7 @@ function changeSshPassphrase
 #==============================================================================
 function getSshKeys
 {
-    [ -z "$(type mktemp 2>/dev/null)" ] && . ${HOME}/.functions.d/F03-misc;
+    [ -z "$(builtin command -v mktemp)" ] && . ${HOME}/.functions.d/F04-misc;
 
     typeset SCRIPT_NAME="F02-ssh";
     typeset FUNCTION_NAME="${FUNCNAME[0]}";
