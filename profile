@@ -40,7 +40,7 @@ do
     [ -z "${PROFILE}" ] && continue;
     [ -d "${PROFILE}" ] && continue;
 
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
+    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(/usr/bin/env basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
 
     [ ! -z "${PROFILE}" ] && unset -v PROFILE;
 done
@@ -55,7 +55,7 @@ then
 
         [ -z "${PROFILE}" ] && continue;
 
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
+        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(/usr/bin/env basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
 
         [ ! -z "${PROFILE}" ] && unset -v PROFILE;
         [ ! -z "${IS_VALID_PROFILE}" ] && unset -v IS_VALID_PROFILE;
@@ -64,8 +64,8 @@ fi
 
 [ ! -z "${PROFILE}" ] && unset -v PROFILE;
 
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.alias 2>&1 | tee -a ${LOG_ROOT}/load-aliases.${DATE_PATTERN}.log || . ${HOME}/.alias;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.functions 2>&1 | tee -a ${LOG_ROOT}/load-functions.${DATE_PATTERN}.log || . ${HOME}/.functions;
+[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.alias 2>&1 | /usr/bin/env tee -a ${LOG_ROOT}/load-aliases.${DATE_PATTERN}.log || . ${HOME}/.alias;
+[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.functions 2>&1 | /usr/bin/env tee -a ${LOG_ROOT}/load-functions.${DATE_PATTERN}.log || . ${HOME}/.functions;
 
 showHostInfo;
 

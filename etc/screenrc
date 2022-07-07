@@ -36,4 +36,4 @@ windowlist string "%4n %h%=%f"
 shell -${SHELL}
 pow_detach_msg "Screen session for \${LOGNAME} \$:cr:\$:nl:ended"
 logfile "~/.log/screen.%n.%Y-%m-%d"
-deflogin off
+

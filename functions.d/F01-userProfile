@@ -308,18 +308,10 @@ function logoutUser
     [ ! -z "$(builtin command -v screen)" -a ! -z "${STY}" ] && return;
 
     ## turn off ssh-agent and keychain
-    [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env ssh-add -D;
+    [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env pkill ssh-agent;
     [ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && /usr/bin/env gpgconf --kill all;
-    [ ! -z "$(builtin command -v keychain)" ] && /usr/bin/env keychain -k all;
 
     [ -f ${HOME}/.ssh/ssh-agent.env ] && /usr/bin/rm -f ${HOME}/.ssh/ssh-agent.env;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-sh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-sh;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-csh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-csh;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-fsh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-fish;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-sh-gpg ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-sh-gpg;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-csh-gpg ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-csh-gpg;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-fish-gpg ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-fish-gpg;
-    [ -f ${HOME}/.keychain/${HOSTNAME}-lockf ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-lockf;
 
     ## clear terminal scrollback
     /usr/bin/env printf "\033c";
