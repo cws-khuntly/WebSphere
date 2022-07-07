@@ -29,7 +29,7 @@ fi
 /usr/bin/env ssh-agent > ~/.ssh/ssh-agent.env;
 source ${HOME}/.ssh/ssh-agent.env;
 
-for SSH_KEY in $(/usr/bin/env ls -ltr "${HOME}/.ssh" | /usr/bin/env egrep -v "known_hosts|pub" | /usr/bin/env awk '{print $NF}')
+for SSH_KEY in $(/usr/bin/env ls -ltr "${HOME}/.ssh" | /usr/bin/env egrep -v "known_hosts|pub|authorized_keys" | /usr/bin/env awk '{print $NF}')
 do
     [ ! -z "$(ssh-keygen -l -f ${HOME}/.ssh/${SSH_KEY} 2>/dev/null)" ]&& /usr/bin/env ssh-add ${HOME}/.ssh/${SSH_KEY};
 done

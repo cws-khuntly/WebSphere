@@ -153,7 +153,6 @@ function cleanAndDeployFiles
     done
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    ## for some stupid ass reason /usr/bin/env cd breaks this fucking line
     builtin cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
@@ -165,10 +164,12 @@ function cleanAndDeployFiles
 
     if [ -z "${USERNAME}" ]
     then
-        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar"; ## remove it if it exists
+        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] &&" \
+            "/usr/bin/env rm -f ${HOME}/dotfiles.tar;"
         /usr/bin/env sftp -b "${SFTP_BATCH}" ${LOGNAME}@${HOSTNAME};
     else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && /usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar"; ## remove it if it exists
+        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
+            "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
         /usr/bin/env sftp -b "${SFTP_BATCH}" ${USERNAME}@${HOSTNAME};
     fi
 
@@ -288,6 +289,23 @@ function installFiles
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> enter";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Provided arguments: ${*}";
+
+    if [ -d "${HOME}/.dotfiles" ]
+    then
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "dotfiles directory already exists. Performing cleanup.";
+
+        builtin cd ${HOME}/.dotfiles;
+        /usr/bin/env rm -rf *;
+    fi
+
+    ## extract the archive
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Extracing archive ${HOME}/dotfiles.tar into ${HOME}/.dotfiles..";
+    [ ! -d "${HOME}/.dotfiles" ] && /usr/bin/env mkdir -pv "${HOME}/.dotfiles";
+
+    ## switch into the dir and untar the archive
+    builtin cd ${HOME}/.dotfiles;
+    /usr/bin/env tar xf ${HOME}/dotfiles.tar;
+    
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Setting permissions.";
 
     ## change some permissions
@@ -295,10 +313,9 @@ function installFiles
     /usr/bin/env find ${HOME}/.dotfiles -type f -exec /usr/bin/env chmod 644 {} \; ;
     /usr/bin/env chmod 755 ${HOME}/.dotfiles/bin/*; ## 755 on all files in bin
     [ ! -d ${HOME}/.ssh ] && /usr/bin/env mkdir -p ${HOME}/.ssh; /usr/bin/env chmod 700 ${HOME}/.ssh; ## ssh wants 700
-    [ ! -d ${HOME}/.gnupg ] && /usr/bin/env mkdir -p ${HOME}/.gnupg; /usr/bin/env chmod 700 ${HOME}/.gnupg
+    [ ! -d ${HOME}/.gnupg ] && /usr/bin/env mkdir -p ${HOME}/.gnupg; /usr/bin/env chmod 700 ${HOME}/.gnupg ## gpg wants 700
     /usr/bin/env chmod 600 ${HOME}/.dotfiles/m2/settings.xml ${HOME}/.dotfiles/etc/ldaprc ${HOME}/.dotfiles/etc/curlrc ${HOME}/.dotfiles/etc/netrc ${HOME}/.dotfiles/etc/wgetrc; ## 600 on all security related files
     /usr/bin/env chmod 600 ${HOME}/.dotfiles/etc/SecurityService/config/ServiceConfig.xml ${HOME}/.dotfiles/etc/eSolutionsCore/config/ServiceConfig.xml; ## 600 on all security related files
-    /usr/bin/env chmod 600 ${HOME}/.dotfiles/config/subversion/servers ${HOME}/.dotfiles/config/subversion/config; ## 600 on all security related files
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "Generating and creating files.";
 
