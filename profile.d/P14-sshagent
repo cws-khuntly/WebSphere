@@ -21,17 +21,17 @@
 
 if [ ! -z "$(/usr/bin/env pidof ssh-agent)" ]
 then
-    . ~/.ssh/ssh-agent.env;
+    . ${HOME}/.ssh/ssh-agent.env;
 
     return;
 fi
 
 /usr/bin/env ssh-agent > ~/.ssh/ssh-agent.env;
-source ~/.ssh/ssh-agent.env;
+source ${HOME}/.ssh/ssh-agent.env;
 
-for SSH_KEY in $(/usr/bin/env ls -ltr ${HOME}/.ssh | /usr/bin/env grep id_ | /usr/bin/env grep -v pub | /usr/bin/env awk '{print $NF}')
+for SSH_KEY in $(/usr/bin/env ls -ltr "${HOME}/.ssh" | /usr/bin/env egrep -v "known_hosts|pub" | /usr/bin/env awk '{print $NF}')
 do
-    /usr/bin/env ssh-add ${HOME}/.ssh/${SSH_KEY};
+    [ ! -z "$(ssh-keygen -l -f ${HOME}/.ssh/${SSH_KEY} 2>/dev/null)" ]&& /usr/bin/env ssh-add ${HOME}/.ssh/${SSH_KEY};
 done
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;

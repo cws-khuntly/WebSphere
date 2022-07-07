@@ -309,8 +309,6 @@ function logoutUser
 
     ## turn off ssh-agent and keychain
     [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env pkill ssh-agent;
-    [ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && /usr/bin/env gpgconf --kill all;
-
     [ -f ${HOME}/.ssh/ssh-agent.env ] && /usr/bin/rm -f ${HOME}/.ssh/ssh-agent.env;
 
     ## clear terminal scrollback
