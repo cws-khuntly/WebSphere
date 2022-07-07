@@ -48,5 +48,3 @@ Host *
     IdentityFile                = ~/.ssh/id_rsa
     IdentityFile                = ~/.ssh/id_dsa
     IdentityFile                = ~/.ssh/id_ecdsa
-    UseRoaming                  = no
-

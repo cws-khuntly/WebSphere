@@ -70,10 +70,12 @@ alias telnet.exp='${HOME}/.lib/telnet.exp';
 
 case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
     [Kk][Ss][Hh])
+        alias reload='. ${HOME}/.kshrc';
         alias shell='selectProfile';
         alias listFunctions="typeset -f | grep function | awk '{print \$NF}'";
         ;;
     [Bb][Aa][Ss][Hh])
+        alias reload='source ${HOME}/.bashrc';
         alias shell='selectProfile';
         alias listFunctions="compgen -A function";
         ;;

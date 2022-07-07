@@ -20,7 +20,7 @@
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
 ## path
-export PATH                             ; PATH="${PATH}:${HOME}/.bin:${HOME}:/.bin/pickup:/usr/sbin/core_perl";
+export PATH                             ; PATH="${PATH}:${HOME}/.bin:${HOME}:/.bin/pickup:/usr/sbin/core_perl:/usr/games";
 export MANPATH                          ; MANPATH="/usr/man:/usr/local/man:/usr/share/man";
 
 ## libpath

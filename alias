@@ -35,18 +35,27 @@ done
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
 ## distribution specific aliases
-for ALIAS in ${HOME}/.alias.d/$(/usr/bin/env lsb_release -a 2>/dev/null | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}')/*
-do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
+typeset DIST_NAME="$(/usr/bin/env lsb_release -a 2>/dev/null | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}')";
 
-    [ -z "${ALIAS}" ] && continue;
-    [ -d "${ALIAS}" ] && continue;
+[ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "DIST_NAME -> ${DIST_NAME}";
 
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
+if [ -d "${HOME}/.alias.d/${DIST_NAME}" ]
+then
+    for ALIAS in ${HOME}/.alias.d/${DIST_NAME}/*
+    do
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
 
-    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-done
+        [ ! -d ]
+        [ -z "${ALIAS}" ] && continue;
+        [ -d "${ALIAS}" ] && continue;
 
+        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
+
+        [ ! -z "${ALIAS}" ] && unset -v ALIAS;
+    done
+fi
+
+[ ! -z "${DIST_NAME}" ] && unset -v DIST_NAME;
 [ ! -z "${ALIAS}" ] && unset -v ALIAS;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
