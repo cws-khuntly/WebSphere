@@ -20,14 +20,14 @@
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
 ## path
-export PATH                             ; PATH="${PATH}:${HOME}/.bin:${HOME}:/.bin/pickup:/usr/sbin/core_perl:/usr/games";
-export MANPATH                          ; MANPATH="/usr/man:/usr/local/man:/usr/share/man";
+typeset -x PATH="${PATH}:${HOME}/.bin:${HOME}:/.bin/pickup:/usr/sbin/core_perl:/usr/games";
+typeset -x MANPATH="/usr/man:/usr/local/man:/usr/share/man";
 
 ## libpath
-export LD_LIBRARY_PATH                  ; LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/lib:/lib64:/usr/lib:/usr/lib64:/usr/local/lib:/usr/local/lib64";
-export LIBPATH                          ; LIBPATH="${LD_LIBRARY_PATH}";
-export LIB_PATH                         ; LIB_PATH="${LD_LIBRARY_PATH}";
-export LD_RUN_PATH                      ; LD_RUN_PATH="${LD_LIBRARY_PATH}";
+typeset -x D_LIBRARY_PATH="${LD_LIBRARY_PATH}:/lib:/lib64:/usr/lib:/usr/lib64:/usr/local/lib:/usr/local/lib64";
+typeset -x LIBPATH="${LD_LIBRARY_PATH}";
+typeset -x LIB_PATH="${LD_LIBRARY_PATH}";
+typeset -x LD_RUN_PATH="${LD_LIBRARY_PATH}";
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
