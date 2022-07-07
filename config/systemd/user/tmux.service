@@ -22,9 +22,8 @@ Description=tmux Terminal Multiplexor
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/tmux new -s 0 -d
-ExecStop=/usr/bin/tmux kill-server
-Restart=on-abort
+ExecStart=/usr/bin/env tmux new-session -s %u -d
+ExecStop=/usr/bin/env tmux kill-session -t %u
 
 [Install]
 WantedBy=default.target
