@@ -45,7 +45,6 @@ then
     do
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
 
-        [ ! -d ]
         [ -z "${ALIAS}" ] && continue;
         [ -d "${ALIAS}" ] && continue;
 
@@ -53,6 +52,9 @@ then
 
         [ ! -z "${ALIAS}" ] && unset -v ALIAS;
     done
+
+    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
+    [ ! -z "${DIST_NAME}" ] && unset -v DIST_NAME;
 fi
 
 [ ! -z "${DIST_NAME}" ] && unset -v DIST_NAME;
