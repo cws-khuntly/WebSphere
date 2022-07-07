@@ -304,9 +304,13 @@ function logoutUser
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided arguments: ${*}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SHELL_NAME -> ${SHELL_NAME}";
 
+    ## check for screen. if we're in a screen session dont do any of this shit
+    [ ! -z "$(builtin command -v screen)" -a ! -z "${STY}" ] && return;
+
     ## turn off ssh-agent and keychain
-    [ ! -z "$(/usr/bin/env ps -ef | /usr/bin/env grep ssh-agent | /usr/bin/env grep -v grep)" ] && /usr/bin/env ssh-add -D;
-    [ ! -z "$(/usr/bin/env ps -ef | /usr/bin/env grep keychain | /usr/bin/env grep -v grep)" ] && /usr/bin/env keychain -k all;
+    [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env ssh-add -D;
+    [ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && /usr/bin/env gpgconf --kill all;
+    [ ! -z "$(builtin command -v keychain)" ] && /usr/bin/env keychain -k all;
 
     [ -f ${HOME}/.ssh/ssh-agent.env ] && /usr/bin/rm -f ${HOME}/.ssh/ssh-agent.env;
     [ -f ${HOME}/.keychain/${HOSTNAME}-sh ] && /usr/bin/env rm -f ${HOME}/.keychain/${HOSTNAME}-sh;

@@ -35,4 +35,5 @@ altscreen on
 windowlist string "%4n %h%=%f"
 shell -${SHELL}
 pow_detach_msg "Screen session for \${LOGNAME} \$:cr:\$:nl:ended"
-logfile "$HOME/.log/screen.%n.%Y-%m-%d"
+logfile "~/.log/screen.%n.%Y-%m-%d"
+deflogin off

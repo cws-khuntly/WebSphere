@@ -19,7 +19,9 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ ! -z "$(/usr/bin/env pidof ssh-agent)" ] || [ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && return;
+## this is prolly not right, but who cares atm
+[ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env pkill $(/usr/bin/env pidof ssh-agent);
+[ ! -z "$(/usr/bin/env pidof gpg-agent)" ] && /usr/bin/env pkill $(/usr/bin/env pidof gpg-agent);
 
 [ ! -d "${HOME}/.keychain" ] && /usr/bin/env mkdir ${HOME}/.keychain;
 
@@ -49,7 +51,15 @@ case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
         ;;
 esac
 
-[ ! -z "$(builtin command -v expect)" ] && /usr/bin/env expect -d -f ${HOME}/.lib/keychain 2>/dev/null;
+for SSH_KEY in "$(/usr/bin/env ls -ltr ${HOME}/.ssh | /usr/bin/env grep id_ | /usr/bin/env grep -v pub | /usr/bin/env awk '{print $NF}')"
+do
+    if [ ! -z "$(builtin command -v keychain)" ]
+    then
+        /usr/bin/env keychain ${HOME}/.ssh/${SSH_KEY};
+    else
+        /usr/bin/env ssh-add ${HOME}/.ssh/${SSH_KEY};
+    fi
+done
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
