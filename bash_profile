@@ -72,7 +72,10 @@ showHostInfo;
 ## trap logout
 trap 'source ~/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
-[ ! -z "$(builtin command -v screen)" -a -z "${STY}" -a -f ${HOME}/.etc/runscreen ] && /usr/bin/env screen -RR;
+## run tmux (we're going to finally learn it)
+## support both tmux and screen, use the flag files appropriately
+[ ! -z "$(builtin command -v tmux)" -a -z "$(/usr/bin/env tmux info 2>/dev/null)" -a -f ${HOME}/.etc/run-tmux ] && /usr/bin/env tmux attach;
+[ ! -z "$(builtin command -v screen)" -a -z "${STY}" -a -f ${HOME}/.etc/run-screen ] && /usr/bin/env screen -RR;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

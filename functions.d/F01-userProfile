@@ -304,8 +304,9 @@ function logoutUser
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided arguments: ${*}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SHELL_NAME -> ${SHELL_NAME}";
 
-    ## check for screen. if we're in a screen session dont do any of this shit
+    ## check for screen/tmux. if we're in a screen session dont do any of this shit
     [ ! -z "$(builtin command -v screen)" -a ! -z "${STY}" ] && return;
+    [ ! -z "$(builtin command -v tmux)" -a  ! -z "$(/usr/bin/env tmux info 2>/dev/null)" ] && return;
 
     ## turn off ssh-agent and keychain
     [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env pkill ssh-agent;
@@ -327,12 +328,6 @@ function logoutUser
 
     [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
-
-    ## if screen is running, detach
-    if [ ! -z "$(builtin command -v screen)" -a -z "${STY}" -a -f ${HOME}/.etc/runscreen ]
-    then
-        /usr/bin/env screen -d;
-    fi
 
     ## terminate the session
     ## SOME OF US DONT WANT KSH AS A SHELL BUT ARE FORCED.
