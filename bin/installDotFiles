@@ -17,7 +17,7 @@
 #==============================================================================
 
 trap 'set +v; set +x' INT TERM EXIT;
-
+set -x
 typeset -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 [ -r "${HOME}/.dotfiles/etc/logging.properties" -a -s "${HOME}/.dotfiles/etc/logging.properties" ] && . "${HOME}/.dotfiles/etc/logging.properties";
@@ -211,13 +211,13 @@ function deployFiles
 }
 
 #=====  FUNCTION  =============================================================
-#          NAME:  cleanAndDeployFiles
+#          NAME:  deployAndInstall
 #   DESCRIPTION:  ssh's to a target host and removes the existing dotfiles
 #                 directory and copies the new one
 #    PARAMETERS:  None
 #       RETURNS:  0 if success, non-zero otherwise
 #==============================================================================
-function cleanAndDeployFiles
+function deployAndInstall
 {
     set +o noclobber;
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
@@ -645,20 +645,20 @@ do
 done
 
 case "${ACTION}" in
-    "install")
+    "installFiles")
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing installFiles...";
 
         installFiles;
         ;;
-    "deploy")
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "deployFiles ${HOSTNAME} ${USERNAME}...";
+    "deployFiles")
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployFiles ${HOSTNAME} ${USERNAME}...";
 
         deployFiles "${HOSTNAME}" "${USERNAME}";
         ;;
     "deployAndInstall")
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "cleanAndDeployFiles ${HOSTNAME} ${USERNAME}...";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployAndInstall ${HOSTNAME} ${USERNAME}...";
 
-        cleanAndDeployFiles "${HOSTNAME}" "${USERNAME}";
+        deployAndInstall "${HOSTNAME}" "${USERNAME}";
         ;;
     *)
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "No arguments/invalid arguments were provided.";
