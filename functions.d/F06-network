@@ -23,7 +23,7 @@ function netinfo
     typeset INET_ADDR_2="$(/usr/bin/env ifconfig | awk /'inet addr/ {print $4}')";
     typeset BROADCAST="$(/usr/bin/env ifconfig | awk /'Bcast/ {print $3}')";
     typeset HWADDR="$(/usr/bin/env ifconfig | awk /'HWaddr/ {print $4,$5}')";
-    typeset EXTERNAL_ADDR="$(/usr/bin/env curl -dump -hiddenlinks=ignore -nolist http://checkip.dyndns.org:8245/ | sed '/^$/d; s/^[ ]*//g; s/[ ]*$//g')";
+    typeset EXTERNAL_ADDR="$(/usr/bin/env dig +short @resolver1.opendns.com myip.opendns.com)";
 
     writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "--------------- Network Information ---------------";
     writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${INET_ADDR_1}";
