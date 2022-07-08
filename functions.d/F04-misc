@@ -54,7 +54,7 @@ function setArray
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${CNAME}" "${LINENO}" "ARRAY_NAME -> ${ARRAY_NAME}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${CNAME}" "${LINENO}" "VARIABLE_VALUE -> ${VARIABLE_VALUE}";
 
-    case "$(echo "${SHELL}" | awk -F "/" '{print $NF}')" in
+    case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
         [Kk][Ss][Hh])
             for VARIABLE in ${VARIABLES}
             do
@@ -394,7 +394,7 @@ function corename
         return ${RETURN_CODE};
     fi
 
-    printf "Corefile %s created by application %s" "${CORE_FILE}" "${PROGRAM_NAME}";
+    /usr/bin/env printf "Corefile %s created by application %s" "${CORE_FILE}" "${PROGRAM_NAME}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -549,7 +549,7 @@ function up
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "NUMBER -> ${NUMBER}";
     done
 
-    DIRECTORY=$(sed 's/^\///' <<< "${DIRECTORY}");
+    DIRECTORY=$(/usr/bin/env sed 's/^\///' <<< "${DIRECTORY}");
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "DIRECTORY -> ${DIRECTORY}";
 
@@ -607,7 +607,7 @@ function tree
 
     [ "${1}" != "" ] && builtin cd "${1}";
 
-    pwd; find . -print | sed -e '/^\.$/d' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'; printf;
+    /usr/bin/env pwd; /usr/bin/env find . -print | /usr/bin/env sed -e '/^\.$/d' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'; /usr/bin/env printf;
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -788,7 +788,7 @@ function mkcd
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "DIRECTORY -> ${DIRECTORY}";
 
-    /usrbin/env mkdir -p "${DIRECTORY}";
+    /usr/bin/env mkdir -p "${DIRECTORY}";
     builtin cd "${DIRECTORY}";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
@@ -859,7 +859,7 @@ function killProc
 
     [ -z ${1} ] && writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Unable to kill process - no process name provided." && return 1;
 
-    /usr/bin/env kill -9 $(ps -ef | grep ${1} | grep -v grep | awk '{echo $2}');
+    /usr/bin/env kill -9 $(/usr/bin/env ps -ef | /usr/bin/env grep ${1} | /usr/bin/env grep -v grep | /usr/bin/env awk '{echo $2}');
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
@@ -1411,7 +1411,7 @@ function extract
     fi
 
     typeset FILE="${1}";
-    typeset TARGET=$(awk -F "." '{print $NR}' <<< ${FILE});
+    typeset TARGET=$(/usr/bin/env awk -F "." '{print $NR}' <<< ${FILE});
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "FILE -> ${FILE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "TARGET -> ${TARGET}";
@@ -1419,9 +1419,9 @@ function extract
     [ ! -d "${TARGET}" ] && mkdir "${TARGET}" > /dev/null 2>&1;
 
     case "${FILE}" in
-        *.bz2|*.gz|*.tar|*.tbz2|*.tgz|*.tar.bz2|*.tar.gz|*.Z) tar xf "${FILE}" -C "${TARGET}" ;;
-        *.jar|*.zip) [ ! -z "${TARGET}" ] && unzip "${FILE}" -d "${TARGET}" ;;
-        *.7z) [ ! -z "${TARGET}" ] && 7z e -o "${TARGET}" "${FILE}" ;;
+        *.bz2|*.gz|*.tar|*.tbz2|*.tgz|*.tar.bz2|*.tar.gz|*.Z) /usr/bin/env tar xf "${FILE}" -C "${TARGET}" ;;
+        *.jar|*.zip) [ ! -z "${TARGET}" ] && /usr/bin/env unzip "${FILE}" -d "${TARGET}" ;;
+        *.7z) [ ! -z "${TARGET}" ] && /usr/bin/env 7z e -o "${TARGET}" "${FILE}" ;;
         *)
             RETURN_CODE=3;
 
@@ -1499,7 +1499,7 @@ function teeOutput
         RETURN_CODE=3;
 
         writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} - Tee the output of an executing command";
-        writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Usage: ${FUNCTION_NAME} [ command ] [ output file ]
+        writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Usage: ${FUNCTION_NAME} [ -c \"command\" ] [ -o \"output file\" ]
                 -> The command to execute and watch
                 -> The file to write to";
 
@@ -1524,6 +1524,7 @@ function teeOutput
         return ${RETURN_CODE};
     fi
 
+    local OPTIND c o;
     while getopts "c:o:" OPTIONS 2>/dev/null
     do
         case ${OPTIONS} in
@@ -1547,7 +1548,7 @@ function teeOutput
                 RETURN_CODE=3;
 
                 writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} - Tee the output of an executing command";
-                writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Usage: ${FUNCTION_NAME} [ command ] [ output file ]
+                writeLogEntry "STDERR" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Usage: ${FUNCTION_NAME} [ -c \"command\" ] [ -o \"output file\" ]
                         -> The command to execute and watch
                         -> The file to write to";
 
@@ -1579,10 +1580,10 @@ function teeOutput
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RUN_COMMAND -> ${RUN_COMMAND}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "OUTPUT_FILE -> ${OUTPUT_FILE}";
 
-    [ -f "${OUTPUT_FILE}" ] && rm -rf "${OUTPUT_FILE}";
-
-    "${RUN_COMMAND}" 3>&1 >&2 2>&3 3>&- | tee "${OUTPUT_FILE}";
-
+    [ -f "${OUTPUT_FILE}" ] && /usr/bin/env rm -rf "${OUTPUT_FILE}";
+set -x
+    ${RUN_COMMAND} 3>&1 >&2 2>&3 3>&- | tee "${OUTPUT_FILE}";
+set +x
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME} -> exit";
 
@@ -1949,7 +1950,7 @@ function returnEpochTime
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${FUNCTION_NAME}" "${SCRIPT_NAME}" "${LINENO}" "Dec -> ${Dec}";
 
     typeset YEAR="$(/usr/bin/env awk '{print $1}' <<< "${1}")";
-    typeset MONTH="$(typeset MONTH_NAME="$(awk '{print $2}' <<< "2015 Apr 01")"; /usr/bin/env sed -e "s/${MONTH_NAME}/$(eval echo \${${MONTH_NAME}})/" <<< "${MONTH_NAME}")";
+    typeset MONTH="$(typeset MONTH_NAME="$(/usr/bin/env awk '{print $2}' <<< "2015 Apr 01")"; /usr/bin/env sed -e "s/${MONTH_NAME}/$(eval echo \${${MONTH_NAME}})/" <<< "${MONTH_NAME}")";
     typeset DAY="$(/usr/bin/env awk '{print $3}' <<< "${1}")";
     [ ${#} -eq 2 ] && typeset -i FUTURE=${2};
 
