@@ -164,6 +164,7 @@ function validateHostAvailability
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
 
+        [ ! -z "${IS_IN_HOSTS}" ] && unset -v IS_IN_HOSTS;
         [ ! -z "${ERROR_COUNT}" ] && typeset -i ERROR_COUNT=0;
         [ ! -z "${SEARCH_ENTRY}" ] && unset -v SEARCH_ENTRY;
         [ ! -z "${VALIDATE_HOSTNAME}" ] && unset -v VALIDATE_HOSTNAME;
@@ -189,6 +190,7 @@ function validateHostAvailability
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "VALIDATE_HOSTNAME -> ${VALIDATE_HOSTNAME}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "VALIDATE_PORT -> ${VALIDATE_PORT}";
 
+    ## check if host exists in DNS
     /usr/bin/env host "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
     typeset -i RET_CODE=${?};
 
@@ -196,29 +198,36 @@ function validateHostAvailability
 
     case ${RET_CODE} in
         0)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Found host in DNS. Performing validation...";
+
+            ## host is in DNS, run validation
             case ${#} in
                 1)
-                    case "$(uname)" in
-                        [Ss][Oo][Ll][Aa][Rr][Ii][Ss])
-                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping \"${VALIDATE_HOSTNAME}\" 1 > /dev/null 2>&1";
+                    case "$(/usr/bin/env uname -a)" in
+                        [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "This is a Solaris host.";
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping ${VALIDATE_HOSTNAME} 1 > /dev/null 2>&1";
 
                             /usr/bin/env ping "${VALIDATE_HOSTNAME}" 1 > /dev/null 2>&1;
                             typeset -i RET_CODE=${?};
 
                             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
 
-                            return ${RET_CODE};
+                            typeset -i ERROR_COUNT=${RET_CODE};
+
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
                             ;;
                         *)
-                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1";
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} ${VALIDATE_HOSTNAME} > /dev/null 2>&1";
 
                             /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
                             typeset -i RET_CODE=${?};
 
                             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
 
-                            return ${RET_CODE};
-                            ;;
+                            typeset -i ERROR_COUNT=${RET_CODE};
+
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
                     esac
                     ;;
                 2)
@@ -227,8 +236,15 @@ function validateHostAvailability
                         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
 
                         /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1;
+                        typeset -i RET_CODE=${?};
+
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
                     else
-                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet \"${VALIDATE_HOSTNAME}\" ${VALIDATE_PORT} >/dev/null 2>&1 &";
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} >/dev/null 2>&1 &";
 
                         /usr/bin/env telnet "${VALIDATE_HOSTNAME}" ${VALIDATE_PORT} > /dev/null 2>&1 &
                         typeset -i TELNET_PID=${!};
@@ -240,49 +256,330 @@ function validateHostAvailability
                     ;;
             esac
             ;;
-        *)
+        1)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was not found in DNS. Checking files...";
+
             ## lets do a few things here. dig/host don't use /etc/resolv.conf
             ## so we have to kind of drag it in here.
-            if [ -f /etc/resolv.conf ]
-            then
-                for SEARCH_ENTRY in $(/usr/bin/env grep search /etc/resolv.conf)
-                do
-                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SEARCH_ENTRY -> ${SEARCH_ENTRY}";
+            ## first lets check if we have an FQDN, if we do then appending search suffixes is gonna break
+            typeset IS_FQDN=$(builtin echo "${VALIDATE_HOSTNAME}" | /usr/bin/env grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)');
 
-                    [ "${SEARCH_ENTRY}" == "search" ] && continue;
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "IS_FQDN -> ${IS_FQDN}";
 
-                    /usr/bin/env host "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" > /dev/null 2>&1;
-                    typeset -i RET_CODE=${?};
+            case "${IS_FQDN}" in
+                "")
+                    ## entry is NOT an fqdn.
+                    if [ -f /etc/resolv.conf ]
+                    then
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Looping through found search suffixes in /etc/resolv.conf";
 
-                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+                        ## loop through all the possible domain names in /etc/resolv.conf
+                        for SEARCH_ENTRY in $(/usr/bin/env grep search /etc/resolv.conf)
+                        do
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SEARCH_ENTRY -> ${SEARCH_ENTRY}";
 
-                    case ${RET_CODE} in
-                        0)
-                            ## make sure to fix the error counter
-                            [ ${ERROR_COUNT} -ne 0 ] && unset -v ERROR_COUNT;
-                            typeset -i ERROR_COUNT=0;
+                            [ "${SEARCH_ENTRY}" == "search" ] && continue;
 
-                            case ${#} in
-                                1)
-                                    case "$(uname)" in
-                                        [Ss][Oo][Ll][Aa][Rr][Ii][Ss])
-                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping \"${VALIDATE_HOSTNAME}\" 1 > /dev/null 2>&1";
+                            ## check if in DNS...
+                            /usr/bin/env host "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" > /dev/null 2>&1;
+                            typeset -i RET_CODE=${?};
 
-                                            /usr/bin/env ping "${VALIDATE_HOSTNAME}" 1 > /dev/null 2>&1;
+                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
 
-                                            break;
+                            case ${RET_CODE} in
+                                0)
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was found in DNS using ${VALIDATE_HOSTNAME}.${SEARCH_SUFFIX}";
+
+                                    ## host is in DNS. run validation
+                                    ## make sure to fix the error counter
+                                    [ ${ERROR_COUNT} -ne 0 ] && unset -v ERROR_COUNT;
+                                    typeset -i ERROR_COUNT=0;
+
+                                    case ${#} in
+                                        1)
+                                            case "$(/usr/bin/env uname -a)" in
+                                                [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} 1 > /dev/null 2>&1";
+
+                                                    /usr/bin/env ping "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" 1 > /dev/null 2>&1;
+                                                    typeset -i RET_CODE=${?};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                    typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                                    ;;
+                                                *)
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} > /dev/null 2>&1";
+
+                                                    /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" > /dev/null 2>&1;
+                                                    typeset -i RET_CODE=${?};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                    typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                                    ;;
+                                            esac
                                             ;;
-                                        *)
-                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1";
+                                        2)
+                                            if [ ! -z "$(builtin command -v nc | /usr/bin/env grep -v alias)" ]
+                                            then
+                                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
 
-                                            /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
+                                                /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1;
+                                                typeset -i RET_CODE=${?};
 
-                                            break;
+                                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                            else
+                                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} ${VALIDATE_PORT} >/dev/null 2>&1 &";
+
+                                                /usr/bin/env telnet "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" ${VALIDATE_PORT} > /dev/null 2>&1 &
+                                                typeset -i TELNET_PID=${!};
+
+                                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TELNET_PID -> ${TELNET_PID}";
+
+                                                [ $(/usr/bin/env kill -0 "${TELNET_PID}" > /dev/null 2>&1; echo ${?}) -eq 1 ] && (( ERROR_COUNT += 1 )) || /usr/bin/env kill -9 ${TELNET_PID} > /dev/null 2>&1;
+                                            fi
                                             ;;
                                     esac
                                     ;;
-                                2)
-                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet \"${VALIDATE_HOSTNAME}\" ${VALIDATE_PORT} >/dev/null 2>&1 &";
+                                1)
+                                    ## check the hosts table
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was NOT found in DNS using ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}";
+
+                                    typeset IS_IN_HOSTS="$(/usr/bin/env grep -w ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} /etc/hosts)";
+
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "IS_IN_HOSTS -> ${IS_IN_HOSTS}";
+
+                                    if [ ! -z "${IS_IN_HOSTS}" ]
+                                    then
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was found in /etc/hosts using ${VALIDATE_HOSTNAME}";
+
+                                        ## make sure to fix the error counter
+                                        [ ${ERROR_COUNT} -ne 0 ] && unset -v ERROR_COUNT;
+                                        typeset -i ERROR_COUNT=0;
+
+                                        case ${#} in
+                                            1)
+                                                case "$(/usr/bin/env uname -a)" in
+                                                    [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} 1 > /dev/null 2>&1";
+
+                                                        /usr/bin/env ping "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" 1 > /dev/null 2>&1;
+                                                        typeset -i RET_CODE=${?};
+
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                                        ;;
+                                                    *)
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} > /dev/null 2>&1";
+
+                                                        /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" > /dev/null 2>&1;
+                                                        typeset -i RET_CODE=${?};
+
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                                        ;;
+                                                esac
+                                                ;;
+                                            2)
+                                                if [ ! -z "$(builtin command -v nc | /usr/bin/env grep -v alias)" ]
+                                                then
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
+
+                                                    /usr/bin/env nc -w 10 "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1;
+                                                    typeset -i RET_CODE=${?};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                                    typeset -i ERROR_COUNT=${RET_CODE};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                                else
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY} ${VALIDATE_PORT} >/dev/null 2>&1 &";
+
+                                                    /usr/bin/env telnet "${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}" ${VALIDATE_PORT} > /dev/null 2>&1 &
+                                                    typeset -i TELNET_PID=${!};
+
+                                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TELNET_PID -> ${TELNET_PID}";
+
+                                                    [ $(/usr/bin/env kill -0 "${TELNET_PID}" > /dev/null 2>&1; echo ${?}) -eq 1 ] && (( ERROR_COUNT += 1 )) || /usr/bin/env kill -9 ${TELNET_PID} > /dev/null 2>&1;
+                                                fi
+                                                ;;
+                                        esac
+                                    else
+                                        ## host was NOT found in DNS OR in the hosts table. error out, we're done
+                                        (( ERROR_COUNT += 1 ));
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+
+                                        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No entry was found for ${VALIDATE_HOSTNAME} in either DNS or files. Cannot continue.";
+                                        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No entry was found for ${VALIDATE_HOSTNAME} in either DNS or files. Cannot continue.";
+                                    fi
+                                    ;;
+                                *)
+                                    writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "An unexpected error occurred while checking ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}.";
+                                    writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "An unexpected error occurred while checking ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}.";
+
+                                    (( ERROR_COUNT += 1 ));
+
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+
+                                    continue;
+                                    ;;
+                            esac
+                        done
+                    else
+                        ## no resolv.conf. This may be a cygwin box, if not, something is bad.
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No resolv.conf file was found.";
+
+                        case "$(/usr/bin/env uname -a)" in
+                            [Cc][Yy][Gg][Ww][Ii][Nn]*)
+                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "This is a Cygwin environment";
+
+                                case ${#} in
+                                    1)
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} ${VALIDATE_HOSTNAME} > /dev/null 2>&1";
+
+                                        /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
+                                        typeset -i RET_CODE=${?};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                        ;;
+                                    2)
+                                        if [ ! -z "$(builtin command -v nc | /usr/bin/env grep -v alias)" ]
+                                        then
+                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
+
+                                            /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1;
+                                            typeset -i RET_CODE=${?};
+
+                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                            typeset -i ERROR_COUNT=${RET_CODE};
+
+                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                        else
+                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} >/dev/null 2>&1 &";
+
+                                            /usr/bin/env telnet "${VALIDATE_HOSTNAME}" ${VALIDATE_PORT} > /dev/null 2>&1 &
+                                            typeset -i TELNET_PID=${!};
+
+                                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TELNET_PID -> ${TELNET_PID}";
+
+                                            [ $(/usr/bin/env kill -0 "${TELNET_PID}" > /dev/null 2>&1; echo ${?}) -eq 1 ] && (( ERROR_COUNT += 1 )) || /usr/bin/env kill -9 ${TELNET_PID} > /dev/null 2>&1;
+                                        fi
+                                        ;;
+                                esac
+                                ;;
+                            *)
+                                typeset RETURN_CODE=1;
+
+                                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No resolv.conf file was found. Cannot continue.";
+                                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No resolv.conf file was found. Cannot continue.";
+
+                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
+                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
+
+                                [ ! -z "${ERROR_COUNT}" ] && typeset -i ERROR_COUNT=0;
+                                [ ! -z "${SEARCH_ENTRY}" ] && unset -v SEARCH_ENTRY;
+                                [ ! -z "${VALIDATE_HOSTNAME}" ] && unset -v VALIDATE_HOSTNAME;
+                                [ ! -z "${VALIDATE_PORT}" ] && unset -v VALIDATE_PORT;
+
+                                [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
+                                [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+
+                                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
+                                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
+                                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
+                                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
+
+                                [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
+                                [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
+
+                                return ${RETURN_CODE};
+                                ;;
+                        esac
+                    fi
+                    ;;
+                *)
+                    ## entry is already and FQDN, test it
+                    ## check the hosts table
+                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was NOT found in DNS using ${VALIDATE_HOSTNAME}.${SEARCH_ENTRY}";
+
+                    typeset IS_IN_HOSTS="$(/usr/bin/env grep -w ${VALIDATE_HOSTNAME} /etc/hosts)";
+
+                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "IS_IN_HOSTS -> ${IS_IN_HOSTS}";
+
+                    if [ ! -z "${IS_IN_HOSTS}" ]
+                    then
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided host was found in /etc/hosts using ${VALIDATE_HOSTNAME}";
+
+                        ## make sure to fix the error counter
+                        [ ${ERROR_COUNT} -ne 0 ] && unset -v ERROR_COUNT;
+                        typeset -i ERROR_COUNT=0;
+
+                        case ${#} in
+                            1)
+                                case "$(/usr/bin/env uname -a)" in
+                                    [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping ${VALIDATE_HOSTNAME} 1 > /dev/null 2>&1";
+
+                                        /usr/bin/env ping "${VALIDATE_HOSTNAME}" 1 > /dev/null 2>&1;
+                                        typeset -i RET_CODE=${?};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                        ;;
+                                    *)
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} ${VALIDATE_HOSTNAME} > /dev/null 2>&1";
+
+                                        /usr/bin/env ping -c 1 -q -W ${THREAD_TIMEOUT} "${VALIDATE_HOSTNAME}" > /dev/null 2>&1;
+                                        typeset -i RET_CODE=${?};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                        typeset -i ERROR_COUNT=${RET_CODE};
+
+                                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                        ;;
+                                esac
+                                ;;
+                            2)
+                                if [ ! -z "$(builtin command -v nc | /usr/bin/env grep -v alias)" ]
+                                then
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env nc -w 10 ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1";
+
+                                    /usr/bin/env nc -w 10 "${VALIDATE_HOSTNAME}" ${VALIDATE_PORT} < /dev/null > /dev/null 2>&1;
+                                    typeset -i RET_CODE=${?};
+
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+
+                                    typeset -i ERROR_COUNT=${RET_CODE};
+
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
+                                else
+                                    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: /usr/bin/env telnet ${VALIDATE_HOSTNAME} ${VALIDATE_PORT} >/dev/null 2>&1 &";
 
                                     /usr/bin/env telnet "${VALIDATE_HOSTNAME}" ${VALIDATE_PORT} > /dev/null 2>&1 &
                                     typeset -i TELNET_PID=${!};
@@ -290,79 +587,47 @@ function validateHostAvailability
                                     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TELNET_PID -> ${TELNET_PID}";
 
                                     [ $(/usr/bin/env kill -0 "${TELNET_PID}" > /dev/null 2>&1; echo ${?}) -eq 1 ] && (( ERROR_COUNT += 1 )) || /usr/bin/env kill -9 ${TELNET_PID} > /dev/null 2>&1;
+                                fi
+                                ;;
+                        esac
+                    else
+                        ## host was NOT found in DNS OR in the hosts table. error out, we're done
+                        (( ERROR_COUNT += 1 ));
 
-                                    break;
-                                    ;;
-                            esac
-                            ;;
-                        1)
-                            ## check hosts file for entry, if it exists use it
-                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No entry was found in DNS. Checking hosts table...";
+                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
 
-                            if [ ! -z "$(/usr/bin/env grep "${VALIDATE_HOSTNAME}" /etc/hosts)" ]
-                            then
-                                ## make sure to fix the error counter
-                                [ ${ERROR_COUNT} -ne 0 ] && unset -v ERROR_COUNT;
-                                typeset -i ERROR_COUNT=0;
-
-                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Entry located in /etc/hosts";
-
-                                RETURN_CODE=0;
-
-                                break;
-                            else
-                                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table. Unable to determine availability.";
-                                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table. Unable to determine availability.";
-
-                                (( ERROR_COUNT += 1 ));
-
-                                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
-
-                                break;
-                            fi
-                            ;;
-                        *)
-                            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table or within local DNS. Unable to determine availability.";
-                            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${VALIDATE_HOSTNAME} does not appear to exist in the hosts table or within local DNS. Unable to determine availability.";
-
-                            (( ERROR_COUNT += 1 ));
-
-                            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "ERROR_COUNT -> ${ERROR_COUNT}";
-
-                            continue;
-                            ;;
-                    esac
-
-                    if [ ${ERROR_COUNT} -ne 0 ]
-                    then
-                        typeset RETURN_CODE=1;
-
-                        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to locate a valid entry for ${VALIDATE_HOSTNAME}. Unable to determine availability.";
-                        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to locate a valid entry for ${VALIDATE_HOSTNAME}. Unable to determine availability.";
-
-                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
-                        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
-
-                        [ ! -z "${ERROR_COUNT}" ] && typeset -i ERROR_COUNT=0;
-                        [ ! -z "${SEARCH_ENTRY}" ] && unset -v SEARCH_ENTRY;
-                        [ ! -z "${VALIDATE_HOSTNAME}" ] && unset -v VALIDATE_HOSTNAME;
-                        [ ! -z "${VALIDATE_PORT}" ] && unset -v VALIDATE_PORT;
-
-                        [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-                        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-                        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
-                        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
-                        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
-                        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
-
-                        [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-                        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
-
-                        return ${RETURN_CODE};
+                        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No entry was found for ${VALIDATE_HOSTNAME} in either DNS or files. Cannot continue.";
+                        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "No entry was found for ${VALIDATE_HOSTNAME} in either DNS or files. Cannot continue.";
                     fi
-                done
-            fi
+                    ;;
+            esac
+            ;;
+        *)
+            typeset RETURN_CODE=1;
+
+            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "An unexpected error occurred while executing the request. Cannot continue.";
+            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "An unexpected error occurred while executing the request. Cannot continue.";
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
+
+            [ ! -z "${ERROR_COUNT}" ] && typeset -i ERROR_COUNT=0;
+            [ ! -z "${SEARCH_ENTRY}" ] && unset -v SEARCH_ENTRY;
+            [ ! -z "${VALIDATE_HOSTNAME}" ] && unset -v VALIDATE_HOSTNAME;
+            [ ! -z "${VALIDATE_PORT}" ] && unset -v VALIDATE_PORT;
+
+            [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
+            [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+
+            [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
+            [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
+            [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
+            [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
+
+            [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
+            [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
+
+            return ${RETURN_CODE};
             ;;
     esac
 
@@ -371,6 +636,7 @@ function validateHostAvailability
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
 
+    [ ! -z "${IS_IN_HOSTS}" ] && unset -v IS_IN_HOSTS;
     [ ! -z "${TELNET_PID}" ] && unset -v TELNET_PID;
     [ ! -z "${RET_CODE}" ] && typeset -i RET_CODE=0;
     [ ! -z "${ERROR_COUNT}" ] && typeset -i ERROR_COUNT=0;
