@@ -305,8 +305,8 @@ function logoutUser
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SHELL_NAME -> ${SHELL_NAME}";
 
     ## check for screen/tmux. if we're in a screen session dont do any of this shit
-    [ ! -z "$(builtin command -v screen)" -a ! -z "${STY}" ] && return;
-    [ ! -z "$(builtin command -v tmux)" -a  ! -z "$(/usr/bin/env tmux info 2>/dev/null)" ] && return;
+    [ ! -z "$(builtin compgen -c | /usr/bin/env grep -E -w ^screen)" -a ! -z "${STY}" ] && return;
+    [ ! -z "$(builtin compgen -c | /usr/bin/env grep -E -w ^tmux)" -a  ! -z "$(/usr/bin/env tmux info 2>/dev/null)" ] && return;
 
     ## turn off ssh-agent and keychain
     [ ! -z "$(/usr/bin/env pidof ssh-agent)" ] && /usr/bin/env pkill ssh-agent;
@@ -394,9 +394,8 @@ function setupNewServer
     [ ${#} -eq 2 ] && typeset -a USER_NAME="${2}" || typeset USER_NAME="${LOGNAME}";
     typeset -x SETUP_NEW_SYSTEM="${_TRUE}";
 
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}";
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "USERNAME -> ${USERNAME}";
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "AUTH_DATA -> ${AUTH_DATA}";
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOSTLIST -> ${HOSTLIST[@]}";
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "USER_NAME -> ${USER_NAME}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SETUP_NEW_SYSTEM -> ${SETUP_NEW_SYSTEM}";
 
     for TARGET_HOST in ${HOSTLIST[*]}
