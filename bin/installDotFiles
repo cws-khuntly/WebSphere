@@ -17,7 +17,7 @@
 #==============================================================================
 
 trap 'set +v; set +x' INT TERM EXIT;
-set -x
+
 typeset -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 [ -r "${HOME}/.dotfiles/etc/logging.properties" -a -s "${HOME}/.dotfiles/etc/logging.properties" ] && . "${HOME}/.dotfiles/etc/logging.properties";
@@ -88,8 +88,23 @@ function deployFiles
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
+        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -121,9 +136,23 @@ function deployFiles
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
-        [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -133,24 +162,24 @@ function deployFiles
 
     ## we are ONLY pushing the tarfile. no ssh keys, no installations, no nothing - just create and send the tar
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
+    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude={'README.md', 'LICENSE.md'} -cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
-    typeset SFTP_BATCH="$(/usr/bin/env mktemp)";
+    typeset SFTP_BATCH_FILE="$(/usr/bin/env mktemp)";
 
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "SFTP_BATCH -> ${SFTP_BATCH}";
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "SFTP_BATCH_FILE -> ${SFTP_BATCH_FILE}";
 
-    echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH}";
+    echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
     if [ -z "${USERNAME}" ]
     then
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] &&" \
             "/usr/bin/env rm -f ${HOME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH}" ${LOGNAME}@${HOSTNAME};
+        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${LOGNAME}@${HOSTNAME};
     else
         /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
             "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH}" ${USERNAME}@${HOSTNAME};
+        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
     fi
 
     typeset -i RET_CODE=${?};
@@ -174,15 +203,26 @@ function deployFiles
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
+        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-        [ -f "${SFTP_BATCH}" ] && /usr/bin/rm -f ${SFTP_BATCH};
-
-        [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
         return ${RETURN_CODE};
     fi
@@ -197,15 +237,26 @@ function deployFiles
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
+    [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+
+    [ ! -z "${CNAME}" ] && unset -v CNAME;
+    [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+    [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+    [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+    [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+    [ ! -z "${ACTION}" ] && unset -v ACTION;
+    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
+    [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-    [ -f "${SFTP_BATCH}" ] && /usr/bin/rm -f ${SFTP_BATCH};
-
-    [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
-    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
     return ${RETURN_CODE};
 }
@@ -247,8 +298,23 @@ function deployAndInstall
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -280,9 +346,23 @@ function deployAndInstall
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
-        [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -295,7 +375,11 @@ function deployAndInstall
     do
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
 
-        [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
+        ## check if the file actually exists, if its not there just skip it
+        [ ! -f ${HOME}/.ssh/${KEYFILE}.pub ] && continue;
+
+        [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || \
+            /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
@@ -309,27 +393,29 @@ function deployAndInstall
 
             continue;
         fi
+
+        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
     done
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar cf ~/dotfiles.tar *; ## create the archive
+    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude={'README.md', 'LICENSE.md'} -cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
-    typeset SFTP_BATCH="$(/usr/bin/env mktemp)";
+    typeset SFTP_BATCH_FILE="$(/usr/bin/env mktemp)";
 
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "SFTP_BATCH -> ${SFTP_BATCH}";
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "SFTP_BATCH_FILE -> ${SFTP_BATCH_FILE}";
 
-    echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH}";
+    echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
     if [ -z "${USERNAME}" ]
     then
         /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] &&" \
             "/usr/bin/env rm -f ${HOME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH}" ${LOGNAME}@${HOSTNAME};
+        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${LOGNAME}@${HOSTNAME};
     else
         /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
             "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH}" ${USERNAME}@${HOSTNAME};
+        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
     fi
 
     typeset -i RET_CODE=${?};
@@ -353,15 +439,26 @@ function deployAndInstall
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-        [ -f "${SFTP_BATCH}" ] && /usr/bin/rm -f ${SFTP_BATCH};
-
-        [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
         return ${RETURN_CODE};
     fi
@@ -403,15 +500,26 @@ function deployAndInstall
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+        [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+        [ ! -z "${ACTION}" ] && unset -v ACTION;
+        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-        [ -f "${SFTP_BATCH}" ] && /usr/bin/rm -f ${SFTP_BATCH};
-
-        [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
         return ${RETURN_CODE};
     fi
@@ -424,15 +532,26 @@ function deployAndInstall
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+    [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+    [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+    [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+    [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+    [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+    [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+    [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+    [ ! -z "${ACTION}" ] && unset -v ACTION;
+    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-    [ -f "${SFTP_BATCH}" ] && /usr/bin/rm -f ${SFTP_BATCH};
-
-    [ ! -z "${SFTP_BATCH}" ] && unset -v SFTP_BATCH;
-    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
     return ${RETURN_CODE};
 }
@@ -573,9 +692,27 @@ function installFiles
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
+    [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+    [ ! -z "${CNAME}" ] && unset -v CNAME;
+    [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+    [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+    [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+    [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+    [ ! -z "${ENTRY_COMMAND}" ] && unset -v ENTRY_COMMAND;
+    [ ! -z "${ENTRY_SOURCE}" ] && unset -v ENTRY_SOURCE;
+    [ ! -z "${ENTRY_TARGET}" ] && unset -v ENTRY_TARGET;
+    [ ! -z "${ENTRY}" ] && unset -v ENTRY;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
-    [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
+    [ ! -z "${ACTION}" ] && unset -v ACTION;
+    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -600,8 +737,27 @@ function usage
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-    [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+    [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+    [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+
+    [ ! -z "${CNAME}" ] && unset -v CNAME;
+    [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+    [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+    [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+    [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+    [ ! -z "${ACTION}" ] && unset -v ACTION;
+    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
+    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${ENTRY_COMMAND}" ] && unset -v ENTRY_COMMAND;
+    [ ! -z "${ENTRY_SOURCE}" ] && unset -v ENTRY_SOURCE;
+    [ ! -z "${ENTRY_TARGET}" ] && unset -v ENTRY_TARGET;
+    [ ! -z "${ENTRY}" ] && unset -v ENTRY;
+    [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+    [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+    [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
