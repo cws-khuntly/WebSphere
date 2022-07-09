@@ -144,7 +144,7 @@ function createBackup
         return ${RETURN_CODE};
     fi
 
-    ${HOME}/.lib/rsync.exp ${USERNAME} ${TARGET_HOST} local ${SOURCE_FS} ${DEST_FS};
+    /usr/bin/env expect -f ${HOME}/.lib/rsync.exp ${USERNAME} ${TARGET_HOST} local ${SOURCE_FS} ${DEST_FS};
     typeset -i RET_CODE=${?};
 
     typeset DEBUG_NAME="F03-rsync#${FUNCNAME[0]}";
@@ -356,7 +356,7 @@ function restoreBackup
         return ${RETURN_CODE};
     fi
 
-    ${HOME}/.lib/rsync.exp ${USERNAME} ${TARGET_HOST} remote ${SOURCE_FS} ${DEST_FS};
+    /usr/bin/env expect -f ${HOME}/.lib/rsync.exp ${USERNAME} ${TARGET_HOST} remote ${SOURCE_FS} ${DEST_FS};
     typeset -i RET_CODE=${?};
 
     typeset DEBUG_NAME="F03-rsync#${FUNCNAME[0]}";
@@ -417,4 +417,3 @@ function restoreBackup
 
     return ${RETURN_CODE};
 }
-

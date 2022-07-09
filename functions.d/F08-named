@@ -51,7 +51,7 @@ function named-compilezone
         return ${RETURN_CODE};
     fi
 
-    typeset TEMPFILE="$(mktemp)";
+    typeset TEMPFILE="$(/usr/bin/env mktemp)";
     typeset DOMAIN="${1}";
     typeset ZONEFILE="${2}"
 
@@ -60,7 +60,7 @@ function named-compilezone
 
     if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
     then
-        mv "${ARCHIVE_DIRECTORY}/$(basename "${FILE_NAME}")" "${FILE_NAME}";
+        mv "${ARCHIVE_DIRECTORY}/$(/usr/bin/env basename "${FILE_NAME}")" "${FILE_NAME}";
 
         RETURN_CODE=1;
 
