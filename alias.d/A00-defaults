@@ -28,6 +28,7 @@ alias fgrep='/usr/bin/env grep -F --color=auto';
 alias wget='/usr/bin/env wget -c';
 alias stat='/usr/bin/env stat -c "%n: Permissions: %a, Owner: %U, Group: %G"';
 alias scp='/usr/bin/env sftp -qr';
+alias sftp='/usr/bin/env sftp -qr';
 alias ssh-keygen='/usr/bin/env ssh-keygen -C ""';
 alias ssh-keyscan='/usr/bin/env ssh-keyscan -H';
 alias rsync='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --delete-excluded --exclude-from=${HOME}/.etc/excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" --log-file=${HOME}/.log/rsync.log';
