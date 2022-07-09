@@ -1,78 +1,4 @@
 #=====  FUNCTION  =============================================================
-#          NAME:  wake
-#   DESCRIPTION:  Sends a Wake-On-LAN packet to a provided host
-#    PARAMETERS:  MAC address to send to
-#       RETURNS:  0
-#==============================================================================
-function wake
-{
-    typeset SCRIPT_NAME="F06-network";
-    typeset FUNCTION_NAME="${FUNCNAME[0]}";
-    typeset -i RETURN_CODE=0;
-
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} START: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i START_EPOCH=$(/usr/bin/env date +"%s");
-
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
-
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> enter";
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided arguments: ${*}";
-
-    if [ ${#} -eq 0 ]
-    then
-        RETURN_CODE=3;
-
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} - Wake a provided server with wake-on-LAN enabled";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "Usage: ${FUNCTION_NAME} [ address ]
-                 -> The MAC address of the machine to wake";
-
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
-
-        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
-
-        [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
-
-        [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-        [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
-
-        return ${RETURN_CODE};
-    fi
-
-    /usr/bin/env wakeonlan ${1};
-    typeset -i RET_CODE=${?};
-
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
-
-    [ -z "${RET_CODE}" ] && RETURN_CODE=1 || RETURN_CODE=${RET_CODE};
-
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
-
-    [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
-
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
-
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
-    [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
-
-    [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
-
-    return ${RETURN_CODE};
-}
-
-#=====  FUNCTION  =============================================================
 #          NAME:  validateHostAvailability
 #   DESCRIPTION:  Validates that a given host exists in DNS and is alive
 #    PARAMETERS:  Target host, port number (optional)
@@ -636,6 +562,8 @@ function checkSslExpiry
     typeset SCRIPT_NAME="F06-network";
     typeset FUNCTION_NAME="${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
+    typeset -i ERROR_COUNT=0;
+    typeset RANDOM_GENERATOR=/dev/urandom;
 
     [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} START: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
     [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i START_EPOCH=$(/usr/bin/env date +"%s");
@@ -657,7 +585,7 @@ function checkSslExpiry
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
 
-        [ ${ERROR_COUNT} -ne 0 ] && typeset -i ERROR_COUNT=0;
+        [ ! ${ERROR_COUNT} -ne 0 ] && typeset -i ERROR_COUNT=0;
         [ ! -z "${EXPIRY_EPOCH}" ] && unset -v EXPIRY_EPOCH;
         [ ! -z "${SITE_LIST}" ] && unset -v SITE_LIST;
         [ ! -z "${SITE}" ] && unset -v SITE;
@@ -731,7 +659,7 @@ function checkSslExpiry
             continue;
         fi
 
-        typeset RETURNED_EXPIRY="$(printf "%s\n" "quit" | /usr/bin/env openssl s_client -connect "${SITE_HOSTNAME}:${SITE_PORT}" -nbio -mtu 1500 -bugs -rand file:${RANDOM_GENERATOR} 2>/dev/null | \
+        typeset RETURNED_EXPIRY="$(printf "%s\n" "quit" | /usr/bin/env openssl s_client -connect "${SITE_HOSTNAME}:${SITE_PORT}" -nbio -mtu 1500 -bugs -writerand /tmp/rnd 2>/dev/null | \
             /usr/bin/env sed -ne "/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p" | /usr/bin/env openssl x509 -noout -subject -dates | /usr/bin/env grep notAfter | cut -d "=" -f 2 | \
             /usr/bin/env awk '{print $4, $1, $2}')";
 

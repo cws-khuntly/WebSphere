@@ -63,6 +63,7 @@ function deployFiles
     set +o noclobber;
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
+    [ -z "${USERNAME}" ] && typeset USERNAME="${LOGNAME}";
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
@@ -162,7 +163,7 @@ function deployFiles
 
     ## we are ONLY pushing the tarfile. no ssh keys, no installations, no nothing - just create and send the tar
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude={'README.md', 'LICENSE.md'} -cf ~/dotfiles.tar *; ## create the archive
+    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude=README.md --exclude=LICENSE.md -cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
     typeset SFTP_BATCH_FILE="$(/usr/bin/env mktemp)";
@@ -171,16 +172,9 @@ function deployFiles
 
     echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
-    if [ -z "${USERNAME}" ]
-    then
-        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] &&" \
-            "/usr/bin/env rm -f ${HOME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${LOGNAME}@${HOSTNAME};
-    else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
-            "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
-    fi
+    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
+        "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
+    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
 
     typeset -i RET_CODE=${?};
 
@@ -273,6 +267,7 @@ function deployAndInstall
     set +o noclobber;
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
+    [ -z "${USERNAME}" ] && typeset USERNAME="${LOGNAME}";
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
@@ -376,10 +371,9 @@ function deployAndInstall
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
 
         ## check if the file actually exists, if its not there just skip it
-        [ ! -f ${HOME}/.ssh/${KEYFILE}.pub ] && continue;
+        [ ! -f /home/${USERNAME}/.ssh/${KEYFILE}.pub ] && continue;
 
-        [ -z "${USERNAME}" ] && /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1 || \
-            /usr/bin/env ssh-copy-id -i ${HOME}/.ssh/${KEYFILE}.pub -f ${USERNAME}@${HOSTNAME} > ${HOME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
+        /usr/bin/env ssh-copy-id -i /home/${USERNAME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > /home/${USERNAME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
@@ -398,7 +392,7 @@ function deployAndInstall
     done
 
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
-    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude={'README.md', 'LICENSE.md'} -cf ~/dotfiles.tar *; ## create the archive
+    builtin cd ${HOME}/.dotfiles; /usr/bin/env tar --exclude-vcs --exclude=README.md --exclude=LICENSE.md -cf ~/dotfiles.tar *; ## create the archive
 
     ## make a temp file to store sftp commands in
     typeset SFTP_BATCH_FILE="$(/usr/bin/env mktemp)";
@@ -407,16 +401,9 @@ function deployAndInstall
 
     echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
-    if [ -z "${USERNAME}" ]
-    then
-        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f ${HOME}/dotfiles.tar ] &&" \
-            "/usr/bin/env rm -f ${HOME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${LOGNAME}@${HOSTNAME};
-    else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
-            "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-        /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
-    fi
+    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
+        "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
+    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
 
     typeset -i RET_CODE=${?};
 
@@ -464,15 +451,9 @@ function deployAndInstall
     fi
 
     ## ok, files should be out there. lets go
-    if [ -z "${USERNAME}" ]
-    then
-        ## hmm, why the fuck am i doing this
-        /usr/bin/env ssh -ql ${LOGNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir ${HOME}/.dotfiles >/dev/null 2>&1; builtin cd ${HOME}/.dotfiles; \
-            /usr/bin/env tar xf ${HOME}/dotfiles.tar; ${HOME}/.dotfiles/bin/installDotFiles -a install;";
-    else
-        /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; builtin cd /home/${USERNAME}/.dotfiles; \
-            /usr/bin/env tar xf /home/${USERNAME}/dotfiles.tar; /home/${USERNAME}/.dotfiles/bin/installDotFiles -a install;";
-    fi
+    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -d /home/${USERNAME}/.dotfiles ] && \
+        /usr/bin/rm -rf /home/${USERNAME}/.dotfiles; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; \
+        builtin cd /home/${USERNAME}/.dotfiles; /usr/bin/env tar xf /home/${USERNAME}/dotfiles.tar; /home/${USERNAME}/.dotfiles/bin/installDotFiles -a installFiles;";
 
     typeset -i RET_CODE=${?};
 
