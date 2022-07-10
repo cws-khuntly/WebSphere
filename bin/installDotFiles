@@ -63,7 +63,7 @@ function deployFiles
     set +o noclobber;
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
-    [ -z "${USERNAME}" ] && typeset USERNAME="${LOGNAME}";
+    [ -z "${TARGET_USER}" ] && typeset TARGET_USER="${LOGNAME}";
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
@@ -101,8 +101,8 @@ function deployFiles
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -116,7 +116,7 @@ function deployFiles
     [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
-    validateHostAvailability ${HOSTNAME};
+    validateHostAvailability ${TARGET_HOST};
     typeset -i RET_CODE=${?};
 
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
@@ -127,8 +127,8 @@ function deployFiles
     then
         typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -149,8 +149,8 @@ function deployFiles
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -172,9 +172,9 @@ function deployFiles
 
     echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
-    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
-        "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
+    /usr/bin/env ssh -ql ${TARGET_USER} ${TARGET_HOST} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${TARGET_USER}/dotfiles.tar ] && " \
+        "/usr/bin/env rm -f /home/${TARGET_USER}/dotfiles.tar;"
+    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${TARGET_USER}@${TARGET_HOST};
 
     typeset -i RET_CODE=${?};
 
@@ -209,8 +209,8 @@ function deployFiles
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -243,8 +243,8 @@ function deployFiles
     [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
     [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
     [ ! -z "${ACTION}" ] && unset -v ACTION;
-    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+    [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -267,7 +267,7 @@ function deployAndInstall
     set +o noclobber;
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
-    [ -z "${USERNAME}" ] && typeset USERNAME="${LOGNAME}";
+    [ -z "${TARGET_USER}" ] && typeset TARGET_USER="${LOGNAME}";
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
@@ -305,8 +305,8 @@ function deployAndInstall
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -320,7 +320,7 @@ function deployAndInstall
     [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
     [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
-    validateHostAvailability ${HOSTNAME};
+    validateHostAvailability ${TARGET_HOST};
     typeset -i RET_CODE=${?};
 
     typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
@@ -331,8 +331,8 @@ function deployAndInstall
     then
         typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${HOSTNAME} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -353,8 +353,8 @@ function deployAndInstall
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -371,17 +371,17 @@ function deployAndInstall
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Copying public key ${KEYFILE}";
 
         ## check if the file actually exists, if its not there just skip it
-        [ ! -f /home/${USERNAME}/.ssh/${KEYFILE}.pub ] && continue;
+        [ ! -f /home/${TARGET_USER}/.ssh/${KEYFILE}.pub ] && continue;
 
-        /usr/bin/env ssh-copy-id -i /home/${USERNAME}/.ssh/${KEYFILE}.pub -f ${HOSTNAME} > /home/${USERNAME}/.log/ssh-copy-id-${KEYFILE} 2>&1;
+        /usr/bin/env ssh-copy-id -i /home/${TARGET_USER}/.ssh/${KEYFILE}.pub -f ${TARGET_HOST} > /home/${TARGET_USER}/.log/ssh-copy-id-${KEYFILE} 2>&1;
         typeset -i RET_CODE=${?};
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
 
         if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
         then
-            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${HOSTNAME}";
-            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${HOSTNAME}";
+            writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${TARGET_HOST}";
+            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy SSH identity ${KEYFILE} to host ${TARGET_HOST}";
 
             typeset -i RET_CODE=0;
 
@@ -401,9 +401,9 @@ function deployAndInstall
 
     echo "put ${HOME}/dotfiles.tar" >| "${SFTP_BATCH_FILE}";
 
-    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${USERNAME}/dotfiles.tar ] && " \
-        "/usr/bin/env rm -f /home/${USERNAME}/dotfiles.tar;"
-    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${USERNAME}@${HOSTNAME};
+    /usr/bin/env ssh -ql ${TARGET_USER} ${TARGET_HOST} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -f /home/${TARGET_USER}/dotfiles.tar ] && " \
+        "/usr/bin/env rm -f /home/${TARGET_USER}/dotfiles.tar;"
+    /usr/bin/env sftp -b "${SFTP_BATCH_FILE}" ${TARGET_USER}@${TARGET_HOST};
 
     typeset -i RET_CODE=${?};
 
@@ -438,8 +438,8 @@ function deployAndInstall
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -451,9 +451,9 @@ function deployAndInstall
     fi
 
     ## ok, files should be out there. lets go
-    /usr/bin/env ssh -ql ${USERNAME} ${HOSTNAME} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -d /home/${USERNAME}/.dotfiles ] && \
-        /usr/bin/rm -rf /home/${USERNAME}/.dotfiles; /usr/bin/env mkdir /home/${USERNAME}/.dotfiles >/dev/null 2>&1; \
-        builtin cd /home/${USERNAME}/.dotfiles; /usr/bin/env tar xf /home/${USERNAME}/dotfiles.tar; /home/${USERNAME}/.dotfiles/bin/installDotFiles -a installFiles;";
+    /usr/bin/env ssh -ql ${TARGET_USER} ${TARGET_HOST} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -d /home/${TARGET_USER}/.dotfiles ] && \
+        /usr/bin/rm -rf /home/${TARGET_USER}/.dotfiles; /usr/bin/env mkdir /home/${TARGET_USER}/.dotfiles >/dev/null 2>&1; \
+        builtin cd /home/${TARGET_USER}/.dotfiles; /usr/bin/env tar xf /home/${TARGET_USER}/dotfiles.tar; /home/${TARGET_USER}/.dotfiles/bin/installDotFiles -a installFiles;";
 
     typeset -i RET_CODE=${?};
 
@@ -493,8 +493,8 @@ function deployAndInstall
         [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
         [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
         [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-        [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
@@ -528,8 +528,8 @@ function deployAndInstall
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
     [ ! -z "${ACTION}" ] && unset -v ACTION;
-    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+    [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -652,7 +652,7 @@ function installFiles
     typeset -x IFS="${IFS}";
 
     ## ssh keys (if they don't already exist AND this host requires them)
-    if [ -z "${HOSTNAME}" ]
+    if [ -z "${TARGET_HOST}" ]
     then
         [ ! -f ${HOME}/.ssh/known_hosts ] && touch -f ${HOME}/.ssh/known_hosts;
         [ ! -f ${HOME}/.ssh/id_rsa ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
@@ -692,8 +692,8 @@ function installFiles
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
     [ ! -z "${ACTION}" ] && unset -v ACTION;
-    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+    [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -730,8 +730,8 @@ function usage
     [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
     [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
     [ ! -z "${ACTION}" ] && unset -v ACTION;
-    [ ! -z "${USERNAME}" ] && unset -v USERNAME;
-    [ ! -z "${HOSTNAME}" ] && unset -v HOSTNAME;
+    [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+    [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
     [ ! -z "${ENTRY_COMMAND}" ] && unset -v ENTRY_COMMAND;
     [ ! -z "${ENTRY_SOURCE}" ] && unset -v ENTRY_SOURCE;
     [ ! -z "${ENTRY_TARGET}" ] && unset -v ENTRY_TARGET;
@@ -753,19 +753,19 @@ do
     case "${OPTIONS}" in
         h)
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting HOSTNAME..";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting TARGET_HOST..";
 
-            typeset HOSTNAME=${OPTARG};
+            typeset TARGET_HOST=${OPTARG};
 
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "HOSTNAME -> ${HOSTNAME}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "TARGET_HOST -> ${TARGET_HOST}";
             ;;
         u)
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting USERNAME..";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting TARGET_USER..";
 
-            typeset USERNAME=${OPTARG};
+            typeset TARGET_USER=${OPTARG};
 
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "USERNAME -> ${USERNAME}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "TARGET_USER -> ${TARGET_USER}";
             ;;
         a)
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "OPTARG -> ${OPTARG}";
@@ -788,14 +788,14 @@ case "${ACTION}" in
         installFiles;
         ;;
     "deployFiles")
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployFiles ${HOSTNAME} ${USERNAME}...";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployFiles ${TARGET_HOST} ${TARGET_USER}...";
 
-        deployFiles "${HOSTNAME}" "${USERNAME}";
+        deployFiles "${TARGET_HOST}" "${TARGET_USER}";
         ;;
     "deployAndInstall")
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployAndInstall ${HOSTNAME} ${USERNAME}...";
+        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployAndInstall ${TARGET_HOST} ${TARGET_USER}...";
 
-        deployAndInstall "${HOSTNAME}" "${USERNAME}";
+        deployAndInstall "${TARGET_HOST}" "${TARGET_USER}";
         ;;
     *)
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "No arguments/invalid arguments were provided.";

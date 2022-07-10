@@ -43,7 +43,6 @@ Host *
     TCPKeepAlive                = yes
     VerifyHostKeyDNS            = ask
     XAuthLocation               = /usr/bin/xauth
-    User                        = kmhuntly
     IdentitiesOnly              = yes
     IdentityFile                = ~/.ssh/id_rsa
     IdentityFile                = ~/.ssh/id_dsa
