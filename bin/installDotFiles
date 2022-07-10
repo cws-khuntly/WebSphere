@@ -127,8 +127,8 @@ function deployFiles
     then
         typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -331,8 +331,8 @@ function deployAndInstall
     then
         typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to exist in DNS. Unable to determine availability.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));

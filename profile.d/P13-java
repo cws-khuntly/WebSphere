@@ -19,8 +19,15 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ -d "/usr/java/latest" -o -L "/usr/java/latest" ] && typeset -x JAVA_HOME="/usr/java/latest";
-[ -d "/usr/java/latest/jre" ] && typeset -x JRE_HOME="/usr/java/latest/jre";
+case $(/usr/bin/env uname -s) in
+    [Cc][Yy][Gg][Ww][Ii][Nn]*)
+        [ ! -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ] && return || typeset -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1";
+        ;;
+    *)
+        [ -d "/usr/java/latest" -o -L "/usr/java/latest" ] && typeset -x JAVA_HOME="/usr/java/latest";
+        [ -d "/usr/java/latest/jre" ] && typeset -x JRE_HOME="/usr/java/latest/jre";
+        ;;
+esac
 
 [ ! -z "${JAVA_HOME}" ] && typeset -x JRE_HOME="/usr/java/latest/jre";
 [ ! -z "${JAVA_HOME}" ] && typeset -x CLASSPATH=".:${CLASSPATH}:${HOME}/.etc:${HOME}/.lib";

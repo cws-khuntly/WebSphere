@@ -19,10 +19,18 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ ! -d /usr/java/latest -o ! -L /usr/java/latest ] && return;
+case $(/usr/bin/env uname -s) in
+    [Cc][Yy][Gg][Ww][Ii][Nn]*)
+        [ ! -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ] && return || typeset -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1";
+        ;;
+    *)
+        [ ! -d /usr/java/latest -o ! -L /usr/java/latest ] && return || typeset -x JAVA_HOME="/usr/java/latest";
+        ;;
+esac
 
 ## java
-[ "$(/usr/bin/env uname -m)" == "x86_64" ] && alias java="${JAVA_HOME}/bin/java -d64 ${JAVA_OPTS}" || alias java="${JAVA_HOME}/bin/java ${JAVA_OPTS}";
+
+alias java="${JAVA_HOME}/bin/java ${JAVA_OPTS}"
 alias keytool="${JAVA_HOME}/bin/keytool";
 alias jad='~/.bin/jad -dead -ff -i -s java -t4';
 alias threadAnalyzer="java -jar ${HOME}/.lib/jca457.jar";
