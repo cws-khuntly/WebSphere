@@ -28,14 +28,14 @@
 
     <!-- do we need a proxy for internet access? -->
     <proxy-config>
-        <proxyServiceRequired>true</proxyServiceRequired>
-        <proxyServerName>proxy.caspersbox.com</proxyServerName>
-        <proxyServerPort>8080</proxyServerPort>
-        <proxyAuthRequired>true</proxyAuthRequired>
-        <proxyAuthType>NTLM</proxyAuthType>
-        <proxyAuthDomain>CaspersBox</proxyAuthDomain>
-        <proxyServerRealm>CWS</proxyServerRealm>
-        <proxyUserId>kmhuntly</proxyUserId>
+        <proxyServiceRequired>false</proxyServiceRequired>
+        <proxyServerName />
+        <proxyServerPort />
+        <proxyAuthRequired />
+        <proxyAuthType />
+        <proxyAuthDomain />
+        <proxyServerRealm />
+        <proxyUserId />
         <proxyPwdSalt />
         <proxyPassword />
     </proxy-config>
@@ -62,16 +62,16 @@
 
     <ssh-config>
         <timeout>15</timeout> <!-- connect timeout in seconds (defaults to 10 if not set here) -->
-        <sshProperties>/opt/cws/eSolutions/.ssh/config</sshProperties> <!-- full path to properties file containing ssh props (like StrictHostKeyChecking, etc) -->
-        <sshAccount>kmhuntly</sshAccount> <!-- username to use for authentication -->
-        <sshKey>${HOME}/.ssh/id_rsa</sshKey> <!-- path to the ssh private key -->
+        <sshProperties />
+        <sshAccount />
+        <sshKey />
         <sshSalt />
         <sshPassword />
     </ssh-config>
 
     <ftp-config>
         <timeout>15</timeout> <!-- connect timeout in seconds (defaults to 10 if not set here) -->
-        <ftpAccount>kmhuntly</ftpAccount> <!-- username to use for authentication -->
+        <ftpAccount />
         <ftpSalt />
         <ftpPassword />
     </ftp-config>
