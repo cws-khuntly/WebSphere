@@ -651,15 +651,6 @@ function installFiles
     ## restore the original ifs
     typeset -x IFS="${IFS}";
 
-    ## ssh keys (if they don't already exist AND this host requires them)
-    if [ -z "${TARGET_HOST}" ]
-    then
-        [ ! -f ${HOME}/.ssh/known_hosts ] && touch -f ${HOME}/.ssh/known_hosts;
-        [ ! -f ${HOME}/.ssh/id_rsa ] && /usr/bin/env ssh-keygen -t rsa -b 4096 -N "" -C "" -f ${HOME}/.ssh/id_rsa;
-        [ ! -f ${HOME}/.ssh/id_dsa ] && /usr/bin/env ssh-keygen -t dsa -b 1024 -N "" -C "" -f ${HOME}/.ssh/id_dsa;
-        [ ! -f ${HOME}/.ssh/id_ecdsa ] && /usr/bin/env ssh-keygen -t ecdsa -b 521 -N "" -C "" -f ${HOME}/.ssh/id_ecdsa;
-    fi
-
     ## remove tarfile
     [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f "${HOME}/dotfiles.tar";
 
@@ -785,7 +776,7 @@ case "${ACTION}" in
     "installFiles")
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing installFiles...";
 
-        installFiles;
+        installFiles
         ;;
     "deployFiles")
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Executing deployFiles ${TARGET_HOST} ${TARGET_USER}...";
