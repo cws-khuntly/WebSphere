@@ -453,7 +453,8 @@ function deployAndInstall
     ## ok, files should be out there. lets go
     /usr/bin/env ssh -ql ${TARGET_USER} ${TARGET_HOST} "typeset -x PATH=${PATH}:/bin:sbin:/usr/bin:/usr/sbin; [ -d /home/${TARGET_USER}/.dotfiles ] && \
         /usr/bin/rm -rf /home/${TARGET_USER}/.dotfiles; /usr/bin/env mkdir /home/${TARGET_USER}/.dotfiles >/dev/null 2>&1; \
-        builtin cd /home/${TARGET_USER}/.dotfiles; /usr/bin/env tar xf /home/${TARGET_USER}/dotfiles.tar; /home/${TARGET_USER}/.dotfiles/bin/installDotFiles -a installFiles;";
+        builtin cd /home/${TARGET_USER}/.dotfiles; /usr/bin/env tar xf /home/${TARGET_USER}/dotfiles.tar; \
+        /home/${TARGET_USER}/.dotfiles/bin/installDotFiles -a installFiles;";
 
     typeset -i RET_CODE=${?};
 
