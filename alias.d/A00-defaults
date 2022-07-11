@@ -65,7 +65,7 @@ case $(/usr/bin/env uname -s) in
         unalias fgrep; alias fgrep='/usr/xpg4/bin/fgrep -v grep';
         ;;
     [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        alias sudo='/usr/bin/env cygstart --action=runas';
+        alias sudo='/usr/bin/env cygstart --action=runas';  
         ;;
 esac
 
