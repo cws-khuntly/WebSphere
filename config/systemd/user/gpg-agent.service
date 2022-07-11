@@ -23,7 +23,7 @@ IgnoreOnIsolate=true
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/gpg-agent --homedir %u/.gnupg --use-standard-socket --daemon
+ExecStart=/usr/bin/gpg-agent --homedir %u/.gnupg --use-standard-socket --enable-ssh-support --daemon
 ExecStop=/usr/bin/pkill gpg-agent
 Restart=on-abort
 

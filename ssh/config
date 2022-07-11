@@ -44,6 +44,4 @@ Host *
     VerifyHostKeyDNS            = ask
     XAuthLocation               = /usr/bin/xauth
     IdentitiesOnly              = yes
-    #IdentityFile                = ~/.ssh/id_rsa
-    #IdentityFile                = ~/.ssh/id_dsa
-    #IdentityFile                = ~/.ssh/id_ecdsa
+    IdentityAgent               = /run/user/1000/gnupg/S.gpg-agent.ssh
