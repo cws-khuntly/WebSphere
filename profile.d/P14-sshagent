@@ -19,7 +19,7 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ -z "$(/usr/bin/env ls -ltr ~/.ssh 2>/dev/null | /usr/bin/env grep pub | /usr/bin/env awk '{print $NF}'" ] && return;
+[ -z "$(/usr/bin/env ls -ltr ~/.ssh 2>/dev/null | /usr/bin/env grep pub | /usr/bin/env awk '{print $NF}')" ] && return;
 
 if [ ! -z "$(/usr/bin/env pidof ssh-agent)" ]
 then
