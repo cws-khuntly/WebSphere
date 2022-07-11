@@ -44,5 +44,5 @@ Host *
     VerifyHostKeyDNS            = ask
     XAuthLocation               = /usr/bin/xauth
     IdentitiesOnly              = yes
-    IdentityFile                = ~/.ssh/id_rsa
+    IdentityFile                = ~/.ssh/id_ed25519
 
