@@ -45,7 +45,4 @@ Host *
     XAuthLocation               = /usr/bin/xauth
     IdentitiesOnly              = yes
     IdentityFile                = ~/.ssh/id_ed25519
-    ControlMaster               = auto
-    ControlPersist              = 60s
-    ControlPath                 = ~/.ssh/control
 
