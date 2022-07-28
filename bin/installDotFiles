@@ -106,6 +106,7 @@ function deployFiles
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -113,53 +114,62 @@ function deployFiles
         return ${RETURN_CODE};
     fi
 
-    [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
+    case "${FORCE_PUSH}" in
+        "${_TRUE}")
+            writeLogEntry "INFO" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Skipping host availability check due to FORCE_PUSH being ${_TRUE}";
+            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Skipping host availability check due to FORCE_PUSH being ${_TRUE}";
+            ;;
+        *)
+            [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
+            [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
-    validateHostAvailability ${TARGET_HOST};
-    typeset -i RET_CODE=${?};
+            validateHostAvailability ${TARGET_HOST};
+            typeset -i RET_CODE=${?};
 
-    typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
+            typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
 
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
 
-    if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
-    then
-        typeset RETURN_CODE=1;
+            if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
+            then
+                typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
 
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
 
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/env rm -f ${HOME}/dotfiles.tar;
-        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+                [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+                [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
 
-        [ ! -z "${CNAME}" ] && unset -v CNAME;
-        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
-        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
-        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
-        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
-        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
-        [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
-        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
-        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+                [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+                [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+                [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+                [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+                [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+                [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+                [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+                [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+                [ ! -z "${ACTION}" ] && unset -v ACTION;
+                [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+                [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
+                [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+                [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+                [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+                [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
-        [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+                [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
+                [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        return ${RETURN_CODE};
-    fi
+                return ${RETURN_CODE};
+            fi
+            ;;
+    esac
 
     ## we are ONLY pushing the tarfile. no ssh keys, no installations, no nothing - just create and send the tar
     ## create a copy of the existing dotfiles directory from THIS host and send it to the target host
@@ -214,6 +224,7 @@ function deployFiles
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -248,6 +259,7 @@ function deployFiles
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${SFTP_BATCH_FILE}" ] && unset -v SFTP_BATCH_FILE;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+    [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -310,6 +322,7 @@ function deployAndInstall
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -317,53 +330,62 @@ function deployAndInstall
         return ${RETURN_CODE};
     fi
 
-    [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
-    [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
+    case "${FORCE_PUSH}" in
+        "${_TRUE}")
+            writeLogEntry "INFO" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Skipping host availability check due to FORCE_PUSH being ${_TRUE}";
+            writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Skipping host availability check due to FORCE_PUSH being ${_TRUE}";
+            ;;
+        *)
+            [ ! -z "${FUNCTION_NAME}" ] && unset -v FUNCTION_NAME;
+            [ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
 
-    validateHostAvailability ${TARGET_HOST};
-    typeset -i RET_CODE=${?};
+            validateHostAvailability ${TARGET_HOST};
+            typeset -i RET_CODE=${?};
 
-    typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
+            typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
 
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RET_CODE -> ${RET_CODE}";
 
-    if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
-    then
-        typeset RETURN_CODE=1;
+            if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
+            then
+                typeset RETURN_CODE=1;
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+                writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
+                writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${TARGET_HOST} does not appear to be available. Unable to install files.";
 
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
-        [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} TOTAL RUNTIME: $(( RUNTIME / 60)) MINUTES, TOTAL ELAPSED: $(( RUNTIME % 60)) SECONDS";
+                [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "${METHOD_NAME} END: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
 
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
+                [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-        [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
-        [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
+                [ -f "${SFTP_BATCH_FILE}" ] && /usr/bin/rm -f "${SFTP_BATCH_FILE}";
+                [ -f "${HOME}/dotfiles.tar" ] && /usr/bin/rm -f "${HOME}/dotfiles.tar";
 
-        [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
-        [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
-        [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
-        [ ! -z "${CONFIG}" ] && unset -v CONFIG;
-        [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
-        [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
-        [ ! -z "${ACTION}" ] && unset -v ACTION;
-        [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
-        [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
-        [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
-        [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
-        [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+                [ ! -z "${CNAME}" ] && unset -v CNAME;[ ! -z "${CNAME}" ] && unset -v CNAME;
+                [ ! -z "${SCRIPT_ABSOLUTE_PATH}" ] && unset -v SCRIPT_ABSOLUTE_PATH;
+                [ ! -z "${SCRIPT_ROOT}" ] && unset -v SCRIPT_ROOT;
+                [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+                [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
+                [ ! -z "${CONFIG}" ] && unset -v CONFIG;
+                [ ! -z "${CURR_IFS}" ] && unset -v CURR_IFS;
+                [ ! -z "${MODIFIED_IFS}" ] && unset -v MODIFIED_IFS;
+                [ ! -z "${ACTION}" ] && unset -v ACTION;
+                [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
+                [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
+                [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
+                [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
+                [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+                [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
-        [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+                [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
+                [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
 
-        return ${RETURN_CODE};
-    fi
+                return ${RETURN_CODE};
+            fi
+            ;;
+    esac
 
     ## copy ssh keys
     for KEYFILE in id_rsa id_dsa id_ecdsa ## handle all, not just rsa
@@ -443,6 +465,7 @@ function deployAndInstall
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -499,6 +522,7 @@ function deployAndInstall
         [ ! -z "${KEYFILE}" ] && unset -v KEYFILE;
         [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+        [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
         [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
         [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -531,6 +555,7 @@ function deployAndInstall
     [ ! -z "${ACTION}" ] && unset -v ACTION;
     [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
     [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
+    [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -686,6 +711,7 @@ function installFiles
     [ ! -z "${ACTION}" ] && unset -v ACTION;
     [ ! -z "${TARGET_USER}" ] && unset -v TARGET_USER;
     [ ! -z "${TARGET_HOST}" ] && unset -v TARGET_HOST;
+    [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -731,6 +757,7 @@ function usage
     [ ! -z "${ERROR_COUNT}" ] && unset -v ERROR_COUNT;
     [ ! -z "${METHOD_NAME}" ] && unset -v METHOD_NAME;
     [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
+    [ ! -z "${FORCE_PUSH}" ] && unset -v FORCE_PUSH;
 
     [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
     [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
@@ -740,7 +767,7 @@ function usage
 
 [ ${#} -eq 0 ] && usage;
 
-while getopts h:u:a: OPTIONS
+while getopts h:u:a:f OPTIONS
 do
     case "${OPTIONS}" in
         h)
@@ -766,6 +793,13 @@ do
             typeset ACTION=${OPTARG};
 
             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "ACTION -> ${ACTION}";
+            ;;
+        f)
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "Setting FORCE_PUSH..";
+
+            typeset FORCE_PUSH=${_TRUE};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "FORCE_PUSH -> ${FORCE_PUSH}";
             ;;
         *)
             usage;
