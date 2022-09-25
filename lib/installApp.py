@@ -18,43 +18,29 @@
 
 import sys
 
-def performAppInstallation(appName, appPath, appTarget, appWarName, appWarFile, targetCell, targetCluster)
-    nodeList = AdminConfig.list('Node').split("\n")
-    cluster = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + targetCluster + ',*')
+def performAppInstallation(clusterName, appName, appPath):
+    lineSplit = java.lang.System.getProperty("line.separator")
+    targetCell = AdminControl.getCell()
+    nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
     print "Installing application .."
-
-    print AdminApp.update(appName, 'app', +
-        '[ -operation update -contents ' + appPath + '-nopreCompileJSPs ' +
-        '-installed.ear.destination ' + appTarget + ' -distributeApp -useMetaDataFromBinary ' +
-        '-nodeployejb -createMBeansForResources -noreloadEnabled -nodeployws -validateinstall warn ' +
-        '-noprocessEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 ' +
-        '-noallowDispatchRemoteInclude -noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED ' +
-        '-nouseAutoLink -MapModulesToServers [[ ' + appWarName + ' ' + appWarFile + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + targetCluster + ' ]]]' )
-
-    AdminApp.update(appName, 'app', +
-        '[ -operation update -contents ' + appPath + '-nopreCompileJSPs ' +
-        '-installed.ear.destination ' + appTarget + ' -distributeApp -useMetaDataFromBinary ' +
-        '-nodeployejb -createMBeansForResources -noreloadEnabled -nodeployws -validateinstall warn ' +
-        '-noprocessEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 ' +
-        '-noallowDispatchRemoteInclude -noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED ' +
-        '-nouseAutoLink -MapModulesToServers [[ ' + appWarName + ' ' + appWarFile + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + targetCluster + ' ]]]' )
+    AdminApplication.installAppWithClusterOption('' + appName + '','' + appPath + '','' + clusterName + '')
 
     print "Saving configuration.."
 
     AdminConfig.save()
 
     for node in nodeList:
-        nodeName = AdminConfig.showAttribute(preNode, 'name')
-        objName = "type=NodeSync,node=" + nodeName + ",*"
-        syncNode = AdminControl.completeObjectName(objName)
+        nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
 
-        if syncNode != "":
-            print "Checking node synchronization status.."
-            nodeStatus = AdminControl.invoke(syncNode, 'isNodeSynchronized')
-            print "Node status: " + nodeStatus
-        else:
-            print
+        if nodeRepo:
+            AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
+
+        syncNode = AdminControl.completeObjectName('cell=' + targetCell + ',node=' + node + ',type=NodeSync,*')
+
+        if syncNode:
+            AdminControl.invoke(syncNode, 'sync')
+
         continue
 
     print "Performing ripple start.."
@@ -76,7 +62,7 @@ def printHelp():
 ##################################
 # main
 #################################
-if(len(sys.argv) == 7):
-    performAppInstallation(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],)
+if(len(sys.argv) == 3):
+    performAppInstallation(sys.argv[0],sys.argv[1],sys.argv[2])
 else:
     printHelp()
