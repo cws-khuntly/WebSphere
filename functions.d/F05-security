@@ -73,7 +73,7 @@ function returnRandomCharacters
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURNED_CHARACTERS -> ${RETURNED_CHARACTERS}";
 
-    writeLogEntry "STDOUT" "${RETURNED_CHARACTERS}";
+    writeLogEntry "STDOUT" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${RETURNED_CHARACTERS}"
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";

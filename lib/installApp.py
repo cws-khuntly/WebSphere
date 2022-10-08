@@ -24,6 +24,7 @@ def performAppInstallation(clusterName, appName, appPath):
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
     print "Installing application .."
+
     AdminApplication.installAppWithClusterOption('' + appName + '','' + appPath + '','' + clusterName + '')
 
     print "Saving configuration.."
@@ -43,10 +44,6 @@ def performAppInstallation(clusterName, appName, appPath):
 
         continue
 
-    print "Performing ripple start.."
-
-    AdminControl.invoke(cluster, 'rippleStart')
-
     print
     print "Executing getDeployStatus()"
     print AdminApp.getDeployStatus(appName)
@@ -54,6 +51,48 @@ def performAppInstallation(clusterName, appName, appPath):
     print
     print "Executing isAppReady()"
     print AdminApp.isAppReady(appName)
+
+def advancedInstallApp(appPath, appName, appModule, warName, clusterName):
+    lineSplit = java.lang.System.getProperty("line.separator")
+    nodeList = AdminTask.listManagedNodes().split(lineSplit)
+    targetCell = AdminControl.getCell()
+
+    AdminApp.install('' + appPath + '', '[ -distributeApp -appname ' + appName + ' -MapModulesToServers [[ ' + appModule + ' ' + warName + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=dmgrCell01,node=pv-web-dv-dx-srv-01Node,server=HTTPServer]]]' )
+    AdminConfig.save()
+
+    for node in nodeList:
+        nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
+
+        if nodeRepo:
+            AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
+
+        syncNode = AdminControl.completeObjectName('cell=' + targetCell + ',node=' + node + ',type=NodeSync,*')
+
+        if syncNode:
+            AdminControl.invoke(syncNode, 'sync')
+
+        continue
+
+def updateInstalledApp(appName, appModule, warName, clusterName):
+    lineSplit = java.lang.System.getProperty("line.separator")
+    nodeList = AdminTask.listManagedNodes().split(lineSplit)
+    targetCell = AdminControl.getCell()
+
+    AdminApp.edit('' + appName + '', '[ -MapModulesToServers [[ ' + appModule + ' ' + warName + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=dmgrCell01,node=pv-web-dv-dx-srv-01Node,server=HTTPServer ]]]' )
+    AdminConfig.save()
+
+    for node in nodeList:
+        nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
+
+        if nodeRepo:
+            AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
+
+        syncNode = AdminControl.completeObjectName('cell=' + targetCell + ',node=' + node + ',type=NodeSync,*')
+
+        if syncNode:
+            AdminControl.invoke(syncNode, 'sync')
+
+        continue
 
 def printHelp():
     print "This script disables the HA Manager on a specific process"
@@ -63,6 +102,10 @@ def printHelp():
 # main
 #################################
 if(len(sys.argv) == 3):
-    performAppInstallation(sys.argv[0],sys.argv[1],sys.argv[2])
+    performAppInstallation(sys.argv[0], sys.argv[1], sys.argv[2])
+elif(len(sys.argv) == 4):
+    updateInstalledApp(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3])
+elif(len(sys.argv) == 5):
+    advancedInstallApp(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 else:
     printHelp()

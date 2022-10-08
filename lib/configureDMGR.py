@@ -18,17 +18,10 @@
 
 import sys
 
-def configureDMGR(wasVersion):
-    nodeName = "dmgrnode"
-    serverName = "dmgr"
+def configureDMGR(nodeName, serverName):
     lineSplit = java.lang.System.getProperty("line.separator")
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
     targetCell = AdminControl.getCell()
-
-    if (wasVersion == "61"):
-        serverLogRoot = "/appvol/WAS61/" + serverName + "/waslog"
-    elif (wasVersion == "70"):
-        serverLogRoot = "/appvol/WAS70/" + serverName + "/waslog"
 
     targetServer = AdminConfig.getid('/Node:' + nodeName + '/Server:' + serverName + '/')
     haManager = AdminConfig.list("HAManagerService", targetServer)
@@ -75,15 +68,7 @@ def configureDMGR(wasVersion):
 
         continue
 
-def printHelp():
-    print "This script configures default values for the Deployment Manager."
-    print "Format is configureDMGR wasVersion"
-
 ##################################
 # main
 #################################
-if(len(sys.argv) == 1):
-    # get node name and process name from the command line
-    configureDMGR(sys.argv[0])
-else:
-    printHelp()
+configureDMGR(sys.argv[0], sys.argv[1])

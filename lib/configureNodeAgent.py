@@ -18,18 +18,12 @@
 
 import sys
 
-def configureNodeAgent(wasVersion):
+def configureNodeAgent():
     serverName = "nodeagent"
     lineSplit = java.lang.System.getProperty("line.separator")
-
     targetCell = AdminControl.getCell()
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
     syncList = AdminConfig.list("ConfigSynchronizationService").split("\n")
-
-    if (wasVersion == "61"):
-        serverLogRoot = "/appvol/WAS61/" + serverName + "/waslog"
-    elif (wasVersion == "70"):
-        serverLogRoot = "/appvol/WAS70/" + serverName + "/waslog"
 
     for node in nodeList:
         targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
@@ -54,7 +48,7 @@ def configureNodeAgent(wasVersion):
 
         AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"]]')
 
-        AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 384 -maximumHeapSize 384 -genericJvmArguments "-Xshareclasses:none"]')
+        AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none"]')
 
     print "Saving configuration.."
 
@@ -75,16 +69,7 @@ def configureNodeAgent(wasVersion):
 
         continue
 
-def printHelp():
-    print "This script configures default values for the Deployment Manager."
-    print "Format is configureDMGR wasVersion"
-
 ##################################
 # main
 #################################
-if(len(sys.argv) == 1):
-    # get node name and process name from the command line
-    configureNodeAgent(sys.argv[0])
-else:
-    printHelp()
-
+configureNodeAgent()

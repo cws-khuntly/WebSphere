@@ -18,44 +18,15 @@
 
 import sys
 
-def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostAliases = "", serverLogRoot = ""):
+def configureTargetServer(serverName, clusterName):
     lineSplit = java.lang.System.getProperty("line.separator")
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
     targetCell = AdminControl.getCell()
     targetCluster = AdminConfig.getid("/ServerCluster:" + clusterName + "/").split("(")[1].split("#")[0].split("|")[0]
 
-    if not serverLogRoot:
-        if (wasVersion == "61"):
-            serverLogRoot = "/appvol/WAS61/" + serverName + "/waslog"
-        elif (wasVersion == "70"):
-            serverLogRoot = "/appvol/WAS70/" + serverName + "/waslog"
-
-    ## create vhost
-    xVirtualHost = AdminConfig.getid("/VirtualHost:" + vHostName + "/")
-
-    if not xVirtualHost:
-        print "Creating vhost " + vHostName
-
-        AdminConfig.create('VirtualHost', AdminConfig.getid('/Cell:' + targetCell + '/'), '[[name "' + vHostName + '"]]')
-        
-    if vHostAliases:
-        vHostTargets = vHostAliases.split(",")
-        
-        for vhost in vHostTargets:
-            if vhost:
-                print "Adding " + vhost + " to " + vHostName
-
-                hostName = vhost.split(":")[0]
-                portNumber = vhost.split(":")[1]
-        
-                if not portNumber:
-                    AdminConfig.create('HostAlias', AdminConfig.getid('/Cell:' + targetCell + '/VirtualHost:' + vHostName + '/'), '[[port "80"] [hostname "' + hostName + '"]]')
-                else:
-                    AdminConfig.create('HostAlias', AdminConfig.getid('/Cell:' + targetCell + '/VirtualHost:' + vHostName + '/'), '[[port "' + portNumber + '"] [hostname "' + hostName + '"]]')
-
     for node in nodeList:
         targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
-    
+
         if targetServer:
             print "Node: " + node + " - Server: " + targetServer
 
@@ -70,14 +41,14 @@ def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostA
             threadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
             targetTCPChannels = AdminConfig.list("TCPInboundChannel", targetServer).split(lineSplit)
             targetHTTPChannels = AdminConfig.list("HTTPInboundChannel", targetServer).split(lineSplit)
-    
+
             print "Disabling HAManager .."
 
             AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-    
+
             for threadPool in threadPools:
                 poolName = threadPool.split("(")[0]
-        
+
                 if (poolName == "server.startup"):
                     AdminConfig.modify(threadPool, '[[maximumSize "10"] [name "' + poolName + '"] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]')
                 elif (poolName == "WebContainer"):
@@ -86,33 +57,22 @@ def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostA
                     AdminConfig.modify(threadPool, '[[minimumSize "0"] [maximumSize "6"] [inactivityTimeout "5000"] [isGrowable "true" ]]')
                 else:
                     continue
-    
+
             print "Modifying JVM .."
 
-            if serverName.find("ASTEMPLATE0001") == -1:
-                ## for all servers. configure monitoring policy to PREVIOUS
-                AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
-            else:
-                ## for the template, configure monitoring policy to STOPPED
-                AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "STOPPED"]]')
-
+            AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
             AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"]]')
-        
-            if wasVersion == "70":
-                AdminConfig.modify(processDef, '[[workingDirectory "/appvol/WAS70/' + serverName + '"]]')
-            elif wasVersion == "61":
-                AdminConfig.modify(processDef, '[[workingDirectory "/appvol/WAS61/' + serverName + '"]]')
-        
-            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 256 -maximumHeapSize 256 -genericJvmArguments "-Xshareclasses:none"]')
-    
+
+            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 12288 -maximumHeapSize 12288 -genericJvmArguments "-Xshareclasses:none -Xgcpolicy:gencon -Dsun.reflect.inflationThreshold=0 -Xdump:none -Djava.security.egd=file:/dev/./urandom -Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=0 -DdisableWSAddressCaching=true -Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0"]')
+
             print "Modifying JVM WebContainer .."
-    
-            AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "' + vHostName + '"]]')
-            AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "' + serverName + '_ID"] [domain ""] [secure "false"] [path "/"]]')
+
+            AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
+            AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "false"] [path "/"]]')
             AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "15"]]')
 
             containerChains = AdminTask.listChains(targetTransport, '[-acceptorFilter WebContainerInboundChannel]').split("\n")
-        
+
             for chain in containerChains:
                 chainName = chain.split("(")[0]
 
@@ -127,7 +87,7 @@ def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostA
 
             for tcpChannel in targetTCPChannels:
                 tcpName = tcpChannel.split("(")[0]
-    
+
                 if tcpName == "TCP_2":
                     print "Modify channel " + tcpChannel
 
@@ -137,7 +97,7 @@ def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostA
 
             for httpChannel in targetHTTPChannels:
                 httpName = httpChannel.split("(")[0]
-    
+
                 if httpName == "HTTP_2":
                     print "Modify channel " + httpChannel
 
@@ -148,18 +108,11 @@ def configureTargetServer(wasVersion, serverName, clusterName, vHostName, vHostA
         else:
             continue
 
-    ## configure cluster-scope server log root
-    print "Add cluster-scope SERVER_LOG_ROOT " + serverLogRoot
-
-    AdminTask.setVariable('[-variableName SERVER_LOG_ROOT -variableValue ' + serverLogRoot + ' -scope Cluster=' + clusterName +']')
-
     print "Saving configuration.."
 
     AdminConfig.save()
 
     print "Configuration saved .."
-
-    nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
     for node in nodeList:
         nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
@@ -223,15 +176,8 @@ def printHelp():
 ##################################
 # main
 #################################
-if(len(sys.argv) >= 4):
+if(len(sys.argv) == 2):
     # get node name and process name from the command line
-    if (len(sys.argv) == 6):
-        configureTargetServer(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-    if (len(sys.argv) == 5):
-        configureTargetServer(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-    else:
-        configureTargetServer(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3])
+    configureTargetServer(sys.argv[0], sys.argv[1])
 else:
     printHelp()
-
-

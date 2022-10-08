@@ -867,7 +867,7 @@ function getSshKeys
 
                             /usr/bin/env grep -v "${ENTRY}" "${TEMP_KNOWN_HOSTS}" > "${TEMP_DELETE}";
 
-                            typeset -i KEY_COUNT=$(/usr/bin/env egrep -c "^${ENTRY} ${KEYTYPE}" "${TEMP_DELETE}");
+                            typeset -i KEY_COUNT=$(/usr/bin/env grep -cE "^${ENTRY} ${KEYTYPE}" "${TEMP_DELETE}");
 
                             [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "KEY_COUNT -> ${KEY_COUNT}";
 

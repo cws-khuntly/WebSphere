@@ -24,8 +24,8 @@ function showHostInfo
     typeset HOST_IP_ADDRESS="$(/usr/bin/env ip addr show 2>/dev/null | /usr/bin/env grep "inet" | /usr/bin/env grep -E -v "inet6|127.0.0.1" | /usr/bin/env awk '{print $2}')";
     typeset HOST_KERNEL_VERSION="$(/usr/bin/env uname -r)";
     typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env grep "model name" | /usr/bin/env wc -l);
-    typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env egrep "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
-    typeset HOST_MEMORY_SIZE="$(echo $(( $(( $(/usr/bin/env egrep MemTotal /proc/meminfo | /usr/bin/env awk '{print $2}') / 1024 ^ 2 )) / 2 )) ) MB";
+    typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env grep -E "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
+    typeset HOST_MEMORY_SIZE="$(echo $(( $(( $(/usr/bin/env grep -E MemTotal /proc/meminfo | /usr/bin/env awk '{print $2}') / 1024 ^ 2 )) / 2 )) ) MB";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST_SYSTEM_NAME -> ${HOST_SYSTEM_NAME}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST_DOMAIN_NAME -> ${HOST_DOMAIN_NAME}";
@@ -261,7 +261,7 @@ function setPromptCommand
             ;;
         *)
             /usr/bin/env echo -ne "\033]0;$(/usr/bin/env printf "[%s:%s as %s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${REAL_USER}" "${PWD}")\007";
-            PS1+='$(/usr/bin/env printf "\e[00;31mNOTE: YOU ARE %s\e[00;32m.\n\e[00;32m[%s:%s as \e[00;31m%s\e[00;32m]\e[m \e[00;00m:\e[m \e[00;33m<%s$([ $(/usr/bin/env git status > /dev/null 2>&1 ; echo $?) == 0 ] && /usr/bin/env printf "[\e[01;34m%s\e[00;33m]" "$(/usr/bin/env git branch 2>/dev/null | grep "*")")>\e[m \e[00;00m\e[m \n\n$ " "${REAL_USER}" "${HOSTNAME}" "${REAL_USER}" "${LOGNAME}" "${PWD}")';
+            PS1+='$(/usr/bin/env printf "\e[00;31mNOTE: YOU ARE %s\e[00;32m.\n\e[00;32m[%s:%s as \e[00;31m%s\e[00;32m]\e[m \e[00;00m:\e[m \e[00;33m<%s$([ $(/usr/bin/env git status > /dev/null 2>&1 ; echo $?) == 0 ] && /usr/bin/env printf "[\e[01;34m%s\e[00;33m]" "$(/usr/bin/env git branch 2>/dev/null | grep "*")")>\e[m \e[00;00m\e[m \n\n$ " "${LOGNAME}" "${HOSTNAME}" "${REAL_USER}" "${LOGNAME}" "${PWD}")';
             ;;
     esac
 
