@@ -18,10 +18,11 @@
 
 import sys
 
+serverName = "nodeagent"
+lineSplit = java.lang.System.getProperty("line.separator")
+targetCell = AdminControl.getCell()
+
 def configureNodeAgent():
-    serverName = "nodeagent"
-    lineSplit = java.lang.System.getProperty("line.separator")
-    targetCell = AdminControl.getCell()
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
     for node in nodeList:
@@ -42,7 +43,7 @@ def configureNodeAgent():
             else:
                 continue
 
-        AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"]]')
+        AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
         AdminConfig.modify(configSyncService, '[[synchInterval "1"] [exclusions ""] [enable "true"] [synchOnServerStartup "true"] [autoSynchEnabled "true"]]')
 
         AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none"]')
@@ -61,6 +62,8 @@ def configureNodeAgent():
             AdminControl.invoke(syncNode, 'sync')
 
         continue
+
+    print "Configuration complete."
 
 ##################################
 # main

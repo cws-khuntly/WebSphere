@@ -18,11 +18,12 @@
 
 import sys
 
+serverName = "dmgr"
+targetCell = AdminControl.getCell()
+lineSplit = java.lang.System.getProperty("line.separator")
+
 def configureDMGR():
-    serverName = "dmgr"
-    lineSplit = java.lang.System.getProperty("line.separator")
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
-    targetCell = AdminControl.getCell()
 
     for node in nodeList:
         targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
@@ -33,7 +34,7 @@ def configureDMGR():
             processExec = AdminConfig.list("ProcessExecution", targetServer)
 
             AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-            AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"]]')
+            AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
 
             for threadPool in threadPools:
                 poolName = threadPool.split("(")[0]
@@ -62,6 +63,8 @@ def configureDMGR():
 
                 continue
         continue
+
+    print "Configuration complete."
 
 ##################################
 # main

@@ -18,6 +18,14 @@
 
 import sys
 
+targetCell = AdminControl.getCell()
+lineSplit = java.lang.System.getProperty("line.separator")
+genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon -verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 "
+                "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xmn1024M -XX:MaxDirectMemorySize=256000000 -Xscmx150m -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
+                "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true "
+                "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 "
+                "-Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0")
+
 def configureAllServers():
     serverList = AdminTask.listServers('[-serverType APPLICATION_SERVER ]').split(lineSplit)
 
@@ -25,9 +33,7 @@ def configureAllServers():
         configureTargetServer(server.split("(")[0])
 
 def configureTargetServer(serverName):
-    lineSplit = java.lang.System.getProperty("line.separator")
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
-    targetCell = AdminControl.getCell()
 
     for node in nodeList:
         targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
@@ -46,7 +52,7 @@ def configureTargetServer(serverName):
 
             AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
             AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
-            AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"]]')
+            AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
             AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
             AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "false"] [path "/"]]')
             AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "15"]]')
@@ -67,7 +73,7 @@ def configureTargetServer(serverName):
             AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "trusthostheaderport"] [description ""] [value "true"] [required "false"]]')
             AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.invokefilterscompatibility"] [description ""] [value "true"] [required "false"]]')
 
-            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 12288 -maximumHeapSize 12288 -genericJvmArguments "-Xshareclasses:none -Xgcpolicy:gencon -Dsun.reflect.inflationThreshold=0 -Xdump:none -Djava.security.egd=file:/dev/./urandom -Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=0 -DdisableWSAddressCaching=true -Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0"]')
+            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 12288 -maximumHeapSize 12288 -debugMode true -genericJvmArguments "' + genericJvmArgs + '"]')
 
             containerChains = AdminTask.listChains(targetTransport, '[-acceptorFilter WebContainerInboundChannel]').split(lineSplit)
 
@@ -113,7 +119,7 @@ def configureTargetServer(serverName):
 
         continue
 
-    print "Configuration complete"
+    print "Configuration complete."
 
 def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
     lineSplit = java.lang.System.getProperty("line.separator")
@@ -131,11 +137,7 @@ def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
     elif (wasVersion == "70"):
         AdminApp.install('/home/wasadm/etc/Initial_Deployment.ear', '[ -installed.ear.destination /appvol/WAS70/' + targetServer + ' -appname ' + targetAppName + ' -MapModulesToServers [[ Initial_Deployment Initial_Deployment.war,WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + targetCluster + ' ]] -MapWebModToVH [[ Initial_Deployment Initial_Deployment.war,WEB-INF/web.xml ' + vHostName + ' ]]]')
 
-    print "Saving configuration.."
-
     AdminConfig.save()
-
-    print "Configuration saved .."
 
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
@@ -151,6 +153,8 @@ def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
             AdminControl.invoke(syncNode, 'sync')
 
         continue
+
+    print "Installation complete."
 
 def printHelp():
     print "This script configures default values for the provided jvm."
