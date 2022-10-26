@@ -25,7 +25,7 @@ function showHostInfo
     typeset HOST_KERNEL_VERSION="$(/usr/bin/env uname -r)";
     typeset -i HOST_CPU_COUNT=$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env grep "model name" | /usr/bin/env wc -l);
     typeset HOST_CPU_INFO="$(/usr/bin/env cat /proc/cpuinfo | /usr/bin/env grep -E "model name" | /usr/bin/env uniq | /usr/bin/env cut -d ":" -f 2 | /usr/bin/env sed -e 's/^ *//g;s/ *$//g' | /usr/bin/env tr -s " ")";
-    typeset HOST_MEMORY_SIZE="$(echo $(( $(( $(/usr/bin/env grep -E MemTotal /proc/meminfo | /usr/bin/env awk '{print $2}') / 1024 ^ 2 )) / 2 )) ) MB";
+    typeset HOST_MEMORY_SIZE="$(echo $(( $(( $(/usr/bin/env grep -E MemTotal /proc/meminfo | /usr/bin/env awk '{print $2}') / 1024 ^ 2)) )) ) MB";
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST_SYSTEM_NAME -> ${HOST_SYSTEM_NAME}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "HOST_DOMAIN_NAME -> ${HOST_DOMAIN_NAME}";
@@ -37,8 +37,8 @@ function showHostInfo
 
     ## user information
     typeset -i USER_DISK_USAGE=$(/usr/bin/env du -ms ${HOME}/ 2>/dev/null | /usr/bin/env awk '{print $1}');
-    typeset -i SYSTEM_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env wc -l | /usr/bin/env awk '{print $1}');
-    typeset -i USER_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env grep "${LOGNAME}" | /usr/bin/env wc -l);
+    typeset -i SYSTEM_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env tail -n +1 | /usr/bin/env wc -l | /usr/bin/env awk '{print $1}');
+    typeset -i USER_PROCESS_COUNT=$(/usr/bin/env ps -ef | /usr/bin/env tail -n +1 | /usr/bin/env grep "${LOGNAME}" | /usr/bin/env wc -l);
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "USER_DISK_USAGE -> ${USER_DISK_USAGE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "SYSTEM_PROCESS_COUNT -> ${SYSTEM_PROCESS_COUNT}";

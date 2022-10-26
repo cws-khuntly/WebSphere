@@ -17,14 +17,16 @@
 #==============================================================================
 
 import sys
+import platform
 
 targetCell = AdminControl.getCell()
 lineSplit = java.lang.System.getProperty("line.separator")
 genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon -verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 "
                 "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xmn1024M -XX:MaxDirectMemorySize=256000000 -Xscmx150m -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
                 "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true "
-                "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 "
-                "-Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0")
+                "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Xlp "
+                "-Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0 -Dlog4j2.formatMsgNoLookups=true -Dderby.system.home=${USER_INSTALL_ROOT}/PortalServer/derby "
+                "-Dephox.allowed-origins.url=http://" + platform.node() + ":10039/ephox-allowed-origins/cors -Dephox.allowed-origins.origins.0=http://" + platform.node() + ":10039")
 
 def configureAllServers():
     serverList = AdminTask.listServers('[-serverType APPLICATION_SERVER ]').split(lineSplit)
@@ -55,7 +57,7 @@ def configureTargetServer(serverName):
             AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
             AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
             AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "false"] [path "/"]]')
-            AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "15"]]')
+            AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "60"]]')
 
             for threadPool in threadPools:
                 poolName = threadPool.split("(")[0]

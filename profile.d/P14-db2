@@ -1,8 +1,8 @@
 #==============================================================================
 #
-#          FILE:  A09-named
-#         USAGE:  . A09-named
-#   DESCRIPTION:  Sets named functions and aliases
+#          FILE:  defaults
+#         USAGE:  . defaults
+#   DESCRIPTION:  Sets default commandline options and variables for various programs
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -19,12 +19,7 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ ! -d /PennVet/IBM/WebSphere ] && return;
-
-alias startManager='/PennVet/IBM/WebSphere/AppServer/profiles/dmgr01/bin/startManager.sh';
-alias stopManager='/PennVet/IBM/WebSphere/AppServer/profiles/dmgr01/bin/stopManager.sh';
-alias startServer'/PennVet/IBM/WebSphere/wp_profile/bin/startServer.sh';
-alias stopServer'/PennVet/IBM/WebSphere/wp_profile/bin/stopServer.sh';
+[ -f ${HOME}/sqllib/db2profile ] && source ${HOME}/sqllib/db2profile;
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
