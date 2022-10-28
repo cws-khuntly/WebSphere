@@ -196,8 +196,8 @@ function deployFiles
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host ${TARGET_HOST}.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host ${TARGET_HOST}.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -437,8 +437,8 @@ function deployAndInstall
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host.";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host ${TARGET_HOST}.";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to copy dotfiles to remote host ${TARGET_HOST}.";
 
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(date +"%s");
         [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
@@ -489,8 +489,8 @@ function deployAndInstall
 
         [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
 
-        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to clean/create dotfiles";
-        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to clean/create dotfiles";
+        writeLogEntry "ERROR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to clean/create dotfiles on host ${TARGET_HOST}";
+        writeLogEntry "STDERR" "${SCRIPT_NAME}" "${LINENO}" "${METHOD_NAME}" "Failed to clean/create dotfiles ${TARGET_HOST}";
 
         [ ! -z "${RET_CODE}" ] && unset -v RET_CODE;
 
@@ -626,8 +626,8 @@ function installFiles
 
                 if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
                 then
-                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
-                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE}";
+                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE} on host $(/usr/bin/env hostname)";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to create directory ${ENTRY_SOURCE} on host $(/usr/bin/env hostname)";
 
                     (( ERROR_COUNT += 1 ));
 
@@ -650,8 +650,8 @@ function installFiles
 
                 if [ -z "${RET_CODE}" -o ${RET_CODE} -ne 0 ]
                 then
-                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
-                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET}";
+                    writeLogEntry "ERROR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET} on host $(/usr/bin/env hostname)";
+                    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Failed to link ${ENTRY_SOURCE} to ${ENTRY_TARGET} on host $(/usr/bin/env hostname)";
 
                     (( ERROR_COUNT += 1 ));
 
