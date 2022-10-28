@@ -721,13 +721,21 @@ function installFiles
 
 function usage
 {
+    typeset METHOD_NAME="${0}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=3;
 
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${0}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
 
     writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "${METHOD_NAME} - Install dotfiles to a remote host";
-    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Usage: ${METHOD_NAME} [ host ]
-            -> The host to connect to";
+    writeLogEntry "STDERR" "${METHOD_NAME}" "${0}" "${LINENO}" "Usage: ${METHOD_NAME} [ -h host ] [ -u user ] [ -a action ] (-f)
+            -> -h <host> - The hostname to connect to
+            -> -u <user> - The username to connect as
+            -> -a <action> - The action to perform
+                -> One of the following:
+                    -> installFiles - To install the files on the local system
+                    -> deployFiles - To deploy the files to the target host but NOT install
+                    -> deployAndInstall - Deploy and install the dotfiles on the target host
+            -> (-f) - Force deployment (skip host verification)";
 
     [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(/usr/bin/env date +"%s");
     [ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( START_EPOCH - END_EPOCH ));
