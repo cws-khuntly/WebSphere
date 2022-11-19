@@ -22,11 +22,11 @@ import platform
 targetCell = AdminControl.getCell()
 lineSplit = java.lang.System.getProperty("line.separator")
 genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon -verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 "
-                "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xmn1024M -XX:MaxDirectMemorySize=256000000 -Xscmx150m -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
+                "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xmn1536M -XX:MaxDirectMemorySize=256000000 -Xscmx150m -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
                 "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true "
                 "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Xlp "
                 "-Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0 -Dlog4j2.formatMsgNoLookups=true -Dderby.system.home=${USER_INSTALL_ROOT}/PortalServer/derby "
-                "-Dephox.allowed-origins.url=http://" + platform.node() + ":10039/ephox-allowed-origins/cors -Dephox.allowed-origins.origins.0=http://" + platform.node() + ":10039")
+                "-Dephox.config.file=/opt/ephox/application.conf -Xjit:iprofilerMemoryConsumptionLimit=67108864 -Xcodecache20m")
 
 def configureAllServers():
     serverList = AdminTask.listServers('[-serverType APPLICATION_SERVER ]').split(lineSplit)
@@ -56,7 +56,7 @@ def configureTargetServer(serverName):
             AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
             AdminConfig.modify(processExec, '[[runAsUser "wasadm"] [runAsGroup "wasgrp"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
             AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
-            AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "false"] [path "/"]]')
+            AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "true"] [path "/"]]')
             AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "60"]]')
 
             for threadPool in threadPools:
@@ -75,17 +75,19 @@ def configureTargetServer(serverName):
             AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "trusthostheaderport"] [description ""] [value "true"] [required "false"]]')
             AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.invokefilterscompatibility"] [description ""] [value "true"] [required "false"]]')
 
-            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 12288 -maximumHeapSize 12288 -debugMode true -genericJvmArguments "' + genericJvmArgs + '"]')
+            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 12288 -maximumHeapSize 12288 -debugMode false -genericJvmArguments "' + genericJvmArgs + '"]')
 
             containerChains = AdminTask.listChains(targetTransport, '[-acceptorFilter WebContainerInboundChannel]').split(lineSplit)
 
             for chain in containerChains:
                 chainName = chain.split("(")[0]
 
-                if (chainName != "WCInboundDefault"):
-                    AdminTask.deleteChain(chain, '[-deleteChannels true]')
-                else:
+                if (chainName == "WCInboundDefault"):
                     continue
+                elif (chainName != "WCInboudDefaultSecure"):
+                    continue
+                else:
+                    AdminTask.deleteChain(chain, '[-deleteChannels true]')
 
             for tcpChannel in targetTCPChannels:
                 tcpName = tcpChannel.split("(")[0]

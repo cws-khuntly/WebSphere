@@ -19,6 +19,8 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
+[ $(builtin compgen -c | /usr/bin/env grep -Ew ^git > /dev/null 2>&1; echo ${?}) -eq 0 ] || return;
+
 ## git
 alias ga='/usr/bin/env git add';
 alias gp='/usr/bin/env git push';

@@ -18,10 +18,10 @@
 
 import sys
 
-def listApps():
-    lineSplit = java.lang.System.getProperty("line.separator")
-    appList = AdminApp.list().split(lineSplit)
+lineSplit = java.lang.System.getProperty("line.separator")
+appList = AdminApp.list().split(lineSplit)
 
+def listApps():
     for app in appList:
         print app
 
