@@ -254,6 +254,10 @@ function setPromptCommand
     builtin history -a;
     builtin history -n;
 
+    typeset -x REAL_USER="$(/usr/bin/env who am i | /usr/bin/env awk '{print $1}')";
+
+    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> enter";
+
     case "${REAL_USER}" in
         "")
             /usr/bin/env echo -ne "\033]0;$(/usr/bin/env printf "[%s:%s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${PWD}")\007";
