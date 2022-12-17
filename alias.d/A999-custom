@@ -47,6 +47,7 @@ alias fortune='/usr/bin/env fortune -a -e';
 alias ipv4sort='/usr/bin/env sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4';
 alias minicom='/usr/bin/env sudo -u root minicom -s /dev/ttyS0';
 alias reload='. ${HOME}/.profile';
+alias tailf='/usr/bin/env tail -f';
 
 ## script tracing
 alias debug='typeset -x ENABLE_DEBUG="true"';
