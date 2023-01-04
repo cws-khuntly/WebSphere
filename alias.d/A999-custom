@@ -37,7 +37,7 @@ alias ssh='/usr/bin/env ssh -qt4AC'
 alias removeKey='/usr/bin/env ssh-keygen -R';
 alias win2unix="/usr/bin/env sed 's/$/\r/'";
 alias fixtty='/usr/bin/env stty sane';
-alias time='/usr/bin/time --format="%C took %e seconds"';
+alias time='/usr/bin/env time --format="%C took %e seconds"';
 alias pdftotext='/usr/bin/env pdftotext -enc UTF-8 -layout';
 alias ff='/usr/bin/env find . -type f';
 alias fd='/usr/bin/env find . -type d';

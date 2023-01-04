@@ -28,6 +28,7 @@ alias stopNode='/PennVet/IBM/WebSphere/wp_profile/bin/stopNode.sh';
 alias startServer='/PennVet/IBM/WebSphere/wp_profile/bin/startServer.sh';
 alias stopServer='/PennVet/IBM/WebSphere/wp_profile/bin/stopServer.sh';
 alias wsadmin='/PennVet/IBM/WebSphere/wp_profile/bin/wsadmin.sh';
+alias syncNode='/PennVet/IBM/WebSphere/wp_profile/bin/syncNode.sh';
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;

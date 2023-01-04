@@ -229,8 +229,8 @@ function writeLogEntry
     typeset LOG_MESSAGE="${5}";
 
     case ${LOG_LEVEL} in
-        [Ss][Tt][Dd][Oo][Uu][Tt]) printf "%s\n" "${5}" >&1; ;;
-        [Ss][Tt][Dd][Ee][Rr][Rr]) printf "\e[00;31m%s\e[00;32m\n" "${5}" >&2; ;;
+        [Ss][Tt][Dd][Oo][Uu][Tt]) /usr/bin/env printf "%s\n" "${5}" >&1; ;;
+        [Ss][Tt][Dd][Ee][Rr][Rr]) /usr/bin/env printf "\e[00;31m%s\e[00;32m\n" "${5}" >&2; ;;
         [Pp][Ee][Rr][Ff][Oo][Rr][Mm][Aa][Nn][Cc][Ee]) typeset LOG_FILE="$(/usr/bin/env sed -e "s/.log/.${DATE_PATTERN}.log/" <<< "${PERF_LOG_FILE}")"; ;;
         [Ff][Aa][Tt][Aa][Ll]) typeset LOG_FILE="$(/usr/bin/env sed -e "s/.log/.${DATE_PATTERN}.log/" <<< "${FATAL_LOG_FILE}")"; ;;
         [Ee][Rr][Rr][Oo][Rr]) typeset LOG_FILE="$(/usr/bin/env sed -e "s/.log/.${DATE_PATTERN}.log/" <<< "${ERROR_LOG_FILE}")"; ;;
