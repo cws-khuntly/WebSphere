@@ -199,6 +199,15 @@ function reloadDotFiles
 
     [ ${ERROR_COUNT} -ne 0 ] && typeset -i RETURN_CODE=${ERROR_COUNT} || typeset -i RETURN_CODE=0;
 
+    case "${SHELL}" in
+        /bin/bash)
+            source ${HOME}/.bash_profile;
+            ;;
+        *)
+            . ${HOME}/.profile;
+            ;;
+    esac
+
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> exit";
 
