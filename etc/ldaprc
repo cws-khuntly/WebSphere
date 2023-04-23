@@ -15,12 +15,8 @@
 #      REVISION:  ---
 #==============================================================================
 
-URI ldaps://ldap.caspersbox.com:10636/
-BASE dc=caspersbox,dc=com
-BINDDN uid=AppUser,ou=AppAdmins,organizationalUnitName=Service Accounts,organizationalUnitName=Users,organizationName=CWS US,dc=caspersbox,dc=com
 NETWORK_TIMEOUT 10
 TIMELIMIT 15
 TIMEOUT 10
-TLS_CACERT ${HOME}/.etc/cacerts
 TLS_RANDFILE /dev/urandom
 TLS_REQCERT demand

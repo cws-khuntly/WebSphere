@@ -21,16 +21,16 @@
 
 case "$(/usr/bin/env whoami)" in
     ihsadm)
-        [ ! -d "/PennVet/IBM/HTTPServer" ] && return;
+        [ ! -d "/opt/IBM/HTTPServer" ] && return;
 
-        typeset -x PATH=${PATH}:/PennVet/IBM/HTTPServer/gsk8/bin
-        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/PennVet/IBM/HTTPServer/gsk8/lib64
+        typeset -x PATH=${PATH}:/opt/IBM/HTTPServer/gsk8/bin
+        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/IBM/HTTPServer/gsk8/lib64
         ;;
     wasadm)
-        [ ! -d "/PennVet/IBM/WebSphere/Plugins" ] && return;
+        [ ! -d "/opt/IBM/WebSphere/Plugins" ] && return;
 
-        typeset -x PATH=${PATH}:/PennVet/IBM/WebSphere/Plugins/gsk8/gsk8_64/bin
-        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/PennVet/IBM/WebSphere/Plugins/gsk8/gsk8_64/lib64
+        typeset -x PATH=${PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/bin
+        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/lib64
         ;;
     *)
         return;

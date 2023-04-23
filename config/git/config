@@ -17,7 +17,6 @@
 	ui = true
 
 [http]
-	sslVerify = false
 
 [https]
 	sslVerify = false
