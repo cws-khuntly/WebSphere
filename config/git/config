@@ -42,3 +42,6 @@
 [push]
 	default = simple
 
+[user]
+	name = Kevin Huntly
+	email = kmhuntly@gmail.com
