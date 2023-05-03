@@ -19,9 +19,10 @@
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
 
-[ ! -d /opt/Apache/tomcat ] && return;
+[ ! -d /opt/Apache/tomcat -o "$(/usr/bin/env whoami)" != "appadm" ] && return
 
-alias appadm='/usr/bin/env sudo su - appadm';
+alias startServer='/opt/Apache/tomcat/current/bin/startup.sh';
+alias stopServer='/opt/Apache/tomcat/current/bin/shutdown.sh';
 
 [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
 [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
