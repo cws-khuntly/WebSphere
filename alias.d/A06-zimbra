@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  A17-zimbra
@@ -16,19 +18,18 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[ ! -d /opt/zimbra ] && return;
+if [[ ! -d /opt/zimbra ]] && [[ "$(whoami)" != "zimbra" ]]; then return; fi
 
-alias zimbra='/usr/bin/env sudo su - zimbra';
-alias zmcontrol="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/zmcontrol < ~/.etc/sudo";
-alias zmprov="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/zmprov";
-alias zmysql="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/mysql -u zimbra < ~/.etc/sudo";
-alias zimbra="/usr/bin/env sudo -Su root su - zimbra < ~/.etc/sudo";
-alias jstack="/usr/bin/env sudo -Su zimbra /opt/zimbra/java/bin/jstack < ~/.etc/sudo";
-alias zmstats="/usr/bin/env sudo -Su zimbra /opt/zimbra/bin zmstat lmtp_threads http_threads db_conn_count db_pool_size gc_major_count < ~/.etc/sudo | tail";
-alias ldapsearch="/opt/zimbra/bin/ldapsearch -H \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey ldap_url < ~/.etc/sudo | awk '{print $1}')\" -D \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_userdn < ~/.etc/sudo)\" -w \"$(/usr/bin/env sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_password < ~/.etc/sudo | awk '{print $1}')\" -LLL";
+alias zmcontrol="sudo -Su zimbra /opt/zimbra/bin/zmcontrol < ~/.etc/sudo";
+alias zmprov="sudo -Su zimbra /opt/zimbra/bin/zmprov";
+alias zmysql="sudo -Su zimbra /opt/zimbra/bin/mysql -u zimbra < ~/.etc/sudo";
+alias zimbra="sudo -Su root su - zimbra < ~/.etc/sudo";
+alias jstack="sudo -Su zimbra /opt/zimbra/java/bin/jstack < ~/.etc/sudo";
+alias zmstats="sudo -Su zimbra /opt/zimbra/bin zmstat lmtp_threads http_threads db_conn_count db_pool_size gc_major_count < ~/.etc/sudo | tail";
+alias ldapsearch="/opt/zimbra/bin/ldapsearch -H \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey ldap_url < ~/.etc/sudo | awk '{print $1}')\" -D \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_userdn < ~/.etc/sudo)\" -w \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_password < ~/.etc/sudo | awk '{print $1}')\" -LLL";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

@@ -123,7 +123,7 @@ def configureTargetServer(serverName):
 
         continue
 
-    print "Configuration complete."
+    print("Configuration complete.")
 
 def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
     lineSplit = java.lang.System.getProperty("line.separator")
@@ -134,7 +134,7 @@ def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
     targetAppName = targetCluster.lower()
     cluster = AdminControl.completeObjectName('cell=' + AdminControl.getCell()  + ',type=Cluster,name=' + targetCluster + ',*')
 
-    print "Installing sample application .."
+    print("Installing sample application ..")
 
     if (wasVersion == "61"):
         AdminApp.install('/home/wasadm/etc/Initial_Deployment.ear', '[ -installed.ear.destination /appvol/WAS61/' + targetServer + ' -appname ' + targetAppName + ' -MapModulesToServers [[ Initial_Deployment Initial_Deployment.war,WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + targetCluster + ' ]] -MapWebModToVH [[ Initial_Deployment Initial_Deployment.war,WEB-INF/web.xml ' + vHostName + ' ]]]')
@@ -158,11 +158,11 @@ def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
 
         continue
 
-    print "Installation complete."
+    print("Installation complete.")
 
 def printHelp():
-    print "This script configures default values for the provided jvm."
-    print "Format is configureTargetServer serverName"
+    print("This script configures default values for the provided jvm.")
+    print("Format is configureTargetServer serverName")
 
 ##################################
 # main

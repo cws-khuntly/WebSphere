@@ -64,7 +64,7 @@ def configureDMGR():
                 continue
         continue
 
-    print "Configuration complete."
+    print("Configuration complete.")
 
 ##################################
 # main

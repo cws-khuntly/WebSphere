@@ -31,7 +31,7 @@ def restartClusters():
     for cluster in clusterList:
         clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
         
-        print "Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2]
+        print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
         
         AdminControl.invoke(clusterName, "stop")
         
@@ -51,14 +51,14 @@ def restartCluster(clusterName):
         if clusterName == cluster.split("(")[0]:
             break
         else:
-            print "The provided cluster is not available on this system."
+            print("The provided cluster is not available on this system.")
 
             sys.exit(1)
 
     for cluster in clusterList:
         clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
         
-        print "Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2]
+        print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
         
         AdminControl.invoke(clusterName, "stop")
         
@@ -70,8 +70,8 @@ def restartCluster(clusterName):
             continue
 
 def printHelp():
-    print "This script configures default values for the Deployment Manager."
-    print "Format is configureDMGR wasVersion"
+    print("This script configures default values for the Deployment Manager.")
+    print("Format is configureDMGR wasVersion")
 
 ##################################
 # main

@@ -1,0 +1,6 @@
+#===  CONFIGURATION ===========================================================
+#          NAME:  E09-network
+#   DESCRIPTION:  Configuration file defining directories and platforms
+#    PARAMETERS:  N/A
+#       RETURNS:  N/A
+#==============================================================================

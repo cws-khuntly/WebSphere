@@ -53,13 +53,13 @@ def getSectionVariables(iniFileName, sectionName):
         if (DEBUG_ENABLED):
             Popen(["bash", "-c", ". " + environ["HOME"] + "/.lib/logger.sh; writeLogEntry DEBUG " + getframeinfo(currentframe()).function + " " + getframeinfo(currentframe()).filename + " " + str(getframeinfo(currentframe()).lineno) + " \"Key: " + key + ", Value: " + val + "\""]);
 
-        print "%s:%s" % (key.rstrip(), val.rstrip());
+        print("%s:%s" % (key.rstrip(), val.rstrip());
 
     return 0;
 
 def printHelp():
-    print "Returns values from a given configuration file (INI) and provided section thereof";
-    print "Format is parseConfigurationFile iniFileName sectionName";
+    print("Returns values from a given configuration file (INI) and provided section thereof";)
+    print("Format is parseConfigurationFile iniFileName sectionName";)
 
 ##################################
 # main

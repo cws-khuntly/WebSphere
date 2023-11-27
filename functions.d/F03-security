@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+
+#=====  FUNCTION  =============================================================
+#          NAME:  returnRandomCharacters
+#   DESCRIPTION:  Returns a random string of alphanumeric characters
+#    PARAMETERS:  Length of string, include special characters
+#       RETURNS:  0 regardless of result.
+#==============================================================================
+function returnRandomCharacters()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F03-security";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    string_length=32;
+    use_special=0;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}" 2>/dev/null;
+    fi
+
+    if (( ${#} == 1 )); then string_length=${1}; fi
+    if (( ${#} == 2 )); then string_length=${1}; use_special=${2}; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}" 2>/dev/null;
+    fi
+
+    if (( use_special == 0 )); then
+        returned_characters=$(tr -cd '[:alnum:]' < /dev/urandom | head -c ${string_length});
+    else
+        returned_characters=$(tr -cd '[:graph:]' < /dev/urandom | head -c ${string_length});
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returned_characters -> ${returned_characters}" 2>/dev/null; fi
+
+    writeLogEntry "STDOUT" "${cname}" "${function_name}" "${LINENO}" "${returned_characters}" 2>/dev/null;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    [[ -n "${returned_characters}" ]] && unset -v returned_characters;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${cname}" ]] && unset -v cname;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  chmod
+#   DESCRIPTION:  Cleans up the archived log directory
+#    PARAMETERS:  Archive Directory, Logfile Name, Retention Time
+#       RETURNS:  0 regardless of result.
+#==============================================================================
+function wchmod()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F03-security";
+    function_name="${FUNCNAME[0]}";
+    error_count=0;
+    return_code=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if [[ "$(uname -s)" =~ [Cc][Yy][Gg]][Ww][Ii][Nn]* ]]; then ## if its not cygwin then do nothing at all
+        if (( ${#} != 2 )); then
+            return_code=3;
+
+            writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "${function_name} - Change the permissions on a target file" 2>/dev/null;
+            writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "Usage: ${function_name} [ permissions ] [ file ]
+                    -> The permissions to apply
+                    -> The file to apply permissions to" 2>/dev/null;
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+            fi
+
+            if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+                end_epoch=$(printf "%(%s)T");
+                runtime=$(( start_epoch - end_epoch ));
+
+                writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+                writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+            fi
+
+            [[ -n "${error_count}" ]] && unset -v error_count;
+            [[ -n "${function_name}" ]] && unset -v function_name;
+            [[ -n "${cname}" ]] && unset -v cname;
+
+            if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+            if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+            return ${return_code};
+        fi
+
+        requested_permissions="${1}";
+        target_files="${2}";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "requested_permissions -> ${requested_permissions}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_files -> ${target_files}" 2>/dev/null;
+        fi
+
+        if [[ -r "${target_files}" ]]; then mapfile -t file_listing < "${2}"; else setArray file_listing "${2}"; fi
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_listing -> ${file_listing[*]}" 2>/dev/null; fi
+
+        user_perms=${requested_permissions:0:1};
+        group_perms=${requested_permissions:1:1};
+        world_perms=${requested_permissions:2:1};
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "user_perms -> ${user_perms}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "group_perms -> ${group_perms}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "world_perms -> ${world_perms}" 2>/dev/null;
+        fi
+
+        for file_entry in "${target_files[@]}"; do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
+
+            if [[ ! -w "${file_entry}" ]]; then
+                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
+                writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
+
+                (( error_count += 1 ));
+
+                continue;
+            fi
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry}" 2>/dev/null; fi
+
+            setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry} 2>/dev/null;
+            ret_code=${?};
+
+            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+
+            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}" 2>/dev/null;
+                writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}" 2>/dev/null;
+
+                (( error_count += 1 ));
+
+                continue;
+            fi
+
+            [ ! -z "${file_entry}" ] && unset -v file_entry;
+            [ ! -z "${ret_code}" ] && unset -v ret_code;
+        done
+    else
+        echo "${@}";
+    fi
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}

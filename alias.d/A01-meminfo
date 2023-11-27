@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  meminfo
@@ -16,19 +18,19 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 ## meminfo
-alias meminfo='/usr/bin/env free -m -l -t';
-alias psmem='/usr/bin/env ps auxf | /usr/bin/env sort -nr -k 4';
-alias psmem10='/usr/bin/env ps auxf | /usr/bin/env sort -nr -k 4 | /usr/bin/env head -10';
-alias pscpu='/usr/bin/env ps auxf | /usr/bin/env sort -nr -k 3';
-alias pscpu10='/usr/bin/env ps auxf | /usr/bin/env sort -nr -k 3 | /usr/bin/env head -10';
-alias gpumeminfo='/usr/bin/env grep -i --color memory /var/log/Xorg.0.log';
-alias hogc='/usr/bin/env ps -e -o %cpu,pid,ppid,user,cmd | sort -nr | head';
-alias hogm='/usr/bin/env ps -e -o %mem,pid,ppid,user,cmd | sort -nr | head';
-alias cpuCount='/usr/bin/env grep -c ^processor /proc/cpuinfo';
+alias meminfo="free -m -l -t";
+alias psmem="ps auxf | sort -nr -k 4";
+alias psmem10="ps auxf | sort -nr -k 4 | head -10";
+alias pscpu="ps auxf | sort -nr -k 3";
+alias pscpu10="ps auxf | sort -nr -k 3 | head -10";
+alias gpumeminfo="grep -i --color memory /var/log/Xorg.0.log";
+alias hogc="ps -e -o %cpu,pid,ppid,user,cmd | sort -nr | head";
+alias hogm="ps -e -o %mem,pid,ppid,user,cmd | sort -nr | head";
+alias cpuCount="grep -c \"^processor\" /proc/cpuinfo";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  sudo
@@ -16,13 +18,21 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 ## sudo aliases
-alias sysadmin='/usr/bin/env sudo su - sysadmin';
-alias ecuser='/usr/bin/env sudo su - ecuser';
-alias root='/usr/bin/env sudo su -';
+alias ecuser="sudo su - ecuser";
+alias sysadmin="sudo su - sysadmin";
+alias ihsadm="sudo su - ihsadm";
+alias appadm="sudo su - appadm";
+alias webadm="sudo su - webadm";
+alias wasadm="sudo su - wasadm";
+alias dnsadm="sudo su - dnsadm";
+alias db2adm="sudo su - db2adm";
+alias ldapadm="sudo su - ldapadm";
+alias zimbra="sudo su - zimbra";
+alias root="sudo su -";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

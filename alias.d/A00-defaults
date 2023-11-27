@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  defaults
@@ -16,59 +18,59 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 ## defaults
-alias mountt='/usr/bin/env mount | /usr/bin/env column -t';
-alias ls='/usr/bin/env ls -lhpF --color=auto';
-alias grep='/usr/bin/env grep --color=auto';
-alias egrep='/usr/bin/env grep -E --color=auto';
-alias fgrep='/usr/bin/env grep -F --color=auto';
-alias wget='/usr/bin/env wget -c';
-alias stat='/usr/bin/env stat -c "%n: Permissions: %a, Owner: %U, Group: %G"';
-alias scp='/usr/bin/env sftp -qr';
-alias sftp='/usr/bin/env sftp -qr';
-alias ssh-keygen='/usr/bin/env ssh-keygen -C ""';
-alias ssh-keyscan='/usr/bin/env ssh-keyscan -H';
-alias rsync='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --delete-excluded --exclude-from=${HOME}/.etc/excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" --log-file=${HOME}/.log/rsync.log';
-alias rsync-tools='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/tools-excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" --log-file=${HOME}/.log/rsync-tools.log'
-alias rsync-remotes='/usr/bin/env rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e "ssh -qaCkT -E ${HOME}/.log/ssh.log" --log-file=${HOME}/.log/rsync-remote.log'
-alias mailx='/usr/bin/env mailx';
-alias du='/usr/bin/env du -sh';
-alias df='/usr/bin/env df -h';
-alias netstat='/usr/bin/env netstat -an';
-alias ldapsearch='/usr/bin/env ldapsearch -W';
-alias ping='/usr/bin/env ping -c 4 -q -W ${THREAD_TIMEOUT}';
-alias mysql='/usr/bin/env mysql --protocol tcp -u ${LOGNAME} -p';
-alias nc='/usr/bin/env nc -w ${THREAD_TIMEOUT}';
-alias jmap='/usr/bin/env jmap -dump:format=b,file=/var/tmp/dump.hprof';
-alias pssh='/usr/bin/env pssh -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -P -l ${LOGNAME} -h ~/.etc/pssh/hosts';
-alias prsync='/usr/bin/env prsync -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -l ${LOGNAME} -h ~/.etc/pssh/hosts';
-alias recode='/usr/bin/env recode -qt';
-alias sshfs='/usr/bin/env sshfs -o sshfs_sync,reconnect,no_readahead,idmap=user,umask=644,uid=$(/usr/bin/env id -u),gid=$(/usr/bin/env id -g)';
-alias apg='/usr/bin/env apg -M SNCL';
-alias curl='/usr/bin/env curl --dump-header ${HOME}/.log/curl-headers';
-alias xlaunch='/usr/bin/env nohup /usr/bin/env xlaunch -run ${HOME}/.etc/config.xlaunch &';
+alias mountt="mount | column -t";
+alias ls="ls -lhpF --color=auto";
+alias grep="grep --color=auto";
+alias egrep="grep -E --color=auto";
+alias fgrep="grep -F --color=auto";
+alias wget="wget -c";
+alias stat="stat -c \"%n: Permissions: %a, Owner: %U, Group: %G\"";
+alias scp="sftp -qr";
+alias sftp="sftp -qr";
+alias ssh-keygen="ssh-keygen -C \"\"";
+alias ssh-keyscan="ssh-keyscan -H";
+alias rsync="rsync -vcarbupEogtIzChi4 --append --safe-links --delete --delete-excluded --exclude-from=${HOME}/.etc/excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e \"ssh -qaCkT -E ${HOME}/.log/ssh.log\" --log-file=${HOME}/.log/rsync.log";
+alias rsync-tools="rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/tools-excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e \"ssh -qaCkT -E ${HOME}/.log/ssh.log\" --log-file=${HOME}/.log/rsync-tools.log";
+alias rsync-remotes="rsync -vcarbupEogtIzChi4 --append --safe-links --delete --exclude-from=${HOME}/.etc/remote-excludes --timeout 10000 --temp-dir=/var/tmp --no-motd --blocking-io --stats --progress -e \"ssh -qaCkT -E ${HOME}/.log/ssh.log\" --log-file=${HOME}/.log/rsync-remote.log";
+alias mailx="mailx";
+alias du="du -sh";
+alias df="df -h";
+alias netstat="netstat -an";
+alias ldapsearch="ldapsearch -W";
+alias ping="ping -c 4 -q -W ${THREAD_TIMEOUT}";
+alias mysql="mysql --protocol tcp -u ${LOGNAME} -p";
+alias nc="nc -w ${THREAD_TIMEOUT}";
+alias jmap="jmap -dump:format=b,file=/var/tmp/dump.hprof";
+alias pssh="pssh -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -P -l ${LOGNAME} -h ~/.etc/pssh/hosts";
+alias prsync="prsync -p 5 -o ${HOME}/.log/pssh -e ${HOME}/.log/pssh -t 900 -l ${LOGNAME} -h ~/.etc/pssh/hosts";
+alias recode="recode -qt";
+alias sshfs="sshfs -o sshfs_sync,reconnect,no_readahead,idmap=user,umask=644,uid=$(id -u),gid=$(id -g)";
+alias apg="apg -M SNCL";
+alias curl="curl --dump-header ${HOME}/.log/curl-headers";
+alias xlaunch="nohup xlaunch -run ${HOME}/.etc/config.xlaunch &";
 
 ## make some customizations IF the command exists
-[ $(builtin compgen -c | /usr/bin/env grep -E -w ^vim > /dev/null 2>&1; echo ${?}) -eq 0 ] && alias vi='/usr/bin/env vim';
-[ $(builtin compgen -c | /usr/bin/env grep -E -w ^colordiff > /dev/null; echo ${?}) -eq 0 ] && alias diff='/usr/bin/env colordiff';
+(( $(compgen -c | grep -E -w "^vim" > /dev/null 2>&1; echo ${?}) > 0 )) && alias vi="vim";
+(( $(compgen -c | grep -E -w "^colordiff" > /dev/null 2>&1; echo ${?}) > 0 )) && alias diff="colordiff";
 
-case $(/usr/bin/env uname -s) in
+case $(uname -s) in
     [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
-        unalias ls; alias ls='/usr/ucb/ls';
-        unalias ps; alias ps='/usr/ucb/ps -auxww';
-        unalias whoami; alias whoami='/usr/ucb/whoami';
-        unalias grep; alias grep='/usr/xpg4/bin/grep -v grep';
-        unalias egrep; alias egrep='/usr/xpg4/bin/egrep -v grep';
-        unalias fgrep; alias fgrep='/usr/xpg4/bin/fgrep -v grep';
+        unalias ls; alias ls="/usr/ucb/ls";
+        unalias ps; alias ps="/usr/ucb/ps -auxww";
+        unalias whoami; alias whoami="/usr/ucb/whoami";
+        unalias grep; alias grep="/usr/xpg4/bin/grep -v grep";
+        unalias egrep; alias egrep="/usr/xpg4/bin/egrep -v grep";
+        unalias fgrep; alias fgrep="/usr/xpg4/bin/fgrep -v grep";
         ;;
     [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        alias sudo='/usr/bin/env cygstart --action=runas';  
+        alias sudo="cygstart --action=runas";  
         ;;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 

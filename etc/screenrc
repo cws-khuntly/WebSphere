@@ -1,6 +1,9 @@
-# GNU Screen - main configuration file
-# All other .screenrc files will source this file to inherit settings.
-# Author: Christian Wills - cwills.sys@gmail.com
+#===  CONFIGURATION ===========================================================
+#          NAME:  E09-network
+#   DESCRIPTION:  Configuration file defining directories and platforms
+#    PARAMETERS:  N/A
+#       RETURNS:  N/A
+#==============================================================================
 
 # Allow bold colors - necessary for some reason
 attrcolor b ".I"

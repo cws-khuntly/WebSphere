@@ -24,7 +24,7 @@
 [alias]
 
 [commit]
-	gpgsign = true
+	#gpgsign = true
 
 [filter "spaces2tabs"]
 	clean = unexpand --tabs=4 --first-only

@@ -23,11 +23,11 @@ def performAppInstallation(clusterName, appName, appPath):
     targetCell = AdminControl.getCell()
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
-    print "Installing application .."
+    print("Installing application ..")
 
     AdminApplication.installAppWithClusterOption('' + appName + '','' + appPath + '','' + clusterName + '')
 
-    print "Saving configuration.."
+    print("Saving configuration..")
 
     AdminConfig.save()
 
@@ -45,11 +45,11 @@ def performAppInstallation(clusterName, appName, appPath):
         continue
 
     print
-    print "Executing getDeployStatus()"
+    print("Executing getDeployStatus()")
     print AdminApp.getDeployStatus(appName)
 
     print
-    print "Executing isAppReady()"
+    print("Executing isAppReady()")
     print AdminApp.isAppReady(appName)
 
 def advancedInstallApp(appPath, appName, appModule, warName, clusterName):
@@ -95,8 +95,8 @@ def updateInstalledApp(appName, appModule, warName, clusterName):
         continue
 
 def printHelp():
-    print "This script disables the HA Manager on a specific process"
-    print "Format is disableHamOnProcess nodeName processName"
+    print("This script disables the HA Manager on a specific process")
+    print("Format is disableHamOnProcess nodeName processName")
 
 ##################################
 # main

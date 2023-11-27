@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  pacman
@@ -16,30 +18,30 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-alias pacupg='sudo pacman -Syu'             # Synchronize with repositories and then upgrade packages that are out of date on the local system.
-alias pacdl='pacman -Sw'                    # Download specified package(s) as .tar.xz ball
-alias pacin='sudo pacman -S'                # Install specific package(s) from the repositories
-alias pacins='sudo pacman -U'               # Install specific package not from the repositories but from a file
-alias pacre='sudo pacman -R'                # Remove the specified package(s), retaining its configuration(s) and required dependencies
-alias pacrem='sudo pacman -Rns'             # Remove the specified package(s), its configuration(s) and unneeded dependencies
-alias pacrep='pacman -Si'                   # Display information about a given package in the repositories
-alias pacreps='pacman -Ss'                  # Search for package(s) in the repositories
-alias pacloc='pacman -Qi'                   # Display information about a given package in the local database
-alias paclocs='pacman -Qs'                  # Search for package(s) in the local database
-alias paclo="pacman -Qdt"                   # List all packages which are orphaned
-alias pacc="sudo pacman -Scc"               # Clean cache - delete all the package files in the cache
-alias paclf="pacman -Ql"                    # List all files installed by a given package
-alias pacown="pacman -Qo"                   # Show package(s) owning the specified file(s)
-alias pacexpl="pacman -D --asexp"           # Mark one or more installed packages as explicitly installed
-alias pacimpl="pacman -D --asdep"           # Mark one or more installed packages as non explicitly installed
+alias pacupg="sudo pacman -Syu";
+alias pacdl="pacman -Sw";
+alias pacin="sudo -u root pacman -S";
+alias pacins="sudo -u root pacman -U";
+alias pacre="sudo -u root pacman -R";
+alias pacrem="sudo -u root pacman -Rns";
+alias pacrep="pacman -Si";
+alias pacreps="pacman -Ss";
+alias pacloc="pacman -Qi";
+alias paclocs="pacman -Qs";
+alias paclo="pacman -Qdt";
+alias pacc="sudo -u root pacman -Scc";
+alias paclf="pacman -Ql";
+alias pacown="pacman -Qo";
+alias pacexpl="pacman -D --asexp";
+alias pacimpl="pacman -D --asdep";
 
 # Additional pacman alias examples
-alias pacupd='sudo pacman -Sy && sudo abs'  # Update and refresh the local package and ABS databases against repositories
-alias pacinsd='sudo pacman -S --asdeps'     # Install given package(s) as dependencies
-alias pacmir='sudo pacman -Syy'             # Force refresh of all package lists after updating /etc/pacman.d/mirrorlist
+alias pacupd="sudo -u root pacman -Sy && sudo -u root abs";
+alias pacinsd="sudo -u root pacman -S --asdeps";
+alias pacmir="sudo pacman -Syy";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi

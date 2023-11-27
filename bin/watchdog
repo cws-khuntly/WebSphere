@@ -1,4 +1,5 @@
 #!/usr/bin/env ksh
+
 #==============================================================================
 #
 #          FILE:  watchdog
@@ -24,8 +25,8 @@ set +o bgnice;
 
 trap 'set -o bgnice; set +v; set +x' INT TERM EXIT;
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v;
+[[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" = "${_TRUE}" ]] && set -x;
+[[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -v;
 
 ## Application constants
 typeset CNAME="$(/usr/bin/env basename "${0}")";
@@ -57,8 +58,8 @@ typeset -i DELAY=${DEFAULT_DELAY};
 
 function usage
 {
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v;
+    [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" = "${_TRUE}" ]] && set -x;
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -v;
 
     typeset METHOD_NAME="${CNAME}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=3;
@@ -72,8 +73,8 @@ function usage
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -x || set +x;
 
     [ ! -z "${TIMEOUT}" ] && unset -v TIMEOUT;
     [ ! -z "${INTERVAL}" ] && unset -v INTERVAL;
@@ -84,8 +85,8 @@ function usage
 
 function timeoutHandler
 {
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v;
+    [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" = "${_TRUE}" ]] && set -x;
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -v;
 
     typeset METHOD_NAME="${CNAME}#${FUNCNAME[0]}";
     typeset -i RETURN_CODE=0;
@@ -116,8 +117,8 @@ function timeoutHandler
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -x || set +x;
 
     [ ! -z "${TIMEOUT}" ] && unset -v TIMEOUT;
     [ ! -z "${INTERVAL}" ] && unset -v INTERVAL;
@@ -183,8 +184,8 @@ shift $(( ${OPTIND} - 1 ))
 
 typeset -i WATCH_PID=${$}
 (
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v;
+    [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" = "${_TRUE}" ]] && set -x;
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -v;
 
     typeset METHOD_NAME="${CNAME}#watchProcess";
     typeset -i RETURN_CODE=0;
@@ -221,8 +222,8 @@ typeset -i WATCH_PID=${$}
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "RETURN_CODE -> ${RETURN_CODE}";
     [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "${METHOD_NAME} -> exit";
 
-    [ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -x || set +x;
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" = "${_TRUE}" ]] && set -x || set +x;
 
     [ ! -z "${TIMEOUT}" ] && unset -v TIMEOUT;
     [ ! -z "${INTERVAL}" ] && unset -v INTERVAL;

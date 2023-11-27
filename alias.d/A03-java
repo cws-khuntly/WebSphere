@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  java
@@ -16,28 +18,28 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-case $(/usr/bin/env uname -s) in
+case $(uname -s) in
     [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        [ ! -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ] && return || typeset -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1";
+        if [[ ! -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ]]; then return; else typeset -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1"; fi
         ;;
     *)
-        [ ! -d /usr/java/latest -o ! -L /usr/java/latest ] && return || typeset -x JAVA_HOME="/usr/java/latest";
+        if [[ ! -d /usr/java/latest ]] || [[ ! -L /usr/java/lates ]]; then return; else typeset -x JAVA_HOME="/usr/java/latest"; fi
         ;;
 esac
 
 ## java
 
-alias java="${JAVA_HOME}/bin/java ${JAVA_OPTS}"
+alias java="${JAVA_HOME}/bin/java ${JAVA_OPTS}";
 alias keytool="${JAVA_HOME}/bin/keytool";
-alias jad='~/.bin/jad -dead -ff -i -s java -t4';
+alias jad="~/.bin/jad -dead -ff -i -s java -t4";
 alias threadAnalyzer="java -jar ${HOME}/.lib/jca457.jar";
 alias heapAnalyzer="java -jar ${HOME}/.lib/ha456.jar";
 
-[ -r "${HOME}/.etc/SecurityService/config/PasswordRepository.config" ] && . "${HOME}/.etc/SecurityService/config/PasswordRepository.config";
-alias javaPasswordRepository='java -cp ".:${UTILITY_CLASSPATH}:${PASSWORD_UTILITY_JAR}" ${PASSWORD_UTILITY_CLASS}';
+if [[ -r "${HOME}/.etc/SecurityService/config/PasswordRepository.config" ]]; then . "${HOME}/.etc/SecurityService/config/PasswordRepository.config"; fi
+alias javaPasswordRepository="java -cp \".:${UTILITY_CLASSPATH}:${PASSWORD_UTILITY_JAR}\" ${PASSWORD_UTILITY_CLASS}";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

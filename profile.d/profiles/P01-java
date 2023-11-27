@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  java
@@ -16,39 +18,53 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-case $(/usr/bin/env uname -s) in
+case $(uname -s) in
     [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        [ ! -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ] && return || typeset -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1";
+        if [[ -d "/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1" ]]; then declare -x JAVA_HOME="/cygdrive/c/PROGRA~1/Java/jdk-18.0.1.1"; fi
         ;;
     *)
-        [ -d "/usr/java/latest" -o -L "/usr/java/latest" ] && typeset -x JAVA_HOME="/usr/java/latest";
-        [ -d "/usr/java/latest/jre" ] && typeset -x JRE_HOME="/usr/java/latest/jre";
+        if [[ -d "/usr/java/latest" ]] || [[ -L "/usr/java/latest" ]]; then declare -x JAVA_HOME="/usr/java/latest"; fi
+        if [[ -d "/usr/java/latest/jre" ]] || [[ -L "/usr/java/latest/jre" ]]; then declare -x JRE_HOME="/usr/java/latest/jre"; fi
         ;;
 esac
 
-[ ! -z "${JAVA_HOME}" ] && typeset -x JRE_HOME="/usr/java/latest/jre";
-[ ! -z "${JAVA_HOME}" ] && typeset -x CLASSPATH=".:${CLASSPATH}:${HOME}/.etc:${HOME}/.lib";
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_EXT_DIRS="${JAVA_EXT_DIRS}:${JRE_HOME}/lib/ext:${WAS_EXT_DIRS}";
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_ENDORSED_DIRS="${JAVA_ENDORSED_DIRS}:${JRE_HOME}/lib/endorsed:${WAS_ENDORSED_DIRS}";
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_OPTS="-cp ${CLASSPATH} -verbose:gc -Xms256m -Xmx256m -XX:NewSize=96m -XX:MaxNewSize=96m -XX:+UseGCOverheadLimit -XX:+AggressiveOpts"
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=16 -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 -XX:+PrintGCDetails";
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_OPTS="${JAVA_OPTS} -XX:+PrintGCTimeStamps -XX:+AggressiveHeap -XX:+ScavengeBeforeFullGC -XX:-UseConcMarkSweepGC";
-[ ! -z "${JAVA_HOME}" ] && typeset -x JAVA_OPTS="${JAVA_OPTS} -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djavax.net.debug=all -Djava.ext.dirs=${JAVA_EXT_DIRS} -Djava.endorsed.dirs=${JAVA_ENDORSED_DIRS}";
-
-## path for ${JAVA_HOME}
-[ ! -z "${JAVA_HOME}" ] && typeset -x PATH="${PATH}:${JAVA_HOME}/bin";
-[ ! -z "${JAVA_HOME}" ] && typeset -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
-[ ! -z "${JAVA_HOME}" ] && typeset -x LIBPATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
-[ ! -z "${JAVA_HOME}" ] && typeset -x LIB_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
+if [[ -n "${JAVA_HOME}" ]]; then
+    declare -x PATH="${PATH}:${JAVA_HOME}/bin";
+    declare -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
+    declare -x LIBPATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
+    declare -x LIB_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
+    declare -x CLASSPATH=".:${CLASSPATH}:${HOME}/.etc:${HOME}/.lib";
+    declare -x JAVA_EXT_DIRS="${JAVA_EXT_DIRS}:${JRE_HOME}/lib/ext:${WAS_EXT_DIRS}";
+    declare -x JAVA_ENDORSED_DIRS="${JAVA_ENDORSED_DIRS}:${JRE_HOME}/lib/endorsed:${WAS_ENDORSED_DIRS}";
+    declare -x JAVA_OPTS="-cp ${CLASSPATH} -verbose:gc -Xms256m -Xmx256m -XX:NewSize=96m -XX:MaxNewSize=96m -XX:+UseGCOverheadLimit -XX:+AggressiveOpts"
+    declare -x JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=16 -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 -XX:+PrintGCDetails";
+    declare -x JAVA_OPTS="${JAVA_OPTS} -XX:+PrintGCTimeStamps -XX:+AggressiveHeap -XX:+ScavengeBeforeFullGC -XX:-UseConcMarkSweepGC";
+    declare -x JAVA_OPTS="${JAVA_OPTS} -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djavax.net.debug=all -Djava.ext.dirs=${JAVA_EXT_DIRS} -Djava.endorsed.dirs=${JAVA_ENDORSED_DIRS}";
+fi
 
 ## path for ${JRE_HOME}
-[ ! -z "${JRE_HOME}" ] && typeset -x PATH="${PATH}:${JAVA_HOME}/bin";
-[ ! -z "${JRE_HOME}" ] && typeset -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
-[ ! -z "${JRE_HOME}" ] && typeset -x LIBPATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
-[ ! -z "${JRE_HOME}" ] && typeset -x LIB_PATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
+if [[ -n "${JRE_HOME}" ]]; then
+    declare -x PATH="${PATH}:${JAVA_HOME}/bin";
+    declare -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
+    declare -x LIBPATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
+    declare -x LIB_PATH="${LD_LIBRARY_PATH}:${JRE_HOME}/bin:${JRE_HOME}/lib";
+fi
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "JAVA_HOME -> ${JAVA_HOME}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "JRE_HOME -> ${JRE_HOME}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "PATH -> ${PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "LD_LIBRARY_PATH -> ${LD_LIBRARY_PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "LIBPATH -> ${LIBPATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "LIB_PATH -> ${LIB_PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "CLASSPATH -> ${CLASSPATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "JAVA_EXT_DIRS -> ${JAVA_EXT_DIRS}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "JAVA_ENDORSED_DIRS -> ${JAVA_ENDORSED_DIRS}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-java" "${LINENO}" "JAVA_OPTS -> ${JAVA_OPTS}";
+fi
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

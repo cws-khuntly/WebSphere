@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  alias
@@ -16,50 +18,45 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+CNAME="$(basename "${BASH_SOURCE[0]}")";
+FUNCTION_NAME="${CNAME}#loadAliases";
 
 ## load aliases
-for ALIAS in ${HOME}/.alias.d/*
+for file_entry in ${HOME}/.alias.d/*
 do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
 
-    [ -z "${ALIAS}" ] && continue;
-    [ -d "${ALIAS}" ] && continue;
+    [[ -z "${file_entry}" ]] && continue;
 
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
+    if [[ -d "${file_entry}" ]]; then
+        for dir_entry in ${HOME}/.alias.d/${file_entry}/*
+        do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}" 2>/dev/null; fi
 
-    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
+            [[ -r "/etc/os-release" ]] && osname="$(grep "NAME=" /etc/os-release | cut -d "" -f 2)";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "osname -> ${osname}" 2>/dev/null; fi
+
+            if [[ -n "${osname}" ]] && [[ "${dir_entry}" != "${osname}" ]] && [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
+
+            [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+            [[ -n "${osname}" ]] && unset -v osname;
+        done
+
+        [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
+        [[ -n "${osname}" ]] && unset -v osname;
+    fi
+
+    if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+
+    [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
+    [[ -n "${osname}" ]] && unset -v osname;
 done
 
-[ ! -z "${ALIAS}" ] && unset -v ALIAS;
-
-## distribution specific aliases
-typeset DIST_NAME="$(/usr/bin/env lsb_release -a 2>/dev/null | /usr/bin/env grep Distributor | /usr/bin/env awk '{print $NF}')";
-
-[ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "DIST_NAME -> ${DIST_NAME}";
-
-if [ -d "${HOME}/.alias.d/${DIST_NAME}" ]
-then
-    for ALIAS in ${HOME}/.alias.d/${DIST_NAME}/*
-    do
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "alias" "${0}" "${LINENO}" "ALIAS -> ${ALIAS}";
-
-        [ -z "${ALIAS}" ] && continue;
-        [ -d "${ALIAS}" ] && continue;
-
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${ALIAS} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${ALIAS}).${DATE_PATTERN}.log || . ${ALIAS};
-
-        [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-    done
-
-    [ ! -z "${ALIAS}" ] && unset -v ALIAS;
-    [ ! -z "${DIST_NAME}" ] && unset -v DIST_NAME;
-fi
-
-[ ! -z "${DIST_NAME}" ] && unset -v DIST_NAME;
-[ ! -z "${ALIAS}" ] && unset -v ALIAS;
-
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
-
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

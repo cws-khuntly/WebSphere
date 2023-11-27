@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  A09-named
@@ -16,17 +18,16 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[ ! -d /var/named ] && return;
+if [[ ! -d /var/named ]] || [[ "$(whoami)" != "dnsadm" ]]; then return; fi
 
-alias dnsadm='/usr/bin/env sudo -u root su - named';
-alias freeze='/usr/bin/env sudo -u named /usr/sbin/rndc freeze';
-alias thaw='/usr/bin/env sudo -u named /usr/sbin/rndc thaw';
-alias notify='/usr/bin/env sudo -u named /usr/sbin/rndc notify';
-alias reconfig='/usr/bin/env sudo -u named /usr/sbin/rndc reconfig';
-alias reload='/usr/bin/env sudo -u named /usr/sbin/rndc reload';
+alias freeze="sudo -u named /usr/sbin/rndc freeze";
+alias thaw="sudo -u named /usr/sbin/rndc thaw";
+alias notify="sudo -u named /usr/sbin/rndc notify";
+alias reconfig="sudo -u named /usr/sbin/rndc reconfig";
+alias reload="sudo -u named /usr/sbin/rndc reload";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

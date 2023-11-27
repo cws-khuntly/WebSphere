@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  safety
@@ -16,27 +18,27 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 ## safety
 case "$(uname)" in
     [Aa][Ii][Xx])
-        alias rm='/usr/bin/env rm -i'
-        alias mv='/usr/bin/env mv -i';
-        alias cp='/usr/bin/env cp -i';
-        alias ln='/usr/bin/env ln -i';
+        alias rm="rm -i";
+        alias mv="mv -i";
+        alias cp="cp -i";
+        alias ln="ln -i";
         ;;
     *)
-        alias rm='/usr/bin/env rm -i --preserve-root'
-        alias chown='/usr/bin/env chown --preserve-root';
-        alias chmod='/usr/bin/env chmod --preserve-root';
-        alias chgrp='/usr/bin/env chgrp --preserve-root';
-        alias mv='/usr/bin/env mv -i';
-        alias cp='/usr/bin/env cp -i';
-        alias ln='/usr/bin/env ln -i';
+        alias rm="rm -i --preserve-root";
+        alias chown="chown --preserve-root";
+        alias chmod="chmod --preserve-root";
+        alias chgrp="chgrp --preserve-root";
+        alias mv="mv -i";
+        alias cp="cp -i";
+        alias ln="ln -i";
         ;;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

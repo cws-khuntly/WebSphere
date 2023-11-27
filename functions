@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  functions
@@ -16,45 +18,38 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+CNAME="$(basename "${BASH_SOURCE[0]}")";
+FUNCTION_NAME="${CNAME}#loadFunctions";
 
 ## load functions
-for FUNCTION in ${HOME}/.functions.d/*
+for file_entry in ${HOME}/.functions.d/*
 do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "functions" "${0}" "${LINENO}" "FUNCTION -> ${FUNCTION}";
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
 
-    [ -z "${FUNCTION}" ] && continue;
-    [ -d "${FUNCTION}" ] && continue;
+    [[ -z "${file_entry}" ]] && continue;
 
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${FUNCTION} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${FUNCTION}).${DATE_PATTERN}.log || . ${FUNCTION};
+    if [[ -d "${file_entry}" ]]; then
+        for dir_entry in ${HOME}/.functions.d/${file_entry}/*
+        do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}" 2>/dev/null; fi
 
-    [ ! -z "${FUNCTION}" ] && unset -v FUNCTION;
+            if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
+
+            [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        done
+
+        [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
+    fi
+
+    if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+
+    [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
 done
 
-[ ! -z "${FUNCTION}" ] && unset -v FUNCTION;
-
-## look for any directories that might contain specifics
-for FUNCTION in ${HOME}/.functions.d/*
-do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "functions" "${0}" "${LINENO}" "FUNCTION -> ${FUNCTION}";
-
-    [ -z "${FUNCTION}" ] && continue;
-    [ ! -d "${FUNCTION}" ] && continue;
-
-    for FUNCTION1 in ${FUNCTION}/*
-    do
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${FUNCTION1} 2>&1 | tee -a ${LOG_ROOT}/$(basename ${FUNCTION1}).${DATE_PATTERN}.log || . ${FUNCTION1};
-
-        [ ! -z "${FUNCTION1}" ] && unset -v FUNCTION1;
-    done
-
-    [ ! -z "${FUNCTION1}" ] && unset -v FUNCTION1;
-    [ ! -z "${FUNCTION}" ] && unset -v FUNCTION;
-done
-
-[ ! -z "${FUNCTION1}" ] && unset -v FUNCTION1;
-[ ! -z "${FUNCTION}" ] && unset -v FUNCTION;
-
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

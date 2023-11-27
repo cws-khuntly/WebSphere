@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  P01-ihsgsk
@@ -16,25 +18,30 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-case "$(/usr/bin/env whoami)" in
+case "$(whoami)" in
     ihsadm)
-        [ ! -d "/opt/IBM/HTTPServer" ] && return;
+        [[ ! -d "/opt/IBM/HTTPServer" ]] && return;
 
-        typeset -x PATH=${PATH}:/opt/IBM/HTTPServer/gsk8/bin
-        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/IBM/HTTPServer/gsk8/lib64
+        declare -x PATH="${PATH}:/opt/IBM/HTTPServer/gsk8/bin";
+        declare -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/IBM/HTTPServer/gsk8/lib64";
         ;;
     wasadm)
-        [ ! -d "/opt/IBM/WebSphere/Plugins" ] && return;
+        [[ ! -d "/opt/IBM/WebSphere/Plugins" ]] && return;
 
-        typeset -x PATH=${PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/bin
-        typeset -x LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/lib64
+        declare -x PATH="${PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/bin";
+        declare -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/IBM/WebSphere/Plugins/gsk8/gsk8_64/lib64";
         ;;
     *)
         return;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    writeLogEntry "DEBUG" "${CNAME}" "P01-gsk" "${LINENO}" "PATH -> ${PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-gsk" "${LINENO}" "LD_LIBRARY_PATH -> ${LD_LIBRARY_PATH}";
+fi
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

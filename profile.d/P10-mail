@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  mail
@@ -16,14 +18,19 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-typeset -x MAIL="/var/spool/mail/${LOGNAME:?}";
-typeset -ix MAILCHECK=10;
+declare -x MAIL="/var/spool/mail/${LOGNAME:?}";
+declare -ix MAILCHECK=10;
 
-[ ! -d ${HOME}/.mail ] && mkdir ${HOME}/.mail;
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAIL -> ${MAIL}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAILCHECK -> ${MAILCHECK}" 2>/dev/null;
+fi
+
+[[ ! -d "${HOME}/.mail" ]] && mkdir -pv "${HOME}/.mail";
 #[ ! -z "$(/usr/bin/env mail -E 2>/dev/null)" ] && echo "$(/usr/bin/env mail -E)";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

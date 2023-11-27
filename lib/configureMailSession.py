@@ -19,11 +19,11 @@
 import sys
 
 def configureMailSession(jndiName, transportHost, userName = "", userPass = "", mailFrom = ""):
-    print "Adding mail session provider .."
+    print("Adding mail session provider ..")
 
     AdminConfig.create('MailSession', AdminConfig.getid('/Cell:' + AdminControl.getCell() + '/MailProvider:Built-in Mail Provider/'), '[[category ""] [description ""] [debug "false"] [name "' + jndiName + '"] [jndiName "jndi/' + jndiName + '"] [mailTransportHost "' + transportHost + '"]  [mailTransportUser "' + userName + '"] [mailTransportPassword "' + userPass + '"] [mailStoreUser ""] [mailStorePassword ""] [mailStoreHost ""] [strict "true"] [mailFrom ""]]')
 
-    print "Saving configuration .."
+    print("Saving configuration ..")
     AdminConfig.save()
 
     nodeList = AdminTask.listManagedNodes().split("\n")
@@ -42,8 +42,8 @@ def configureMailSession(jndiName, transportHost, userName = "", userPass = "", 
         continue
 
 def printHelp():
-    print "This script configures a cell-level mail transport."
-    print "Format is configureMailSession jndiName transportHost ((userName) (userPass) (mailFrom))"
+    print("This script configures a cell-level mail transport.")
+    print("Format is configureMailSession jndiName transportHost ((userName) (userPass) (mailFrom))")
 
 ##################################
 # main

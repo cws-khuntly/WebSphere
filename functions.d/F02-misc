@@ -1,0 +1,473 @@
+#!/usr/bin/env bash
+
+#=====  FUNCTION  =============================================================
+#          NAME:  setArray
+#   DESCRIPTION:  Creates or modifies an array with the given information
+#    PARAMETERS:  Name of array and value to add
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function setArray()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F02-misc";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if (( ${#} != 2 )); then
+        return_code=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - Creates or updates an array with the given information" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ array name ] [ new value ]
+                -> The variable name for the given array
+                -> The value to add to the array" 2>/dev/null;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        [[ -n "${array_variable}" ]] && unset -v array_variable;
+        [[ -n "${array_variables[*]}" ]] && unset -v array_variables;
+        [[ -n "${array_identifier}" ]] && unset -v array_identifier;
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    array_identifier="${1}";
+    [[ -r "${2}" ]] && mapfile -t array_variables < "${2}" || array_variables="${2}";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_identifier -> ${array_identifier}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_variable -> ${array_variables[*]}" 2>/dev/null;
+    fi
+
+    case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
+        [Kk][Ss][Hh])
+            for array_variable in "${array_variables[@]}"; do
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_variable -> ${array_variable}" 2>/dev/null; fi
+
+                set -A "$(eval echo \${array_identifier})" "$(eval echo \${${array_identifier}[*]})" "${array_variable}";
+            done
+            ;;
+        [Bb][Aa][Ss][Hh])
+            for array_variable in "${array_variables[@]}"; do
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_variable -> ${array_variable}" 2>/dev/null; fi
+
+                if [[ -n "$(command -v readarray 2>/dev/null)" ]]; then
+                    readarray -t "$(eval echo \${array_identifier})" < <( eval echo \${${array_identifier}[*]} "${array_variable}" );
+                else
+                    eval ${array_identifier}+=\(\"\${array_variable}\"\);
+                fi
+            done
+            ;;
+    esac
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    [[ -n "${array_variable}" ]] && unset -v array_variable;
+    [[ -n "${array_variables[*]}" ]] && unset -v array_variables;
+    [[ -n "${array_identifier}" ]] && unset -v array_identifier;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  mkcd
+#   DESCRIPTION:  Creates a directory and then changes into it
+#    PARAMETERS:  Directory to create
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function mkcd()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F02-misc";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if (( ${#} != 1 )); then
+        return_code=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - Make a directory and change into it" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ directory ]
+                 -> The name of the directory to create" 2>/dev/null;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        [[ -n "${directory_to_create}" ]] && unset -v directory_to_create;
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+        [[ -n "${cname}" ]] && unset -v cname;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    directory_to_create="${1}";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "directory_to_create -> ${directory_to_create}" 2>/dev/null; fi
+
+    mkdir -pv "${directory_to_create}";
+
+    if [[ -d "${directory_to_create}" ]]; then
+        cd "${directory_to_create}";
+    else
+        (( error_count += 1 ));
+
+        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create requested directory ${directory_to_create}" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to create requested directory ${directory_to_create}" 2>/dev/null;
+    fi
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    [[ -n "${directory_to_create}" ]] && unset -v directory_to_create;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  lsz
+#   DESCRIPTION:  Lists the content of a provided archive
+#    PARAMETERS:  Archive to list
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function lsz()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F02-misc";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if [ ${#} -eq 0 ]
+    then
+        RETURN_CODE=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - List contents of an archived file, such as a zip or jar" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ file ]
+            -> The full path to the compressed file to view" 2>/dev/null;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        [[ -n "${extract_to_dir}" ]] && unset -v extract_to_dir;
+        [[ -n "${file_of_type}" ]] && unset -v file_of_type;
+        [[ -n "${file_to_extract}" ]] && unset -v file_to_extract;
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+        [[ -n "${cname}" ]] && unset -v cname;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    file_to_view="${1}";
+    file_of_type="${file_to_view##*.}";
+    extract_to_dir="$(mktemp -p "${TMPDIR-${USABLE_TMP_DIR}}")";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_to_view -> ${file_to_view}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_of_type -> ${file_of_type}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "extract_to_dir -> ${extract_to_dir}" 2>/dev/null;
+    fi
+
+    case "${file_of_type}" in
+        tar|Z) tar tvf "${file_to_view}"; ;;
+        tar.bz2|bz|bz2|tbz2) bunzip2 < "${file_to_view}" | tar tvf -; ;;
+        tar.gz|gz|tgz) gunzip < "${file_to_view}" | tar tvf -; ;;
+        jar|zip) unzip -l "${file_to_view}"; ;;
+        7z) 7z -l -o "${file_to_view}"; ;;
+        *)
+            (( error_count += 1 ));
+
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Archive file type not recognized. File extension obtained: ${file_of_type}" 2>/dev/null;
+            writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Archive file type not recognized. File extension obtained: ${file_of_type}" 2>/dev/null;
+            ;;
+    esac
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    [[ -n "${extract_to_dir}" ]] && unset -v extract_to_dir;
+    [[ -n "${file_of_type}" ]] && unset -v file_of_type;
+    [[ -n "${file_to_extract}" ]] && unset -v file_to_extract;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  extract
+#   DESCRIPTION:  Extracts the provided archive
+#    PARAMETERS:  Archive to extract
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function extract()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F02-misc";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if (( ${#} != 1 )); then
+        return_code=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - Uncompress a provided file, such as a zip or jar" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ file ] [ (target) ]
+            -> The full path to the file to uncompress" 2>/dev/null;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        [[ -n "${extract_to_dir}" ]] && unset -v extract_to_dir;
+        [[ -n "${file_of_type}" ]] && unset -v file_of_type;
+        [[ -n "${file_to_extract}" ]] && unset -v file_to_extract;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+        [[ -n "${cname}" ]] && unset -v cname;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    file_to_extract="${1}";
+    file_of_type="${file_to_extract##*.}";
+    extract_to_dir="$(mktemp -p "${TMPDIR-${USABLE_TMP_DIR}}")";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_to_extract -> ${file_to_extract}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_of_type -> ${file_of_type}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "extract_to_dir -> ${extract_to_dir}" 2>/dev/null;
+    fi
+
+    case "${file_of_type}" in
+        tar|Z) tar xf "${file_to_extract}" -C "${extract_to_dir}"; ;;
+        tar.bz2|bz|bz2|tbz2) bunzip2 < "${file_to_extract}" | tar xf - -C "${extract_to_dir}"; ;;
+        tar.gz|gz|tgz) gunzip < "${file_to_extract}" | tar xf - -C "${extract_to_dir}"; ;;
+        jar|zip) unzip "${file_to_extract}" -d "${extract_to_dir}"; ;;
+        7z) 7z e -o "${extract_to_dir}" "${file_to_extract}"; ;;
+        *)
+            (( error_count += 1 ));
+
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Archive file type not recognized. File extension obtained: ${file_of_type}" 2>/dev/null;
+            writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Archive file type not recognized. File extension obtained: ${file_of_type}" 2>/dev/null;
+            ;;
+    esac
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then
+        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "One or more errors occurred while processing. Please review logs." 2>/dev/null;
+        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "One or more errors occurred while processing. Please review logs." 2>/dev/null;
+    else
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Switching into directory ${extract_to_dir}" 2>/dev/null; fi
+
+        cd "${extract_to_dir}";
+    fi
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    [[ -n "${extract_to_dir}" ]] && unset -v extract_to_dir;
+    [[ -n "${file_of_type}" ]] && unset -v file_of_type;
+    [[ -n "${file_to_extract}" ]] && unset -v file_to_extract;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}

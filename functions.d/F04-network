@@ -1,0 +1,364 @@
+#!/usr/bin/env bash
+
+#=====  FUNCTION  =============================================================
+#          NAME:  validateHostAvailability
+#   DESCRIPTION:  Validates that a given host exists in DNS and is alive
+#    PARAMETERS:  Target host, port number (optional)
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function validateHostAvailability()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F04-network";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if (( ${#} == 0 )); then
+        return_code=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - Validate a provided server's availability" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ hostname ] [ port ]
+                 -> The target host to validate
+                 -> The port number to attempt connection on" 2>/dev/null;
+
+        [[ -n "${validate_hostname}" ]] && unset -v validate_hostname;
+        [[ -n "${validate_port}" ]] && unset -v validate_port;
+
+        if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${cname}" ]] && unset -v cname;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+        [[ -n "${ret_code}" ]] && unset -v ret_code;
+        [[ -n "${telnet_pid}" ]] && unset -v telnet_pid;
+        [[ -n "${lookup_hostname}" ]] && unset -v lookup_hostname;
+        [[ -n "${isFQDN}" ]] && unset -v isFQDN;
+        [[ -n "${validate_port}" ]] && unset -v validate_port;
+        [[ -n "${validate_hostname}" ]] && unset -v validate_hostname;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    validate_hostname="${1}";
+    validate_port="${2}";
+    isFQDN=$(printf "%s" "${validate_hostname}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)');
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "validate_hostname -> ${validate_hostname}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "validate_port -> ${validate_port}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "isFQDN -> ${isFQDN}" 2>/dev/null;
+    fi
+
+    if [[ -z "${isFQDN}" ]]; then
+        if [[ -r /etc/resolv.conf ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Looping through found search suffixes in /etc/resolv.conf" 2>/dev/null; fi
+
+            ## loop through all the possible domain names in /etc/resolv.conf
+            for resolver_entry in $(grep search /etc/resolv.conf | grep -v "#"); do
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "resolver_entry -> ${resolver_entry}" 2>/dev/null; fi
+
+                [[ "${resolver_entry}" == "search" ]] && continue;
+
+                ## check if in DNS...
+                host "${validate_hostname}.${resolver_entry}" > /dev/null 2>&1;
+                ret_code=${?};
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
+
+                if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
+                    lookup_hostname="${validate_hostname}.${resolver_entry}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "lookup_hostname -> ${lookup_hostname}" 2>/dev/null; fi
+
+                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+                    [[ -n "${resolver_entry}" ]] && unset -v resolver_entry;
+
+                    break;
+                fi
+
+                [[ -n "${ret_code}" ]] && unset -v ret_code;
+                [[ -n "${resolver_entry}" ]] && unset -v resolver_entry;
+            done
+        fi
+    else
+        lookup_hostname="${validate_hostname}";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "lookup_hostname -> ${lookup_hostname}" 2>/dev/null; fi
+    fi
+
+    if [[ -n "${lookup_hostname}" ]]; then
+        if [[ -n "${validate_port}" ]] && [[ ${validate_port} =~ ^-?[0-9]+$ ]]; then
+            if [[ ! -z "$(compgen -c | grep -E -w "^nc")" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: nc -w 10 ${validate_hostname} ${validate_port} < /dev/null > /dev/null 2>&1" 2>/dev/null; fi
+
+                nc -w 10 ${validate_hostname} ${validate_port} < /dev/null > /dev/null 2>&1;
+                ret_code=${?};
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
+
+                if [[ -n "${ret_code}" ]] && (( ret_code != 0 )); then (( error_count += 1 )); fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: telnet ${validate_hostname} ${validate_port} >/dev/null 2>&1 &" 2>/dev/null; fi
+
+                telnet "${lookup_hostname}" ${validate_port} > /dev/null 2>&1 &
+                telnet_pid=${!};
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "telnet_pid -> ${telnet_pid}" 2>/dev/null; fi
+
+                if (( $(kill -0 "${telnet_pid}" > /dev/null 2>&1; echo ${?}) == 1 )); then
+                    (( error_count += 1 ));
+                else
+                    kill -9 ${telnet_pid} > /dev/null 2>&1;
+                fi
+            fi
+        else
+            case "$(uname -a)" in
+                [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "This is a Solaris host." 2>/dev/null;
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ping ${lookup_hostname} 1 > /dev/null 2>&1" 2>/dev/null;
+                    fi
+
+                    ping "${lookup_hostname}" 1 > /dev/null 2>&1;
+                    ret_code=${?};
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
+
+                    if [[ -n "${ret_code}" ]] && (( ret_code != 0 )); then (( error_count += 1 )); fi
+                    ;;
+                *)
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ping -c 1 -q -W ${THREAD_TIMEOUT} ${lookup_hostname} > /dev/null 2>&1" 2>/dev/null; fi
+
+                    ping -c 1 -q -W ${THREAD_TIMEOUT} "${lookup_hostname}" > /dev/null 2>&1;
+                    ret_code=${?};
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
+
+                    if [[ -n "${ret_code}" ]] && (( ret_code != 0 )); then (( error_count += 1 )); fi
+            esac
+        fi
+    else
+        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An invalid hostname was provided. Cannot continue." 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "An invalid hostname was provided. Cannot continue." 2>/dev/null;
+
+        (( error_count += 1 ));
+    fi
+
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
+    [[ -n "${telnet_pid}" ]] && unset -v telnet_pid;
+    [[ -n "${lookup_hostname}" ]] && unset -v lookup_hostname;
+    [[ -n "${isFQDN}" ]] && unset -v isFQDN;
+    [[ -n "${validate_port}" ]] && unset -v validate_port;
+    [[ -n "${validate_hostname}" ]] && unset -v validate_hostname;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${cname}" ]] && unset -v cname;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${random_generator}" ]] && unset -v random_generator;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  checkSslExpiry
+#   DESCRIPTION:  Checks the SSL certificate expiration of a given host.
+#    PARAMETERS:  Service hostname
+#       RETURNS:  0 if success, non-zero otherwise
+#==============================================================================
+function checkSslExpiry()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F04-network";
+    function_name="${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+    random_generator="/dev/urandom";
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+
+        start_epoch=$(printf "%(%s)T");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}" 2>/dev/null;
+    fi
+
+    if (( ${#} == 0 )); then
+        return_code=3;
+
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "${function_name} - Configure access to a newly provisioned host" 2>/dev/null;
+        writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Usage: ${function_name} [ website:port ]
+                -> The website and port number to verify. Format: site name:port number" 2>/dev/null;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+        fi
+
+        if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            end_epoch=$(printf "%(%s)T");
+            runtime=$(( start_epoch - end_epoch ));
+
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        fi
+
+        [[ -n "${cname}" ]] && unset -v cname;
+        [[ -n "${function_name}" ]] && unset -v function_name;
+        [[ -n "${error_count}" ]] && unset -v error_count;
+        [[ -n "${random_generator}" ]] && unset -v random_generator;
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    fi
+
+    if [[ -r "${1}" ]]; then mapfile -t host_list < "${1}"; else setArray host_list "${1}"; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_list -> ${host_list[*]}" 2>/dev/null; fi
+
+    for host_entry in ${host_list[*]}; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_entry -> ${host_entry}" 2>/dev/null; fi
+
+        site_hostname="$(cut -d ":" -f 1 <<< "${host_entry}")";
+        site_port="$(cut -d ":" -f 2 <<< "${host_entry}")";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "site_hostname -> ${site_hostname}" 2>/dev/null;
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "site_port -> ${site_port}" 2>/dev/null;
+        fi
+
+        validateHostAvailability "${site_hostname}" ${site_port};
+        ret_code=${?};
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
+
+        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Target host ${site_hostname} does not appear to be available." 2>/dev/null;
+            writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Target host ${site_hostname} does not appear to be available." 2>/dev/null;
+
+            [[ -n "${ret_code}" ]] && unset -v ret_code;
+            [[ -n "${site_port}" ]] && unset -v site_port;
+            [[ -n "${site_hostname}" ]] && unset -v site_hostname;
+            [[ -n "${host_entry}" ]] && unset -v host_entry;
+
+            (( error_count += 1 ));
+
+            continue;
+        fi
+
+        ssl_expiry="$(printf "%s\n" "quit" | openssl s_client -connect "${site_hostname}:${site_port}" -nbio -mtu 1500 -bugs -writerand /tmp/rnd 2>/dev/null | \
+            sed -ne "/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p" | openssl x509 -noout -subject -dates | grep notAfter | cut -d "=" -f 2 | awk '{print $4, $1, $2}')";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ssl_expiry -> ${ssl_expiry}" 2>/dev/null; fi
+
+        if [[ -z "${ssl_expiry}" ]]; then
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to obtain SSL certificate information from ${site_hostname}. Please verify the hostname and port number, and re-try." 2>/dev/null;
+            writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to obtain SSL certificate information from ${site_hostname}. Please verify the hostname and port number, and re-try." 2>/dev/null;
+
+            [[ -n "${ret_code}" ]] && unset -v ret_code;
+            [[ -n "${site_port}" ]] && unset -v site_port;
+            [[ -n "${site_hostname}" ]] && unset -v site_hostname;
+            [[ -n "${host_entry}" ]] && unset -v host_entry;
+            [[ -n "${ssl_expiry}" ]] && unset -v ssl_expiry;
+
+            (( error_count += 1 ));
+
+            continue;
+        fi
+
+        writeLogEntry "STDOUT" "${FUNCTION_NAME}" "${cname}" "${LINENO}" "Certificate for host ${site_hostname} expires on ${ssl_expiry}";
+
+        [[ -n "${ret_code}" ]] && unset -v ret_code;
+        [[ -n "${site_port}" ]] && unset -v site_port;
+        [[ -n "${site_hostname}" ]] && unset -v site_hostname;
+        [[ -n "${host_entry}" ]] && unset -v host_entry;
+        [[ -n "${ssl_expiry}" ]] && unset -v ssl_expiry;
+    done
+
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
+    [[ -n "${site_port}" ]] && unset -v site_port;
+    [[ -n "${site_hostname}" ]] && unset -v site_hostname;
+    [[ -n "${host_entry}" ]] && unset -v host_entry;
+    [[ -n "${ssl_expiry}" ]] && unset -v ssl_expiry;
+    [[ -n "${random_generator}" ]] && unset -v random_generator;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}" 2>/dev/null;
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit" 2>/dev/null;
+    fi
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${cname}" ]] && unset -v cname;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}

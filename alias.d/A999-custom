@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  custom
@@ -16,71 +18,70 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 ## customs
-alias lt='/usr/bin/env ls -ltrhpF --color=auto';
-alias la='/usr/bin/env ls -ltrahpF --color=auto';
-alias ll='/usr/bin/env ls -lhpF --color=auto';
-alias ll.='/usr/bin/env ls -ltrdhpF .* --color=auto';
-alias li='/usr/bin/env ls -iltrhpF --color=auto';
-alias li.='/usr/bin/env ls -iltrahpF --color=auto';
-alias ld='/usr/bin/env ls -ldhpF --color=auto';
-alias sizeof='/usr/bin/env du -sk';
-alias mktd='pushd $(/usr/bin/env mktemp)';
-alias listd='for inode in *; do [ -d ${inode} ] && echo "${inode}"; done';
-alias stamp='/usr/bin/env date "+%Y%m%d %H:%M:%S"';
-alias da='/usr/bin/env date "+%Y-%m-%d %A    %T %Z"';
-alias zero='/usr/bin/env cat /dev/null >|';
-alias ssh='/usr/bin/env ssh -qt4AC'
-alias removeKey='/usr/bin/env ssh-keygen -R';
-alias win2unix="/usr/bin/env sed 's/$/\r/'";
-alias fixtty='/usr/bin/env stty sane';
-alias time='/usr/bin/env time --format="%C took %e seconds"';
-alias pdftotext='/usr/bin/env pdftotext -enc UTF-8 -layout';
-alias ff='/usr/bin/env find . -type f';
-alias fd='/usr/bin/env find . -type d';
-alias clearScroll='/usr/bin/env printf "\033c"';
-alias icanhazip='/usr/bin/env dig +short @resolver1.opendns.com myip.opendns.com';
-alias fortune='/usr/bin/env fortune -a -e';
-alias ipv4sort='/usr/bin/env sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4';
-alias minicom='/usr/bin/env sudo -u root minicom -s /dev/ttyS0';
-alias reload='. ${HOME}/.profile';
-alias tailf='/usr/bin/env tail -f';
+alias lt="ls -ltrhpF --color=auto";
+alias la="ls -ltrahpF --color=auto";
+alias ll="ls -lhpF --color=auto";
+alias ll.="ls -ltrdhpF .* --color=auto";
+alias li="ls -iltrhpF --color=auto";
+alias li.="ls -iltrahpF --color=auto";
+alias ld="ls -ldhpF --color=auto";
+alias sizeof="du -sk";
+alias mktd="pushd $(mktemp)";
+alias listd="for inode in *; do [[ -d \"${inode}\" ]]; then echo \"${inode}\"; fi; done";
+alias stamp="date \"+%Y%m%d %H:%M:%S\"";
+alias da="date \"+%Y-%m-%d %A    %T %Z\"";
+alias zero="cat /dev/null >|";
+alias ssh="ssh -qt4AC";
+alias removeKey="ssh-keygen -R";
+alias win2unix="sed 's/$/\r/'";
+alias fixtty="stty sane";
+alias time="time --format=\"%C took %e seconds\"";
+alias pdftotext="pdftotext -enc UTF-8 -layout";
+alias ff="find . -type f";
+alias fd="find . -type d";
+alias clearScroll="printf \"\033c\"";
+alias icanhazip="dig +short @resolver1.opendns.com myip.opendns.com";
+alias fortune="fortune -a -e";
+alias ipv4sort="sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4";
+alias minicom="sudo -u root minicom -s /dev/ttyS0";
+alias tailf="tail -f";
 
 ## script tracing
-alias debug='typeset -x ENABLE_DEBUG="true"';
-alias verbose='typeset -x ENABLE_VERBOSE="true"';
-alias trace='typeset -x ENABLE_TRACE="true"';
-alias perf='typeset -x ENABLE_PERFORMANCE="true"';
-alias nodebug='typeset -x ENABLE_DEBUG="false"';
-alias noverbose='typeset -x ENABLE_VERBOSE="false"';
-alias notrace='typeset -x ENABLE_TRACE="false"';
-alias noperf='typeset -x ENABLE_PERFORMANCE="false"';
+alias enableDebug="declare -x ENABLE_DEBUG=\"${_TRUE}"\";
+alias enableVerbose="declare -x ENABLE_VERBOSE=\"${_TRUE}"\";
+alias enableTrace="declare -x ENABLE_TRACE=\"${_TRUE}"\";
+alias enablePerf="declare -x ENABLE_PERFORMANCE=\"${_TRUE}"\";
+alias disableDebug="declare -x ENABLE_DEBUG=\"${_FALSE}"\";
+alias disableVerbose="declare -x ENABLE_VERBOSE=\"${_FALSE}"\";
+alias disableTrace="declare -x ENABLE_TRACE=\"${_FALSE}"\";
+alias disablePerf="declare -x ENABLE_PERFORMANCE=\"${_FALSE}"\";
 
 ## expect
-alias scp.exp='${HOME}/.lib/scp.exp';
-alias ssh.exp='${HOME}/.lib/ssh.exp';
-alias ssh-copy-id.exp='${HOME}/.lib/sshCopyIdentity.exp';
-alias sudo.exp='${HOME}/.lib/sudo.exp';
-alias rsync.exp='${HOME}/.lib/rsync.exp';
-alias gpg.exp='${HOME}/.lib/gpg.exp';
-alias keychain.exp='${HOME}/.lib/keychain.exp';
-alias telnet.exp='${HOME}/.lib/telnet.exp';
+alias scp.exp="${HOME}/.lib/scp.exp";
+alias ssh.exp="${HOME}/.lib/ssh.exp";
+alias ssh-copy-id.exp="${HOME}/.lib/sshCopyIdentity.exp";
+alias sudo.exp="${HOME}/.lib/sudo.exp";
+alias rsync.exp="${HOME}/.lib/rsync.exp";
+alias gpg.exp="${HOME}/.lib/gpg.exp";
+alias keychain.exp="${HOME}/.lib/keychain.exp";
+alias telnet.exp="${HOME}/.lib/telnet.exp";
 
-case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
+case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
     [Kk][Ss][Hh])
-        alias reload='. ${HOME}/.kshrc';
-        alias shell='selectProfile';
+        alias reload=". ${HOME}/.kshrc";
+        alias shell="selectProfile";
         alias listFunctions="typeset -f | grep function | awk '{print \$NF}'";
         ;;
     [Bb][Aa][Ss][Hh])
-        alias reload='source ${HOME}/.bashrc';
-        alias shell='selectProfile';
+        alias reload="source ${HOME}/.bashrc";
+        alias shell="selectProfile";
         alias listFunctions="compgen -A function";
         ;;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

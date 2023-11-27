@@ -23,7 +23,7 @@ appList = AdminApp.list().split(lineSplit)
 
 def listApps():
     for app in appList:
-        print app
+        print(app)
 
         continue
 
@@ -31,8 +31,8 @@ def exportApp(appName):
     AdminApp.export(appName, '/var/tmp/' + appName + '.ear')
 
 def printHelp():
-    print "This script configures default values for the Deployment Manager."
-    print "Format is configureDMGR wasVersion"
+    print("This script configures default values for the Deployment Manager.")
+    print("Format is configureDMGR wasVersion")
 
 ##################################
 # main

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  defaults
@@ -16,46 +18,71 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[ -z "${LOGNAME}" ] && typeset -x LOGNAME="$(/usr/bin/env whoami)";
+[[ -z "${LOGNAME}" ]] && declare -x LOGNAME="$(whoami)";
 
-typeset -x LANG="en_US.UTF-8";
-typeset -x LC_ALL="en_US.UTF-8";
-typeset -x TIMEFORMAT=$'\nreal %3R\tuser %3U\tsys %3S\tpcpu %P\n';
-typeset -x LESS="-QR";
-typeset -ix IGNOREEOF=1;
-typeset -x GPG_TTY=$(tty);
-typeset -x BLOCKSIZE="K";
-typeset -x PAGER="/usr/bin/env less";
-typeset -x EDITOR="/usr/bin/env vim";
-typeset -x FCEDIT="/usr/bin/env vim";
-typeset -x VISUAL="/usr/bin/env vim";
-typeset -x DISPLAY=":0.0";
-typeset -x _TRUE="true";
-typeset -x _FALSE="false";
-typeset -ix THREAD_TIMEOUT=10;
-typeset -x MODIFIED_IFS="^";
-typeset -x RANDOM_GENERATOR="/dev/urandom";
-typeset -x ENTROPY_FILE="${HOME}/.etc/entropy";
-typeset -ix ENTROPY_FILE_SIZE=16384;
-typeset -x SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
+declare -x LANG="en_US.UTF-8";
+declare -x LC_ALL="en_US.UTF-8";
+declare -x TIMEFORMAT=$'\nreal %3R\tuser %3U\tsys %3S\tpcpu %P\n';
+declare -x LESS="-QR";
+declare -ix IGNOREEOF=1;
+declare -x GPG_TTY="$(tty)";
+declare -x BLOCKSIZE="K";
+declare -x PAGER="less";
+declare -x EDITOR="vim";
+declare -x FCEDIT="vim";
+declare -x VISUAL="vim";
+declare -x DISPLAY=":0.0";
+declare -x _TRUE="true";
+declare -x _FALSE="false";
+declare -ix THREAD_TIMEOUT=10;
+declare -x MODIFIED_IFS="^";
+declare -x RANDOM_GENERATOR="/dev/urandom";
+declare -x ENTROPY_FILE="${HOME}/.etc/entropy";
+declare -ix ENTROPY_FILE_SIZE=16384;
+declare -x SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
 
 case "$(/usr/bin/env uname -s)" in
     [Cc][Yy][Gg]][Ww][Ii][Nn]*)
-        typeset -x TERM="ansi";
-        typeset -x PATHSEP=";";
+        declare -x TERM="ansi";
+        declare -x PATHSEP=";";
         ;;
     [Ll][Ii]][Nn][Uu][Xx])
-        typeset -x TERM="linux";
-        typeset -x PATHSEP=":";
+        declare -x TERM="linux";
+        declare -x PATHSEP=":";
         ;;
     [Aa][Ii][Xx]|[Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
-        typeset -x TERM="ansi";
-        typeset -x PATHSEP=":";
+        declare -x TERM="ansi";
+        declare -x PATHSEP=":";
         ;;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LANG -> ${LANG}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LC_ALL -> ${LC_ALL}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "TIMEFORMAT -> ${TIMEFORMAT}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LESS -> ${LESS}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "IGNOREEOF -> ${IGNOREEOF}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "GPG_TTY -> ${GPG_TTY}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "BLOCKSIZE -> ${BLOCKSIZE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "PAGER -> ${PAGER}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "EDITOR -> ${EDITOR}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "FCEDIT -> ${FCEDIT}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "VISUAL -> ${VISUAL}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "DISPLAY -> ${DISPLAY}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "_TRUE -> ${_TRUE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "_FALSE -> ${_FALSE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "THREAD_TIMEOUT -> ${THREAD_TIMEOUT}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "MODIFIED_IFS -> ${MODIFIED_IFS}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "RANDOM_GENERATOR -> ${RANDOM_GENERATOR}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "ENTROPY_FILE -> ${ENTROPY_FILE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "ENTROPY_FILE_SIZE -> ${ENTROPY_FILE_SIZE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "SSH_AUTH_SOCK -> ${SSH_AUTH_SOCK}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "TERM -> ${TERM}";
+    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "PATHSEP -> ${PATHSEP}";
+fi
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

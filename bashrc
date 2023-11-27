@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  bash_profile
@@ -18,53 +20,55 @@
 
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
-[ -f "${HOME}/.etc/logging.properties" ] && . "${HOME}/.etc/logging.properties";
-[ -f "${HOME}/.lib/logger.sh" ] && . "${HOME}/.lib/logger.sh";
+declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
-typeset SCRIPT_NAME="profile";
+[[ -f "${HOME}/.etc/logging.properties" ]] && source "${HOME}/.etc/logging.properties";
+[[ -f "${HOME}/.lib/logger.sh" ]] && source "${HOME}/.lib/logger.sh";
 
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "${METHOD_NAME} START: $(/usr/bin/env date +"${TIMESTAMP_OPTS}")";
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i START_EPOCH=$(/usr/bin/env date +"%s");
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+CNAME="$(basename "${BASH_SOURCE[0]}")";
+FUNCTION_NAME="${CNAME}#loadProfile";
 
-typeset -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
+if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    writeLogEntry "PERFORMANCE" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "${FUNCTION_NAME} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
 
-## load profile
-for PROFILE in ${HOME}/.profile.d/*
-do
-    [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "PROFILE -> ${PROFILE}";
-
-    [ -z "${PROFILE}" ] && continue;
-    [ -d "${PROFILE}" ] && continue;
-
-    [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(/usr/bin/env basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
-
-    [ ! -z "${PROFILE}" ] && unset -v PROFILE;
-done
-
-[ ! -z "${PROFILE}" ] && unset -v PROFILE;
-
-if [ -d ${HOME}/.profile.d/profiles/ ]
-then
-    for PROFILE in ${HOME}/.profile.d/profiles/*
-    do
-        [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "PROFILE -> ${PROFILE}";
-
-        [ -z "${PROFILE}" ] && continue;
-
-        [ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${PROFILE} 2>&1 | tee -a ${LOG_ROOT}/$(/usr/bin/env basename ${PROFILE}).${DATE_PATTERN}.log || . ${PROFILE};
-
-        [ ! -z "${PROFILE}" ] && unset -v PROFILE;
-        [ ! -z "${IS_VALID_PROFILE}" ] && unset -v IS_VALID_PROFILE;
-    done
+    start_epoch=$(printf "%(%s)T");
 fi
 
-[ ! -z "${PROFILE}" ] && unset -v PROFILE;
+## load profile
+for file_entry in ${HOME}/.profile.d/*
+do
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
 
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.alias 2>&1 | /usr/bin/env tee -a ${LOG_ROOT}/load-aliases.${DATE_PATTERN}.log || . ${HOME}/.alias;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && . ${HOME}/.functions 2>&1 | /usr/bin/env tee -a ${LOG_ROOT}/load-functions.${DATE_PATTERN}.log || . ${HOME}/.functions;
+    [[ -z "${file_entry}" ]] && continue;
+
+    if [[ -d "${file_entry}" ]]; then
+        for dir_entry in ${HOME}/.profile.d/${file_entry}/*
+        do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}" 2>/dev/null; fi
+
+            if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
+
+            [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        done
+
+        [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
+    fi
+
+    if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+
+    [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
+done
+
+[[ -n "${dir_entry}" ]] && unset -v dir_entry;
+[[ -n "${file_entry}" ]] && unset -v file_entry;
+
+source ${HOME}/.alias;
+source ${HOME}/.functions;
 
 showHostInfo;
 
@@ -73,22 +77,11 @@ trap 'source ~/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
 ## run tmux (we're going to finally learn it)
 ## support both tmux and screen, use the flag files appropriately
-[ ! -z "$(builtin compgen -c | /usr/bin/env grep -E -w ^tmux)" -a -z "$(/usr/bin/env tmux info 2>/dev/null)" -a -f ${HOME}/.etc/run-tmux ] && /usr/bin/env tmux attach;
-[ ! -z "$(builtin compgen -c | /usr/bin/env grep -E -w ^screen)" -a -z "${STY}" -a -f ${HOME}/.etc/run-screen ] && /usr/bin/env screen -RR;
+[[ -n "$(compgen -c | grep -E -w ^tmux)" ]] && [[ -z "$(tmux info 2>/dev/null)" ]] && [[ -f ${HOME}/.etc/run-tmux ]] && tmux attach;
+[[ -n "$(compgen -c | grep -E -w ^screen)" ]] && [[ -z "${STY}" ]] && [[ -f ${HOME}/.etc/run-screen ]] && screen -RR;
 
 ## make the umask sane
-/usr/bin/env umask 022;
+umask 022;
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
-
-[ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "${METHOD_NAME} -> exit";
-
-[ ! -z "${SCRIPT_NAME}" ] && unset -v SCRIPT_NAME;
-[ ! -z "LOGIN" ] && unset -v FUNCTION_NAME;
-
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i END_EPOCH=$(date +"%s");
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && typeset -i RUNTIME=$(( ${START_EPOCH} - ${END_EPOCH} ));
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "${METHOD_NAME} TOTAL RUNTIME: $((${RUNTIME} / 60)) MINUTES, TOTAL ELAPSED: $((${RUNTIME} % 60)) SECONDS";
-[ ! -z "${ENABLE_PERFORMANCE}" -a "${ENABLE_PERFORMANCE}" = "${_TRUE}" ] && writeLogEntry "PERFORMANCE" "${SCRIPT_NAME}" "${LINENO}" "LOGIN" "${METHOD_NAME} END: $(date +"${TIMESTAMP_OPTS}")";
-
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi

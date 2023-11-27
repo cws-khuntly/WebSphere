@@ -63,7 +63,7 @@ def configureNodeAgent():
 
         continue
 
-    print "Configuration complete."
+    print("Configuration complete.")
 
 ##################################
 # main

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  A12-ihs
@@ -16,18 +18,23 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
+<<<<<<< HEAD
 [ ! -d /opt/IBM/HTTPServer -o "$(/usr/bin/env whoami)" != "ihsadm" ] && return
+=======
+if [[ ! -d /opt/IBM/HTTPServer ]] || [[ "$(whoami)" != "ihsadm" ]]; then return; fi
+>>>>>>> c9782bb (f)
 
-alias ihsadm='/usr/bin/env sudo su - ihsadm';
-alias stopServer='/opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop'; ## without IfDefine
-alias startServer='/opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k start'; ## without IfDefine
-alias stopServer='/opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -D * -k stop'; ## with IfDefine
-alias startServer='/opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -D * -k start'; ## with IfDefine
-alias startAdmin='/opt/IBM/HTTPServer/bin/adminctl -f /opt/IBM/HTTPServer/conf/admin.conf -k stop';
-alias stopAdmin='/opt/IBM/HTTPServer/bin/adminctl -f /opt/IBM/HTTPServer/conf/admin.conf -k start';
+alias startServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k start";
+alias startDefinedServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k start -D";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+alias stopServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop";
+alias stopDefinedServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop -D";
+
+alias startAdmin="sudo -u root /opt/IBM/HTTPServer/bin/adminctl -f /opt/IBM/HTTPServer/conf/admin.conf -k stop";
+alias stopAdmin="sudo -u root /opt/IBM/HTTPServer/bin/adminctl -f /opt/IBM/HTTPServer/conf/admin.conf -k start";
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

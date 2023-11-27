@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  A12-httpd
@@ -16,16 +18,20 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
+<<<<<<< HEAD
 [ ! -d /opt/Apache/httpd/current -o "$(/usr/bin/env whoami)" != "webadm" ] && return
+=======
+if [[ ! -d /opt/Apache/httpd ]] || [[ "$(whoami)" != "webadm" ]]; then return; fi
+>>>>>>> c9782bb (f)
 
-alias webadm='/usr/bin/env sudo su - webadm';
-alias stopServer='/opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop'; ## without IfDefine
-alias startServer='/opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k start'; ## without IfDefine
-alias stopServer='/opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -D * -k stop'; ## with IfDefine
-alias startServer='/opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -D * -k start'; ## with IfDefine
+alias startServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectll -f /opt/Apache/httpd/current/conf/httpd.conf -k start";
+alias startDefinedServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k start -D";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+alias stopServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop";
+alias stopDefinedServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop -D";
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

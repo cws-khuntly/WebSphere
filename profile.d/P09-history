@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  history
@@ -16,24 +18,34 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-case "$(echo "${SHELL}" | /usr/bin/env awk -F "/" '{print $NF}')" in
+case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
     [Kk][Ss][Hh])
-        typeset -x HISTFILE="${HOME}/.ksh_history";
-        typeset -ix HISTSIZE=10000;
-        typeset -x EXTENDED_HISTORY="ON";
+        declare -x HISTFILE="${HOME}/.ksh_history";
+        declare -ix HISTSIZE=10000;
+        declare -x EXTENDED_HISTORY="ON";
         ;;
     [Bb][Aa][Ss][Hh])
-        typeset -x HISTFILE="${HOME}/.bash_history";
-        typeset -ix HISTSIZE=10000;
-        typeset -ix HISTFILESIZE=10000;
-        typeset -x HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S ";
-        typeset -x HISTCONTROL="ignoredups:ignorespace";
-        typeset -x HISTIGNORE="ls:ll:lt:la:l:cd:pwd:exit:mc:su:df:clear:cls:bg:fg";
+        declare -x HISTFILE="${HOME}/.bash_history";
+        declare -ix HISTSIZE=10000;
+        declare -ix HISTFILESIZE=10000;
+        declare -x HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S ";
+        declare -x HISTCONTROL="ignoredups:ignorespace";
+        declare -x HISTIGNORE="ls:ll:lt:la:l:cd:pwd:exit:mc:su:df:clear:cls:bg:fg";
         ;;
 esac
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTFILE -> ${HISTFILE}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTSIZE -> ${HISTSIZE}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "EXTENDED_HISTORY -> ${EXTENDED_HISTORY}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTFILESIZE -> ${HISTFILESIZE}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTTIMEFORMAT -> ${HISTTIMEFORMAT}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTCONTROL -> ${HISTCONTROL}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTIGNORE -> ${HISTIGNORE}" 2>/dev/null;
+fi
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

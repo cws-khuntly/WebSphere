@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
 #          FILE:  A02-git
@@ -16,28 +18,28 @@
 #
 #==============================================================================
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[ $(builtin compgen -c | /usr/bin/env grep -Ew ^git > /dev/null 2>&1; echo ${?}) -eq 0 ] || return;
+(( $(compgen -c | grep -Ew "^git" > /dev/null 2>&1; echo ${?}) == 0 )) || return;
 
 ## git
-alias ga='/usr/bin/env git add';
-alias gp='/usr/bin/env git push';
-alias gl='/usr/bin/env git log';
-alias gs='/usr/bin/env git status';
-alias gd='/usr/bin/env git diff';
-alias gdc='/usr/bin/env git diff --cached';
-alias gm='/usr/bin/env git commit -m';
-alias gma='/usr/bin/env git commit -am';
-alias rgc='/usr/bin/env git commit -m "$(/usr/bin/env curl -s https://whatthecommit.com/index.txt)"';
-alias gb='/usr/bin/env git branch';
-alias gc='/usr/bin/env git checkout';
-alias gr='/usr/bin/env git rm';
-alias gra='/usr/bin/env git remote add';
-alias grr='/usr/bin/env git remote rm';
-alias gpu='/usr/bin/env git pull';
-alias gcl='/usr/bin/env git clone';
+alias ga="git add";
+alias gp="git push";
+alias gl="git log";
+alias gs="git status";
+alias gd="git diff";
+alias gdc="git diff --cached";
+alias gm="git commit -m";
+alias gma="git commit -am";
+alias rgc="git commit -m \"$(curl -s https://whatthecommit.com/index.txt)"\";
+alias gb="git branch";
+alias gc="git checkout";
+alias gr="git rm";
+alias gra="git remote add";
+alias grr="git remote rm";
+alias gpu="git pull";
+alias gcl="git clone";
 
-[ ! -z "${ENABLE_VERBOSE}" -a "${ENABLE_VERBOSE}" = "${_TRUE}" ] && set -x || set +x;
-[ ! -z "${ENABLE_TRACE}" -a "${ENABLE_TRACE}" = "${_TRUE}" ] && set -v || set +v;
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
