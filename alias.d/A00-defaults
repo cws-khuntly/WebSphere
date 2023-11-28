@@ -67,7 +67,8 @@ case $(uname -s) in
         unalias fgrep; alias fgrep="/usr/xpg4/bin/fgrep -v grep";
         ;;
     [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        alias sudo="cygstart --action=runas";  
+        alias sudo="cygstart --action=runas";
+        alias gpg="gpg2";
         ;;
 esac
 
