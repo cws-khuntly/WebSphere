@@ -18,7 +18,7 @@
 #
 #==============================================================================
 
-[[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
+[[ "${-}" != *i* ]] || [ -z "${PS1}" ] && return;
 
 declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 

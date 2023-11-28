@@ -21,11 +21,7 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-<<<<<<< HEAD
-[ ! -d /opt/Apache/httpd/current -o "$(/usr/bin/env whoami)" != "webadm" ] && return
-=======
 if [[ ! -d /opt/Apache/httpd ]] || [[ "$(whoami)" != "webadm" ]]; then return; fi
->>>>>>> c9782bb (f)
 
 alias startServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectll -f /opt/Apache/httpd/current/conf/httpd.conf -k start";
 alias startDefinedServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k start -D";

@@ -21,11 +21,7 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-<<<<<<< HEAD
-[ ! -d /opt/IBM/HTTPServer -o "$(/usr/bin/env whoami)" != "ihsadm" ] && return
-=======
 if [[ ! -d /opt/IBM/HTTPServer ]] || [[ "$(whoami)" != "ihsadm" ]]; then return; fi
->>>>>>> c9782bb (f)
 
 alias startServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k start";
 alias startDefinedServer="sudo -u ihssrv /opt/IBM/HTTPServer/bin/apachectl -f /opt/IBM/HTTPServer/conf/httpd.conf -k start -D";
