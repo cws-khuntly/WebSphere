@@ -29,23 +29,17 @@ if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#loadProfile";
 
-if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-    writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
-
-    start_epoch=$(printf "%(%s)T");
-fi
-
 declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## load profile
-for file_entry in ${HOME}/.profile.d/*
+for file_entry in "${HOME}"/.profile.d/*
 do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
 
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in ${HOME}/.profile.d/${file_entry}/*
+        for dir_entry in "${HOME}"/.profile.d/"${file_entry}"/*
         do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}" 2>/dev/null; fi
 
@@ -67,8 +61,8 @@ done
 [[ -n "${dir_entry}" ]] && unset -v dir_entry;
 [[ -n "${file_entry}" ]] && unset -v file_entry;
 
-source ${HOME}/.alias;
-source ${HOME}/.functions;
+source "${HOME}"/.alias;
+source "${HOME}"/.functions;
 
 showHostInfo;
 

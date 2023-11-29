@@ -18,9 +18,9 @@ function validateHostAvailability()
     error_count=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
-
         start_epoch=$(printf "%(%s)T");
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -51,7 +51,7 @@ function validateHostAvailability()
             runtime=$(( start_epoch - end_epoch ));
 
             writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
         fi
 
         [[ -n "${error_count}" ]] && unset -v error_count;
@@ -85,10 +85,11 @@ function validateHostAvailability()
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Looping through found search suffixes in /etc/resolv.conf" 2>/dev/null; fi
 
             ## loop through all the possible domain names in /etc/resolv.conf
-            for resolver_entry in $(grep search /etc/resolv.conf | grep -v "#"); do
+            grep "search" < "/etc/resolv.conf" | while read -r resolver_entry; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "resolver_entry -> ${resolver_entry}" 2>/dev/null; fi
 
                 [[ "${resolver_entry}" == "search" ]] && continue;
+                [[ "${resolver_entry}" =~ ^\# ]] && continue;
 
                 ## check if in DNS...
                 host "${validate_hostname}.${resolver_entry}" > /dev/null 2>&1;
@@ -119,10 +120,10 @@ function validateHostAvailability()
 
     if [[ -n "${lookup_hostname}" ]]; then
         if [[ -n "${validate_port}" ]] && [[ ${validate_port} =~ ^-?[0-9]+$ ]]; then
-            if [[ ! -z "$(compgen -c | grep -E -w "^nc")" ]]; then
+            if [[ -n "$(compgen -c | grep -E -w "^nc")" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: nc -w 10 ${validate_hostname} ${validate_port} < /dev/null > /dev/null 2>&1" 2>/dev/null; fi
 
-                nc -w 10 ${validate_hostname} ${validate_port} < /dev/null > /dev/null 2>&1;
+                nc -w 10 "${validate_hostname}" "${validate_port}" < /dev/null > /dev/null 2>&1;
                 ret_code=${?};
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
@@ -131,7 +132,7 @@ function validateHostAvailability()
             else
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: telnet ${validate_hostname} ${validate_port} >/dev/null 2>&1 &" 2>/dev/null; fi
 
-                telnet "${lookup_hostname}" ${validate_port} > /dev/null 2>&1 &
+                telnet "${lookup_hostname}" "${validate_port}" > /dev/null 2>&1 &
                 telnet_pid=${!};
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "telnet_pid -> ${telnet_pid}" 2>/dev/null; fi
@@ -160,7 +161,7 @@ function validateHostAvailability()
                 *)
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ping -c 1 -q -W ${THREAD_TIMEOUT} ${lookup_hostname} > /dev/null 2>&1" 2>/dev/null; fi
 
-                    ping -c 1 -q -W ${THREAD_TIMEOUT} "${lookup_hostname}" > /dev/null 2>&1;
+                    ping -c 1 -q -W "${THREAD_TIMEOUT}" "${lookup_hostname}" > /dev/null 2>&1;
                     ret_code=${?};
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
@@ -194,7 +195,7 @@ function validateHostAvailability()
         runtime=$(( start_epoch - end_epoch ));
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     [[ -n "${cname}" ]] && unset -v cname;
@@ -227,9 +228,9 @@ function checkSslExpiry()
     random_generator="/dev/urandom";
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
-
         start_epoch=$(printf "%(%s)T");
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -254,7 +255,7 @@ function checkSslExpiry()
             runtime=$(( start_epoch - end_epoch ));
 
             writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+            writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
         fi
 
         [[ -n "${cname}" ]] && unset -v cname;
@@ -272,7 +273,7 @@ function checkSslExpiry()
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_list -> ${host_list[*]}" 2>/dev/null; fi
 
-    for host_entry in ${host_list[*]}; do
+    for host_entry in "${host_list[@]}"; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_entry -> ${host_entry}" 2>/dev/null; fi
 
         site_hostname="$(cut -d ":" -f 1 <<< "${host_entry}")";
@@ -283,7 +284,7 @@ function checkSslExpiry()
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "site_port -> ${site_port}" 2>/dev/null;
         fi
 
-        validateHostAvailability "${site_hostname}" ${site_port};
+        validateHostAvailability "${site_hostname}" "${site_port}";
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}" 2>/dev/null; fi
@@ -322,7 +323,7 @@ function checkSslExpiry()
             continue;
         fi
 
-        writeLogEntry "STDOUT" "${FUNCTION_NAME}" "${cname}" "${LINENO}" "Certificate for host ${site_hostname} expires on ${ssl_expiry}";
+        writeLogEntry "STDOUT" "${function_name}" "${cname}" "${LINENO}" "Certificate for host ${site_hostname} expires on ${ssl_expiry}";
 
         [[ -n "${ret_code}" ]] && unset -v ret_code;
         [[ -n "${site_port}" ]] && unset -v site_port;
@@ -350,7 +351,7 @@ function checkSslExpiry()
         runtime=$(( start_epoch - end_epoch ));
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;

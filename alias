@@ -25,14 +25,14 @@ CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#loadAliases";
 
 ## load aliases
-for file_entry in ${HOME}/.alias.d/*
+for file_entry in "${HOME}"/.alias.d/*
 do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}" 2>/dev/null; fi
 
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in ${HOME}/.alias.d/${file_entry}/*
+        for dir_entry in "${HOME}"/.alias.d/"${file_entry}"/*
         do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}" 2>/dev/null; fi
 

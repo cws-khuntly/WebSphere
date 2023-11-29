@@ -17,9 +17,9 @@ function returnRandomCharacters()
     return_code=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
-
         start_epoch=$(printf "%(%s)T");
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -44,9 +44,9 @@ function returnRandomCharacters()
     fi
 
     if (( use_special == 0 )); then
-        returned_characters=$(tr -cd '[:alnum:]' < /dev/urandom | head -c ${string_length});
+        returned_characters=$(tr -cd '[:alnum:]' < /dev/urandom | head -c "${string_length}");
     else
-        returned_characters=$(tr -cd '[:graph:]' < /dev/urandom | head -c ${string_length});
+        returned_characters=$(tr -cd '[:graph:]' < /dev/urandom | head -c "${string_length}");
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returned_characters -> ${returned_characters}" 2>/dev/null; fi
@@ -65,7 +65,7 @@ function returnRandomCharacters()
         runtime=$(( start_epoch - end_epoch ));
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     [[ -n "${cname}" ]] && unset -v cname;
@@ -95,9 +95,9 @@ function wchmod()
     return_code=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
-
         start_epoch=$(printf "%(%s)T");
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -124,7 +124,7 @@ function wchmod()
                 runtime=$(( start_epoch - end_epoch ));
 
                 writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-                writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+                writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
             fi
 
             [[ -n "${error_count}" ]] && unset -v error_count;
@@ -149,9 +149,9 @@ function wchmod()
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_listing -> ${file_listing[*]}" 2>/dev/null; fi
 
-        user_perms=${requested_permissions:0:1};
-        group_perms=${requested_permissions:1:1};
-        world_perms=${requested_permissions:2:1};
+        user_perms="${requested_permissions:0:1}";
+        group_perms="${requested_permissions:1:1}";
+        world_perms="${requested_permissions:2:1}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "user_perms -> ${user_perms}" 2>/dev/null;
@@ -173,10 +173,10 @@ function wchmod()
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry}" 2>/dev/null; fi
 
-            setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry} 2>/dev/null;
+            setfacl -s u::"${user_perms}",g::"${group_perms}","${world_perms}" "${file_entry}" 2>/dev/null;
             ret_code=${?};
 
-            [ ! -z "${ENABLE_DEBUG}" -a "${ENABLE_DEBUG}" = "${_TRUE}" ] && writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+            if [[ -n "${ENABLE_DEBUG}" ]] &&[[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}" 2>/dev/null;
@@ -187,12 +187,15 @@ function wchmod()
                 continue;
             fi
 
-            [ ! -z "${file_entry}" ] && unset -v file_entry;
-            [ ! -z "${ret_code}" ] && unset -v ret_code;
+            [[ -n "${file_entry}" ]] && unset -v file_entry;
+            [[ -n "${ret_code}" ]] && unset -v ret_code;
         done
     else
         echo "${@}";
     fi
+
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code=${error_count} || return_code=0; fi
 
@@ -206,7 +209,7 @@ function wchmod()
         runtime=$(( start_epoch - end_epoch ));
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS" 2>/dev/null;
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")" 2>/dev/null;
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")" 2>/dev/null;
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
