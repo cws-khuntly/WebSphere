@@ -21,11 +21,11 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-stty erase "^?" 2>/dev/null;
-stty kill "^B" 2>/dev/null;
-stty -ixon 2>/dev/null;
-stty echoe 2>/dev/null;
-stty istrip 2>/dev/null;
+stty erase "^?";
+stty kill "^B";
+stty -ixon;
+stty echoe;
+stty istrip;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

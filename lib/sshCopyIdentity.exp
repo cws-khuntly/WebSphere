@@ -98,7 +98,7 @@ if { ! [ info exists _USER_PASSWD ] } {
     exit 1;
 }
 
-eval spawn /usr/bin/env ssh-copy-id -i "$IDENTITY" "$USERNAME@$HOSTNAME";
+eval spawn ssh-copy-id -i "$IDENTITY" "$USERNAME@$HOSTNAME";
 
 set i 0;
 

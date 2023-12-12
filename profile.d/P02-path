@@ -32,12 +32,12 @@ declare -x LIB_PATH="${LD_LIBRARY_PATH}";
 declare -x LD_RUN_PATH="${LD_LIBRARY_PATH}";
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "PATH -> ${PATH}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "MANPATH -> ${MANPATH}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LD_LIBRARY_PATH -> ${LD_LIBRARY_PATH}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LIBPATH -> ${LIBPATH}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LIB_PATH -> ${LIB_PATH}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LD_RUN_PATH -> ${LD_RUN_PATH}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "PATH -> ${PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "MANPATH -> ${MANPATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LD_LIBRARY_PATH -> ${LD_LIBRARY_PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LIBPATH -> ${LIBPATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LIB_PATH -> ${LIB_PATH}";
+    writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LD_RUN_PATH -> ${LD_RUN_PATH}";
 fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi

@@ -21,9 +21,9 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[[ -z "$(compgen -c | grep -E -w "^ansible")" ]] && return;
+(( "$(grep -qE "^ansible" <<< "$(compgen -c)"; printf "%s" "${?}")" != 0 )) && return;
 
-declare -x ANSIBLE_HOSTS="${HOME}/.etc/ansible/hosts";
+declare -x ANSIBLE_HOSTS="${HOME}/etc/ansible/hosts";
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "P01-ansible" "${LINENO}" "ANSIBLE_HOSTS -> ${ANSIBLE_HOSTS}"; fi
 

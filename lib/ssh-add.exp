@@ -53,7 +53,7 @@ foreach { _KEYFILE } $_KEYFILES {
     set _AUTH_DATA [ split [ getAuthValue $_KEYFILE $_KEYFILE $AUTHFILE gpg ] " " ];
 
     if { [ info exists _PASSPHRASE ] } {
-        eval spawn /usr/bin/env ssh-add $env(HOME)/.ssh/$_KEYFILE;
+        eval spawn ssh-add $env(HOME)/.ssh/$_KEYFILE;
 
         expect {
             "Enter passphrase*" {

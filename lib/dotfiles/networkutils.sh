@@ -6,13 +6,13 @@
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function validateHostAvailability()
-{
+function validateHostAddress()
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -34,20 +34,20 @@ function validateHostAvailability()
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "provided_hostname -> ${provided_hostname}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "provided_port -> ${provided_port}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidHost ${provided_hostname}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidAddress ${provided_hostname}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidPort ${provided_port}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkForValidHost ${provided_hostname}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkForValidAddress ${provided_hostname}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkForValidPort ${provided_port}";
     fi
 
     [[ -n "${cname}" ]] && unset -v cname;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-    validatedHostName="$(isValidHost "${provided_hostname}")";
-    validatedHostAddress="$(isValidAddress "${provided_hostname}")";
-    validatedPortNumber="$(isValidPort "${provided_port}")";
+    validatedHostName="$(checkForValidHost "${provided_hostname}")";
+    validatedHostAddress="$(checkForValidAddress "${provided_hostname}")";
+    validatedPortNumber="$(checkForValidPort "${provided_port}")";
 
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -56,58 +56,56 @@ function validateHostAvailability()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "validatedPortNumber -> ${validatedPortNumber}";
     fi
 
-    [[ -n "${function_name}" ]] && unset -v function_name;
-    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
     if [[ -n "${validatedHostName}" ]] && [[ -n "${validatedPortNumber}" ]]; then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidNetworkName ${validatedHostName} ${validatedPortNumber}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkIfHostIsAlive ${validatedHostName} ${validatedPortNumber}"; fi
 
+        [[ -n "${cname}" ]] && unset -v cname;
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        isValidNetworkName "${validatedHostName}" "${validatedPortNumber}";
+        checkIfHostIsAlive "${validatedHostName}" "${validatedPortNumber}";
         ret_code="${?}";
 
-        cname="F04-network";
+        cname="networkutils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
     elif [[ -n "${validatedHostAddress}" ]] && [[ -n "${validatedPortNumber}" ]]; then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidNetworkName ${validatedHostAddress} ${validatedPortNumber}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkIfHostIsAlive ${validatedHostAddress} ${validatedPortNumber}"; fi
 
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        isValidNetworkName "${validatedHostAddress}" "${validatedPortNumber}";
+        checkIfHostIsAlive "${validatedHostAddress}" "${validatedPortNumber}";
         ret_code="${?}";
 
-        cname="F04-network";
+        cname="networkutils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
     elif [[ -n "${validatedHostName}" ]] && [[ -z "${validatedPortNumber}" ]]; then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidNetworkName ${validatedHostName}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkIfHostIsAlive ${validatedHostName}"; fi
 
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        isValidNetworkName "${validatedHostName}";
+        checkIfHostIsAlive "${validatedHostName}";
         ret_code="${?}";
 
-        cname="F04-network";
+        cname="networkutils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
     elif [[ -n "${validatedHostAddress}" ]] && [[ -z "${validatedPortNumber}" ]]; then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: isValidNetworkName ${validatedHostAddress}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: checkIfHostIsAlive ${validatedHostAddress}"; fi
 
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        isValidNetworkName "${validatedHostAddress}";
+        checkIfHostIsAlive "${validatedHostAddress}";
         ret_code="${?}";
 
-        cname="F04-network";
+        cname="networkutils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
@@ -148,7 +146,7 @@ function validateHostAvailability()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -156,13 +154,13 @@ function validateHostAvailability()
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function isValidHost()
-{
+function checkForValidHost()
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -259,12 +257,18 @@ function isValidHost()
                     done
                 fi
             fi
+        else
+            (( error_count += 1 ));
+
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "The provided information failed validation.";
         fi
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${searchForNameInHosts}" ]] && unset -v searchForNameInHosts;
     [[ -n "${checkForHostname}" ]] && unset -v checkForHostname;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
@@ -288,7 +292,7 @@ function isValidHost()
 
     [[ -n "${returnedHostname}" ]] && printf "%s" "${returnedHostname}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -296,13 +300,13 @@ function isValidHost()
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function isValidAddress()
-{
+function checkForValidAddress()
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -389,6 +393,10 @@ function isValidAddress()
                     fi
                 fi
             fi
+        else
+            (( error_count += 1 ));
+
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "The provided information failed validation.";
         fi
     fi
 
@@ -396,6 +404,8 @@ function isValidAddress()
     [[ -n "${searchForAddressInHosts}" ]] && unset -v searchForAddressInHosts;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${checkForAddress}" ]] && unset -v checkForAddress;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
@@ -419,7 +429,7 @@ function isValidAddress()
 
     [[ -n "${returnedHostAddress}" ]] && printf "%s" "${returnedHostAddress}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -427,13 +437,13 @@ function isValidAddress()
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function isValidPort()
-{
+function checkForValidPort()
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -469,11 +479,17 @@ function isValidPort()
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returnedPortNumber -> ${returnedPortNumber}"; fi
             fi
+        else
+            (( error_count += 1 ));
+
+            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "The provided information failed validation.";
         fi
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${checkPortNumber}" ]] && unset -v checkPortNumber;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
@@ -497,7 +513,7 @@ function isValidPort()
 
     [[ -n "${returnedPortNumber}" ]] && printf "%s" "${returnedPortNumber}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -505,13 +521,13 @@ function isValidPort()
 #    PARAMETERS:  Target host, port number (optional)
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function isValidNetworkName()
-{
+function checkIfHostIsAlive()
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F04-network";
+    cname="networkutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -608,7 +624,7 @@ function isValidNetworkName()
     else
         (( error_count += 1 ));
 
-        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while checking host availability via nmap - no return code/a non-zero return code was received.";
+        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "No valid host entry was provided";
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -639,4 +655,4 @@ function isValidNetworkName()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)

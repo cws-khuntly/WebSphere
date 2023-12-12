@@ -26,9 +26,9 @@ declare -x https_proxy="";
 declare -x ftp_proxy="";
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "http_proxy -> ${http_proxy}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "https_proxy -> ${https_proxy}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "ftp_proxy -> ${ftp_proxy}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "http_proxy -> ${http_proxy}";
+    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "https_proxy -> ${https_proxy}";
+    writeLogEntry "DEBUG" "${CNAME}" "P11-proxy" "${LINENO}" "ftp_proxy -> ${ftp_proxy}";
 fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi

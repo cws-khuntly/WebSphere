@@ -23,13 +23,12 @@ if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set
 
 if [[ ! -d /opt/zimbra ]] && [[ "$(whoami)" != "zimbra" ]]; then return; fi
 
-alias zmcontrol="sudo -Su zimbra /opt/zimbra/bin/zmcontrol < ~/.etc/sudo";
-alias zmprov="sudo -Su zimbra /opt/zimbra/bin/zmprov";
-alias zmysql="sudo -Su zimbra /opt/zimbra/bin/mysql -u zimbra < ~/.etc/sudo";
-alias zimbra="sudo -Su root su - zimbra < ~/.etc/sudo";
-alias jstack="sudo -Su zimbra /opt/zimbra/java/bin/jstack < ~/.etc/sudo";
-alias zmstats="sudo -Su zimbra /opt/zimbra/bin zmstat lmtp_threads http_threads db_conn_count db_pool_size gc_major_count < ~/.etc/sudo | tail";
-alias ldapsearch="/opt/zimbra/bin/ldapsearch -H \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey ldap_url < ~/.etc/sudo | awk '{print $1}')\" -D \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_userdn < ~/.etc/sudo)\" -w \"$(sudo -Su zimbra /opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_password < ~/.etc/sudo | awk '{print $1}')\" -LLL";
+alias zmcontrol="/opt/zimbra/bin/zmcontrol";
+alias zmprov="/opt/zimbra/bin/zmprov";
+alias zmysql="/opt/zimbra/bin/mysql -u zimbra -p";
+alias jstack="/opt/zimbra/java/bin/jstack";
+alias zmstats="/opt/zimbra/bin zmstat lmtp_threads http_threads db_conn_count db_pool_size gc_major_count | tail";
+alias ldapsearch="/opt/zimbra/bin/ldapsearch -H \"/opt/zimbra/bin/zmlocalconfig -s -m nokey ldap_url | awk '{print $1}')\" -D \"$(/opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_userdn)\" -w \"$(/opt/zimbra/bin/zmlocalconfig -s -m nokey zimbra_ldap_password | awk '{print $1}')\" -LLL";
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

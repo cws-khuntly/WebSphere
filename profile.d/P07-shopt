@@ -23,20 +23,20 @@ if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set
 
 case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
     [Bb][Aa][Ss][Hh])
-        shopt -s expand_aliases 2>/dev/null;
-        shopt -s huponexit 2>/dev/null;
-        shopt -s mailwarn 2>/dev/null;
-        shopt -s histreedit 2>/dev/null;
-        shopt -s histappend 2>/dev/null;
-        shopt -s histverify 2>/dev/null;
-        shopt -s hostcomplete 2>/dev/null;
-        shopt -s cmdhist 2>/dev/null;
-        shopt -s checkwinsize 2>/dev/null;
-        shopt -s checkhash 2>/dev/null;
-        shopt -s cdspell 2>/dev/null;
-        shopt -s dirspell 2>/dev/null;
-        shopt -s mailwarn 2>/dev/null;
-        shopt -s checkjobs 2>/dev/null;
+        shopt -s expand_aliases;
+        shopt -s huponexit;
+        shopt -s mailwarn;
+        shopt -s histreedit;
+        shopt -s histappend;
+        shopt -s histverify;
+        shopt -s hostcomplete;
+        shopt -s cmdhist;
+        shopt -s checkwinsize;
+        shopt -s checkhash;
+        shopt -s cdspell;
+        shopt -s dirspell;
+        shopt -s mailwarn;
+        shopt -s checkjobs;
         ;;
 esac
 

@@ -21,14 +21,15 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-[[ -z "${LOGNAME}" ]] && declare -x LOGNAME="$(whoami)";
+[[ -z "${LOGNAME}" ]] && LOGNAME="$(whoami)"; declare -x LOGNAME;
+
+GPG_TTY="$(tty)"; declare -x GPG_TTY;
 
 declare -x LANG="en_US.UTF-8";
 declare -x LC_ALL="en_US.UTF-8";
 declare -x TIMEFORMAT=$'\nreal %3R\tuser %3U\tsys %3S\tpcpu %P\n';
 declare -x LESS="-QR";
 declare -ix IGNOREEOF=1;
-declare -x GPG_TTY="$(tty)";
 declare -x BLOCKSIZE="K";
 declare -x PAGER="less";
 declare -x EDITOR="vim";
@@ -44,7 +45,7 @@ declare -x ENTROPY_FILE="${HOME}/.etc/entropy";
 declare -ix ENTROPY_FILE_SIZE=16384;
 declare -x SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
 
-case "$(/usr/bin/env uname -s)" in
+case "$(uname -s)" in
     [Cc][Yy][Gg]][Ww][Ii][Nn]*)
         declare -x TERM="ansi";
         declare -x PATHSEP=";";

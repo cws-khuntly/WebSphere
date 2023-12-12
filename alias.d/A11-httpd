@@ -23,11 +23,11 @@ if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set
 
 if [[ ! -d /opt/Apache/httpd ]] || [[ "$(whoami)" != "webadm" ]]; then return; fi
 
-alias startServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectll -f /opt/Apache/httpd/current/conf/httpd.conf -k start";
-alias startDefinedServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k start -D";
+alias startServer="sudo -u websrv /opt/Apache/httpd/current/bin/apachectll -f /opt/Apache/httpd/current/conf/httpd.conf -k start";
+alias startDefinedServer="sudo -u websrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k start -D";
 
-alias stopServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop";
-alias stopDefinedServer="sudo -u ihssrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop -D";
+alias stopServer="sudo -u websrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop";
+alias stopDefinedServer="sudo -u websrv /opt/Apache/httpd/current/bin/apachectl -f /opt/Apache/httpd/current/conf/httpd.conf -k stop -D";
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

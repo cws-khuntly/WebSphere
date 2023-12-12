@@ -25,12 +25,12 @@ declare -x MAIL="/var/spool/mail/${LOGNAME:?}";
 declare -ix MAILCHECK=10;
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAIL -> ${MAIL}" 2>/dev/null;
-    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAILCHECK -> ${MAILCHECK}" 2>/dev/null;
+    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAIL -> ${MAIL}";
+    writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAILCHECK -> ${MAILCHECK}";
 fi
 
-[[ ! -d "${HOME}/.mail" ]] && mkdir -pv "${HOME}/.mail";
-#[ ! -z "$(/usr/bin/env mail -E 2>/dev/null)" ] && echo "$(/usr/bin/env mail -E)";
+[[ ! -d "${HOME}/.mail" ]] && mkdir -p "${HOME}/.mail";
+#[ ! -z "$(mail -E 2> /dev/null)" ] && echo "$(mail -E)";
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi

@@ -62,7 +62,7 @@ proc getAuthValue { _HOSTNAME _USERNAME { _AUTH_FILE "" } { _ID_FILE "" } { _ENC
             }
         }
         java {
-            set _DECRYPTED [ split [ exec -ignorestderr /usr/bin/env bash -c ". $env(HOME)/.functions.d/F05-security; passwordRepository decrypt $_HOSTNAME $_USERNAME 2>/dev/null" ] "\n" ]
+            set _DECRYPTED [ split [ exec -ignorestderr bash -c ". $env(HOME)/.functions.d/F05-security; passwordRepository decrypt $_HOSTNAME $_USERNAME 2> /dev/null" ] "\n" ]
 
             foreach _ENTRY $_DECRYPTED {
                 if { [ string match "#*" $_ENTRY ] } {
@@ -106,7 +106,7 @@ proc getAuthValue { _HOSTNAME _USERNAME { _AUTH_FILE "" } { _ID_FILE "" } { _ENC
                 if { [ string length $_ENCRYPTION_TYPE ] != 0 } {
                     switch $_ENCRYPTION_TYPE {
                         gpg {
-                            set _DECRYPTED [ split [ exec -ignorestderr /usr/bin/env bash -c ". $env(HOME)/.functions.d/F05-security; fileCrypt decrypt [ lindex $_AUTH_VARIABLE 1 ] 2>/dev/null" ] "\n" ]
+                            set _DECRYPTED [ split [ exec -ignorestderr bash -c ". $env(HOME)/.functions.d/F05-security; fileCrypt decrypt [ lindex $_AUTH_VARIABLE 1 ] 2> /dev/null" ] "\n" ]
                         }
                         openssl {
                             ## need to figure out a way to pass in the auth string for openssl here ...
