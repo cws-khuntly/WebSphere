@@ -49,7 +49,7 @@ function transferFiles()
     if [[ -n "${files_to_process}" ]]; then
         case "${operating_mode}" in
             "${TRANSFER_LOCATION_LOCAL}")
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupLocalFiles ${cleanup_file_list}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferLocalFiles ${files_to_process}"; fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
@@ -66,8 +66,7 @@ function transferFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
+                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while transferring files on the local system. Please review logs.";
                 fi
                 ;;
             "${TRANSFER_LOCATION_REMOTE}")
@@ -106,21 +105,13 @@ function transferFiles()
                 fi
 
                 if [[ -n "${continue_exec}" ]] && [[ "${continue_exec}" == "${_TRUE}" ]]; then
-                    ## housekeeping
-                    [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
-
-                    cleanup_list="${files_to_process}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_REMOTE} ${cleanup_list} ${target_host} ${target_port} ${target_user} ${force_push}";
-                    fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferRemoteFiles ${files_to_process} ${target_host} ${target_port} ${target_user}"; fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    cleanupFiles "${CLEANUP_LOCATION_REMOTE}" "${cleanup_list}" "${target_host}" "${target_port}" "${target_user}" "${force_push}";
+                    transferRemoteFiles "${files_to_process}" "${target_host}" "${target_port}" "${target_user}";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
@@ -131,27 +122,7 @@ function transferFiles()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ))
 
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute remote file cleanup. Please review logs.";
-                    else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferRemoteFiles ${files_to_process} ${target_host} ${target_port} ${target_user}"; fi
-
-                        [[ -n "${cname}" ]] && unset -v cname;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        transferRemoteFiles "${files_to_process}" "${target_host}" "${target_port}" "${target_user}";
-                        ret_code="${?}";
-
-                        cname="transferutils.sh";
-                        function_name="${cname}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ))
-
-                            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute remote file transfer. Please review logs.";
-                        fi
+                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute remote file transfer. Please review logs.";
                     fi
                 else
                     (( error_count += 1 ));
@@ -342,10 +313,6 @@ function transferRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_port -> ${target_port}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_user -> ${target_user}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_push -> ${force_push}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Performing cleanup of any remote orphaned files...";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating sFTP batch send file...";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p \"${TMPDIR:-${USABLE_TMP_DIR}}\"";
     fi
@@ -379,13 +346,13 @@ function transferRemoteFiles()
 
             if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
                 if (( file_counter == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >| ${file_cleanup_file}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >| ${file_cleanup_file}"; fi
 
                     { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >| "${sftp_send_file}";
 
                     (( file_counter += 1 ));
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >> ${file_cleanup_file}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >> ${file_cleanup_file}"; fi
 
                     { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >> "${sftp_send_file}";
                 fi
@@ -406,12 +373,12 @@ function transferRemoteFiles()
             writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the sFTP batch send file ${sftp_send_file}. Please ensure the file exists and can be written to.";
         else
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Sending package files to host ${target_host} as user ${target_user}...";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: sftp -b ${sftp_send_file} -P ${SSH_PORT_NUMBER} ${target_user}@${target_host}";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Sending requested files to host ${target_host} as user ${target_user}...";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: sftp -b ${sftp_send_file} -P ${target_port} ${target_user}@${target_host}";
             fi
 
-            sftp -b "${sftp_send_file}" -P "${SSH_PORT_NUMBER}" "${target_user}@${target_host}" > /dev/null 2>&1;
-            ret_code=0;
+            sftp -b "${sftp_send_file}" -P "${target_port}" "${target_user}@${target_host}" > /dev/null 2>&1;
+            ret_code="${?}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
@@ -419,89 +386,14 @@ function transferRemoteFiles()
                 (( error_count += 1 ))
 
                 writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while transferring the dotfiles package. Please review logs.";
-            else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating validation script...";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p ${TMPDIR:-${USABLE_TMP_DIR}}";
-                fi
-
-                file_verification_script="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_verification_script -> ${file_verification_script}"; fi
-
-                if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
-                    (( error_count += 1 ))
-
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
-                else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating file verification script ${file_verification_script}..."; fi
-
-                    ## set script header
-                    {
-                        printf "%s\n\n" "#!/usr/bin/env bash";
-                        printf "%s\n" "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin;";
-                        printf "%s\n\n" "error_counter=0;";
-                    } >| "${file_verification_script}";
-
-                    for eligibleFile in "${file_list[@]}"; do
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}"; fi
-
-                        targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
-                        targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetFile -> ${targetFile}";
-                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetDir -> ${targetDir}";
-                        fi
-
-                        if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
-                            {
-                                printf "%s\n" "if [[ ! -e ${targetDir}/${targetFile} ]] || [[ ! -r ${targetDir}/${targetFile} ]]; then (( error_counter += 1 )); fi;";
-                            } >> "${file_verification_script}";
-                        else
-                            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
-                        
-                            continue;
-                        fi
-
-                        {
-                            printf "%s\n\n" "\"printf \"\%s\" \${error_count}\"";
-                        } >> "${file_verification_script}";
-
-                        [[ -n "${eligibleFile}" ]] && unset -v eligibleFile;
-                        [[ -n "${targetFile}" ]] && unset -v targetFile;
-                        [[ -n "${targetDir}" ]] && unset -v targetDir;
-                    done
-
-                    if [[ ! -s "${file_verification_script}" ]]; then
-                        (( error_count += 1 ))
-
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
-                    else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh -ql ${target_user} -p ${SSH_PORT_NUMBER} ${target_host} \"bash -s\" < ${file_verification_script}"; fi
-
-                        ssh_response=$(ssh -ql "${target_user}" -p "${SSH_PORT_NUMBER}" "${target_host}" "bash -s" < "${file_verification_script}");
-                        ret_code="${?}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ssh_response -> ${ssh_response}";
-                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ssh_response}" ]] || (( ssh_response != 0 )) || [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ))
-
-                            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while performing file verification. Please review logs.";
-                        fi
-                    fi
-                fi
             fi
         fi
     fi
 
-    [[ -n "${sftp_delete_file}" ]] && cleanup_list="${sftp_delete_file},";
-    [[ -n "${sftp_send_file}" ]] && cleanup_list+="${sftp_send_file},";
-    [[ -n "${file_verification_script}" ]] && cleanup_list+="${file_verification_script}";
+    ## cleanup
+    [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
+
+    cleanup_list="${sftp_delete_file},${sftp_send_file},";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
@@ -520,7 +412,7 @@ function transferRemoteFiles()
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to perform cleanup on local host. Please review logs.";
+        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     [[ -n "${force_push}" ]] && unset -v force_push;

@@ -101,24 +101,46 @@ function main()
 
     case "${TARGET_ACTION}" in
         [Ii][Nn][Ss][Tt][Aa][Ll][Ff][Ii][Ll][Ee][Ss])
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_LOCAL}"; fi
+            if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${TRANSFER_LOCATION_LOCAL}"; fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
-            [[ -n "${function_name}" ]] && unset -v function_name;
-            [[ -n "${ret_code}" ]] && unset -v ret_code;
+                [[ -n "${CNAME}" ]] && unset -v CNAME;
+                [[ -n "${function_name}" ]] && unset -v function_name;
+                [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-            installFiles "${INSTALL_LOCATION_LOCAL}";
-            ret_code="${?}";
+                installFiles "${INSTALL_LOCATION_LOCAL}";
+                ret_code="${?}";
 
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
-            function_name="${CNAME}#${FUNCNAME[0]}";
+                CNAME="$(basename "${BASH_SOURCE[0]}")";
+                function_name="${CNAME}#${FUNCNAME[0]}";
             
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
-            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    (( error_count += 1 ))
 
-                writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles. Please review logs.";
+                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
+                fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+
+                [[ -n "${CNAME}" ]] && unset -v CNAME;
+                [[ -n "${function_name}" ]] && unset -v function_name;
+                [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                ret_code="${?}";
+
+                CNAME="$(basename "${BASH_SOURCE[0]}")";
+                function_name="${CNAME}#${FUNCNAME[0]}";
+            
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    (( error_count += 1 ))
+
+                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_REMOTE}. Please review logs.";
+                fi
             fi
             ;;
         [Dd][Ee][Pp][Ll][Oo][Yy][Ff][Ii][Ll][Ee][Ss])
@@ -141,39 +163,20 @@ function main()
 
                 writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute buildPackage. Please review logs.";
             else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
+                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
+                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
-                [[ -n "${CNAME}" ]] && unset -v CNAME;
-                [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}"; fi 
 
-                copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
-                ret_code="${?}";
-
-                CNAME="$(basename "${BASH_SOURCE[0]}")";
-                function_name="${CNAME}#${FUNCNAME[0]}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ))
-
-                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyKeysToTarget. Please review logs.";
-                else
-                    transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                    transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
-                    transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}";
-                        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}";
-                    fi
+                if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}"; fi
 
                     [[ -n "${CNAME}" ]] && unset -v CNAME;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                    transferFiles "${TRANSFER_LOCATION_LOCAL}" "${transfer_file_list}";
                     ret_code="${?}";
 
                     CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -184,7 +187,50 @@ function main()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ))
 
-                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyFilesToTarget. Please review logs.";
+                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
+                    fi
+                else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+
+                    [[ -n "${CNAME}" ]] && unset -v CNAME;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                    copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                    ret_code="${?}";
+
+                    CNAME="$(basename "${BASH_SOURCE[0]}")";
+                    function_name="${CNAME}#${FUNCNAME[0]}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        (( error_count += 1 ))
+
+                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyKeysToTarget. Please review logs.";
+                    else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}";
+                            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}";
+                        fi
+
+                        [[ -n "${CNAME}" ]] && unset -v CNAME;
+                        [[ -n "${function_name}" ]] && unset -v function_name;
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                        transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                        ret_code="${?}";
+
+                        CNAME="$(basename "${BASH_SOURCE[0]}")";
+                        function_name="${CNAME}#${FUNCNAME[0]}";
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            (( error_count += 1 ));
+
+                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                        fi
                     fi
                 fi
             fi
@@ -209,41 +255,20 @@ function main()
 
                 writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute buildPackage. Please review logs.";
             else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
+                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
+                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
-                [[ -n "${CNAME}" ]] && unset -v CNAME;
-                [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}"; fi 
 
-                copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
-                ret_code="${?}";
-
-                CNAME="$(basename "${BASH_SOURCE[0]}")";
-                function_name="${CNAME}#${FUNCNAME[0]}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ))
-
-                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyKeysToTarget. Please review logs.";
-                else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: copyFilesToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
-
-                    transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                    transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
-                    transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}";
-                        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}";
-                    fi
+                if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}"; fi
 
                     [[ -n "${CNAME}" ]] && unset -v CNAME;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                    transferFiles "${TRANSFER_LOCATION_LOCAL}" "${transfer_file_list}";
                     ret_code="${?}";
 
                     CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -254,7 +279,7 @@ function main()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ))
 
-                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyFilesToTarget. Please review logs.";
+                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
                     else
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
 
@@ -262,7 +287,7 @@ function main()
                         [[ -n "${function_name}" ]] && unset -v function_name;
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                        installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                        installFiles "${INSTALL_LOCATION_LOCAL}";
                         ret_code="${?}";
 
                         CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -273,8 +298,71 @@ function main()
                         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                             (( error_count += 1 ))
 
-                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles on remote host ${TARGET_HOST}. Please review logs.";
+                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
                         fi
+                    fi
+                else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+
+                    [[ -n "${CNAME}" ]] && unset -v CNAME;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                    copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                    ret_code="${?}";
+
+                    CNAME="$(basename "${BASH_SOURCE[0]}")";
+                    function_name="${CNAME}#${FUNCNAME[0]}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        (( error_count += 1 ))
+
+                        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute copyKeysToTarget. Please review logs.";
+                    else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}";
+                            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}";
+                        fi
+
+                        [[ -n "${CNAME}" ]] && unset -v CNAME;
+                        [[ -n "${function_name}" ]] && unset -v function_name;
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                        transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                        ret_code="${?}";
+
+                        CNAME="$(basename "${BASH_SOURCE[0]}")";
+                        function_name="${CNAME}#${FUNCNAME[0]}";
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            (( error_count += 1 ));
+
+                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                        else
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_PUSH}"; fi
+
+                            [[ -n "${CNAME}" ]] && unset -v CNAME;
+                            [[ -n "${function_name}" ]] && unset -v function_name;
+                            [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                            installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_PUSH}";
+                            ret_code="${?}";
+
+                            CNAME="$(basename "${BASH_SOURCE[0]}")";
+                            function_name="${CNAME}#${FUNCNAME[0]}";
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                                (( error_count += 1 ))
+
+                                writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_REMOTE}. Please review logs.";
+                            fi
+                        fi    
                     fi
                 fi
             fi
@@ -290,15 +378,14 @@ function main()
         writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
         writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
     else
-        (( error_count += 1 ));
+        return_code="${error_count}"
 
         writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
         writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
     fi
 
+    [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";

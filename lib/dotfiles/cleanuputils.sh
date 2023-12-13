@@ -396,7 +396,7 @@ function cleanupRemoteFiles()
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: sftp -b ${file_cleanup_file} -oPort=${remote_port} ${remote_user}@${remote_host} > /dev/null 2>&1"; fi
 
                 sftp -b "${file_cleanup_file}" -oPort="${remote_port}" "${remote_user}@${remote_host}" > /dev/null 2>&1;
-                ret_code=0;
+                ret_code="${?}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
