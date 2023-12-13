@@ -33,7 +33,7 @@ if { [ info exists env(ENABLE_TRACE) ] } {
 }
 
 log_user 0
-log_file -a $env(HOME)/.log/sudo.log
+log_file -a $env(HOME)/log/sudo.log
 
 ## set up some class info
 global env

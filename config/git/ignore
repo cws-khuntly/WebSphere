@@ -232,6 +232,7 @@ FakesAssemblies/
 .ntvs_analysis.dat
 *.plg
 *.opt
+*.code-workspace
 
 ## eclipse
 *.pydevproject

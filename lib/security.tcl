@@ -18,7 +18,7 @@
 set _AUTH_VALUE "none";
 set _PASSWD_LENGTH "64";
 set _RANDOM_GENERATOR "/dev/urandom";
-set _DEFAULT_AUTH "file:$env(HOME)/.etc/passwd.asc";
+set _DEFAULT_AUTH "file:$env(HOME)/etc/passwd.asc";
 
 proc getAuthValue { _HOSTNAME _USERNAME { _AUTH_FILE "" } { _ID_FILE "" } { _ENCRYPTED 1 } { _ENCRYPTION_PRG "gpg" } } {
     global env;

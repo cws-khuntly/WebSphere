@@ -36,7 +36,7 @@ if [[ -n "${JAVA_HOME}" ]]; then
     declare -x LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
     declare -x LIBPATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
     declare -x LIB_PATH="${LD_LIBRARY_PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/lib";
-    declare -x CLASSPATH=".:${CLASSPATH}:${HOME}/.etc:${HOME}/.lib";
+    declare -x CLASSPATH=".:${CLASSPATH}:${HOME}/etc:${HOME}/.lib";
     declare -x JAVA_EXT_DIRS="${JAVA_EXT_DIRS}:${JRE_HOME}/lib/ext:${WAS_EXT_DIRS}";
     declare -x JAVA_ENDORSED_DIRS="${JAVA_ENDORSED_DIRS}:${JRE_HOME}/lib/endorsed:${WAS_ENDORSED_DIRS}";
     declare -x JAVA_OPTS="-cp ${CLASSPATH} -verbose:gc -Xms256m -Xmx256m -XX:NewSize=96m -XX:MaxNewSize=96m -XX:+UseGCOverheadLimit -XX:+AggressiveOpts"

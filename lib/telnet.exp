@@ -32,7 +32,7 @@ if { [ info exists env(ENABLE_TRACE) ] } {
     }
 }
 
-log_file -a $env(HOME)/.log/telnet.log
+log_file -a $env(HOME)/log/telnet.log
 
 ## set up some class info
 global env

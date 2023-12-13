@@ -30,8 +30,8 @@
     </security-config>
 
     <password-repository>
-        <passwordFile>${HOME}/.etc/password.properties</passwordFile>
-        <saltFile>${HOME}/.etc/salt.properties</saltFile>
+        <passwordFile>${HOME}/etc/password.properties</passwordFile>
+        <saltFile>${HOME}/etc/salt.properties</saltFile>
     </password-repository>
 
     <key-config />

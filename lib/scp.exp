@@ -32,7 +32,7 @@ if { [ info exists env(ENABLE_TRACE) ] } {
     }
 }
 
-log_file -a $env(HOME)/.log/scp.log;
+log_file -a $env(HOME)/log/scp.log;
 
 # set up some class info
 global env;
@@ -45,7 +45,7 @@ set _CNAME "scp";
 set _METHOD_NAME "scp";
 set _LINE_TERMINATOR "\r\n";
 set USERNAME $env(LOGNAME);
-set AUTHFILE "file:/home/khuntly/.etc/password.asc";
+set AUTHFILE "file:/home/khuntly/etc/password.asc";
 set timeout -1; ## set an infinite timeout. user can override as necessary
 
 if { [info exists env(THREAD_TIMEOUT)] } {

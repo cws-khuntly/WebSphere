@@ -20,7 +20,7 @@
 
     <mail-config>
         <mailFrom>kmhuntly@gmail.com</mailFrom>
-        <propertyFile>${HOME]/.etc/eSolutionsCore/config/mail/MailConfig.properties</propertyFile>
+        <propertyFile>${HOME]/etc/eSolutionsCore/config/mail/MailConfig.properties</propertyFile>
     </mail-config>
 
     <!-- how do we talk to the agent? -->

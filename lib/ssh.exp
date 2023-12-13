@@ -31,7 +31,7 @@ if { [ info exists env(ENABLE_TRACE) ] } {
     }
 }
 
-log_file -a $env(HOME)/.log/ssh.log;
+log_file -a $env(HOME)/log/ssh.log;
 
 ## set up some class info
 global env;

@@ -38,7 +38,7 @@ alias jad="~/.bin/jad -dead -ff -i -s java -t4";
 alias threadAnalyzer="java -jar ${HOME}/.lib/jca457.jar";
 alias heapAnalyzer="java -jar ${HOME}/.lib/ha456.jar";
 
-if [[ -r "${HOME}/.etc/SecurityService/config/PasswordRepository.config" ]]; then . "${HOME}/.etc/SecurityService/config/PasswordRepository.config"; fi
+if [[ -r "${HOME}/etc/SecurityService/config/PasswordRepository.config" ]]; then . "${HOME}/etc/SecurityService/config/PasswordRepository.config"; fi
 alias javaPasswordRepository="java -cp \".:${UTILITY_CLASSPATH}:${PASSWORD_UTILITY_JAR}\" ${PASSWORD_UTILITY_CLASS}";
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi

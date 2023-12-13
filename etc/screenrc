@@ -38,7 +38,7 @@ altscreen on
 windowlist string "%4n %h%=%f"
 shell -${SHELL}
 pow_detach_msg "Screen session for \${LOGNAME} \$:cr:\$:nl:ended"
-logfile "~/.log/screen.%n.%Y-%m-%d"
+logfile "~/log/screen.%n.%Y-%m-%d"
 
 # GNU Screen - main configuration file
 # All other .screenrc files will source this file to inherit settings.
@@ -77,4 +77,4 @@ altscreen on
 windowlist string "%4n %h%=%f"
 shell -${SHELL}
 pow_detach_msg "Screen session for \${LOGNAME} \$:cr:\$:nl:ended"
-logfile "~/.log/screen.%n.%Y-%m-%d"
+logfile "~/log/screen.%n.%Y-%m-%d"
