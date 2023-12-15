@@ -490,8 +490,15 @@ function installRemoteFiles()
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${install_to_host} ${install_to_port} ${install_as_user} ${install_as_user} ${force_push}";
             fi
 
+            [[ -n "${CNAME}" ]] && unset -v CNAME;
+            [[ -n "${function_name}" ]] && unset -v function_name;
+            [[ -n "${ret_code}" ]] && unset -v ret_code;
+
             transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${install_to_host}" "${install_to_port}" "${install_as_user}" "${install_as_user} ${force_push}";
             ret_code="${?}";
+
+            cname="installutils.sh";
+            function_name="${cname}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
@@ -564,8 +571,15 @@ function installRemoteFiles()
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${install_to_host} ${install_to_port} ${install_as_user} ${install_as_user} ${force_push}";
                             fi
 
+                            [[ -n "${CNAME}" ]] && unset -v CNAME;
+                            [[ -n "${function_name}" ]] && unset -v function_name;
+                            [[ -n "${ret_code}" ]] && unset -v ret_code;
+
                             transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${install_to_host}" "${install_to_port}" "${install_as_user}" "${install_as_user} ${force_push}";
                             ret_code="${?}";
+
+                            cname="installutils.sh";
+                            function_name="${cname}#${FUNCNAME[0]}";
 
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
@@ -615,13 +629,14 @@ function installRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_REMOTE} ${cleanup_list} ${install_host} ${install_port} ${install_user}";
     fi
 
+    [[ -n "${CNAME}" ]] && unset -v CNAME;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
     cleanupFiles "${CLEANUP_LOCATION_REMOTE}" "${cleanup_list}" "${install_host}" "${install_port}" "${install_user}";
     ret_code="${?}";
 
-    set +o noclobber;
+    cname="installutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
@@ -642,13 +657,14 @@ function installRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
     fi
 
+    [[ -n "${CNAME}" ]] && unset -v CNAME;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
     cleanupFiles "${CLEANUP_LOCATION_LOCAL}" "${cleanup_list}";
     ret_code="${?}";
 
-    set +o noclobber;
+    cname="installutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
