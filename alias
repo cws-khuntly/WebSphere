@@ -36,6 +36,8 @@ do
         do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
 
+            [[ -n "${dir_entry}" ]] && continue;
+
             [[ -r "/etc/os-release" ]] && osname="$(grep "NAME=" /etc/os-release | cut -d "" -f 2)";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "osname -> ${osname}"; fi

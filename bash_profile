@@ -20,9 +20,14 @@
 
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
-if [[ -r "${HOME}/etc/logging.properties" ]] && [[ -s "${HOME}/etc/logging.properties" ]]; then source "${HOME}/etc/logging.properties"; fi
+## get the available log config
+if [[ -r "/etc/logging.properties" ]] && [[ -s "/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/etc/logging.properties"; fi ## if its here, use it
+if [[ -r "${HOME}"/etc/logging.properties ]] && [[ -s "${HOME}"/etc/logging.properties ]]; then LOGGING_PROPERTIES="${HOME}"/etc/logging.properties; fi ## if its here, use it
+
+## load application logging
+if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then source "/usr/local/lib/logger.sh"; fi
-if [[ -z "$(command -v "writeLogEntry")" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; fi;
+if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; fi;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
@@ -43,6 +48,8 @@ do
         for dir_entry in "${HOME}"/.profile.d/"${file_entry}"/*
         do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
+
+            [[ -z "${dir_entry}" ]] && continue;
 
             if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
 

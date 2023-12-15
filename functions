@@ -36,6 +36,8 @@ do
         do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
 
+            [[ -z "${dir_entry}" ]] && continue;
+
             if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
 
             [[ -n "${dir_entry}" ]] && unset -v dir_entry;
