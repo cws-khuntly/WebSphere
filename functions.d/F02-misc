@@ -75,12 +75,16 @@ function setArray()
             for array_variable in "${array_variables[@]}"; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_variable -> ${array_variable}"; fi
 
+                [[ -n "${array_variable}" ]] && continue;
+
                 set -A "$(eval echo \${array_identifier})" "$(eval echo \${${array_identifier}[*]})" "${array_variable}";
             done
             ;;
         [Bb][Aa][Ss][Hh])
             for array_variable in "${array_variables[@]}"; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "array_variable -> ${array_variable}"; fi
+
+                [[ -n "${array_variable}" ]] && continue;
 
                 if [[ -n "$(command -v readarray 2> /dev/null)" ]]; then
                     readarray -t "$(eval echo \${array_identifier})" < <( eval echo \${${array_identifier}[*]} "${array_variable}" );

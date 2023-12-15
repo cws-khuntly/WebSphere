@@ -70,13 +70,6 @@ function cleanupFiles()
                 fi
                 ;;
             "${CLEANUP_LOCATION_REMOTE}")
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_host -> ${cleanup_host}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_port -> ${cleanup_port}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_user -> ${cleanup_user}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_push -> ${force_push}";
-                fi
-
                 if [[ -n "${force_push}" ]] && [[ "${force_push}" == "${_FALSE}" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
                         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Checking host availibility for ${cleanup_host}";
@@ -215,6 +208,8 @@ function cleanupLocalFiles()
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
         fi
 
+        [[ -z "${eligibleFile}" ]] && continue;
+
         targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
         targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
@@ -225,8 +220,6 @@ function cleanupLocalFiles()
         fi
 
         if [[ -n "${targetFile}" ]] && [[ -n "${targetDir}" ]]; then
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: rm -f ${targetFile}"; fi
-
             if [[ -d "${targetDir}/${targetFile}" ]] && [[ -w "${targetDir}/${targetFile}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing directory ${targetDir}/${targetFile}";
@@ -356,6 +349,8 @@ function cleanupRemoteFiles()
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
                 fi
+
+                [[ -z "${eligibleFile}" ]] && continue;
 
                 targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
                 targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";

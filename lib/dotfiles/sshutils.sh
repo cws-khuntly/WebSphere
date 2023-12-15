@@ -73,6 +73,8 @@ function copyKeysToTarget()
             for keyfile in "${SSH_KEY_LIST[@]}"; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "keyfile -> ${keyfile}"; fi
 
+                [[ -z "${keyfile}" ]] && continue;
+
                 ## check if the file actually exists, if its not there just skip it
                 if [[ -f "${keyfile}" ]] && [[ -r "${keyfile}" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then

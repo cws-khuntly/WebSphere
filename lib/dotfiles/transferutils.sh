@@ -211,6 +211,8 @@ function transferLocalFiles()
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
         fi
 
+        [[ -z "${eligibleFile}" ]] && continue;
+
         targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
         targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
@@ -331,10 +333,9 @@ function transferRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating batch file ${sftp_send_file}..."; fi
 
         for eligibleFile in "${files_to_process[@]}"; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
-            fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}"; fi
+
+            [[ -z "${eligibleFile}" ]] && continue;
 
             targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
             targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
@@ -393,7 +394,7 @@ function transferRemoteFiles()
     ## cleanup
     [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
 
-    cleanup_list="${sftp_delete_file},${sftp_send_file},";
+    cleanup_list="$(basename "${sftp_send_file}")|${TMPDIR:-${USABLE_TMP_DIR}},";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";

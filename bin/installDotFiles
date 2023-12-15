@@ -24,11 +24,15 @@ declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")"; declare SCRIPT_ROOT;
 
+## get the available log config
+if [[ -r "/etc/logging.properties" ]] && [[ -s "/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/etc/logging.properties"; fi ## if its here, use it
+if [[ -r "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]]; then LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties"; fi ## if its here, override the above and use it
+
 ## load application logging
 # shellcheck source=../etc/logging.properties
-if [[ -r "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]]; then source "${SCRIPT_ROOT}/etc/dotfiles/logging.properties"; fi
+if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then source "/usr/local/lib/logger.sh"; fi
-if [[ -z "$(command -v "writeLogEntry")" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; fi;
+if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; fi;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
@@ -48,17 +52,6 @@ if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
 else
     writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
     writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
-fi
-
-## bring in any library scripts
-if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${SCRIPT_ROOT}/lib"; fi
-
-    for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
-
-        if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
-    done
 fi
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
@@ -100,7 +93,7 @@ function main()
     fi
 
     case "${TARGET_ACTION}" in
-        [Ii][Nn][Ss][Tt][Aa][Ll][Ff][Ii][Ll][Ee][Ss])
+        [Ii][Nn][Ss][Tt][Aa][Ll][Ll][Ff][Ii][Ll][Ee][Ss])
             if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${TRANSFER_LOCATION_LOCAL}"; fi
 
@@ -256,7 +249,7 @@ function main()
                 writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute buildPackage. Please review logs.";
             else
                 transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
+                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
                 transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}"; fi 
@@ -477,7 +470,13 @@ while (( ${#} > 0 )); do
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}"; fi
 
-                source "${WORKING_CONFIG_FILE}";
+                if [[ -n "${WORKING_CONFIG_FILE}" ]]; then
+                    source "${WORKING_CONFIG_FILE}";
+                else
+                    RETURN_CODE=2;
+
+                    writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Unable to load provided configuration file ${PROVIDED_CONFIG_FILE}.";
+                fi
             fi
             ;;
         servername|s)
@@ -546,6 +545,20 @@ if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_USER -> ${TARGET_USER}";
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_ACTION -> ${TARGET_ACTION}";
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "FORCE_PUSH -> ${FORCE_PUSH}";
+fi
+
+## bring in any library scripts
+## we have this here because of the possibility of a different config file other than the default being used
+if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${DOTFILES_LIB_PATH}"; fi
+
+    for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
+
+        [[ -z "${LIBENTRY}" ]] && continue;
+
+        if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
+    done
 fi
 
 if [[ -n "${return_code}" ]] && (( return_code != 0 )) || [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then

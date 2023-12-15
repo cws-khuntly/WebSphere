@@ -159,6 +159,7 @@ function reloadDotFiles()
     do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
 
+        [[ -z "${entry}" ]] && continue;
         [[ "${entry}" =~ ^\# ]] && continue;
 
         entry_command="$(cut -d "|" -f 1 <<< "${entry}")";

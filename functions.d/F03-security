@@ -162,6 +162,8 @@ function wchmod()
         for file_entry in "${target_files[@]}"; do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_entry -> ${file_entry}"; fi
 
+            [[ -n "${file_entry}" ]] && continue;
+
             if [[ ! -w "${file_entry}" ]]; then
                 writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
                 writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
