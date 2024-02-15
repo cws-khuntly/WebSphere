@@ -323,6 +323,12 @@ function installLocalFiles()
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh "${HOME}"/.gnupg";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/m2/settings.xml ${DOTFILES_INSTALL_PATH}/etc/ldaprc \"${DOTFILES_INSTALL_PATH}\"/etc/curlrc \"${DOTFILES_INSTALL_PATH}\"/etc/netrc \"${HOME}\"/.dotfiles/etc/wgetrc;";
                 fi
+
+                find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
+                find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
+                chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
+                chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
+                chmod 600 "${DOTFILES_INSTALL_PATH}"/m2/settings.xml "${DOTFILES_INSTALL_PATH}"/etc/ldaprc "${DOTFILES_INSTALL_PATH}"/etc/curlrc "${DOTFILES_INSTALL_PATH}"/etc/netrc "${HOME}"/.dotfiles/etc/wgetrc;
             else
                 (( error_count += 1 ));
 
@@ -395,7 +401,7 @@ function installLocalFiles()
 )
 
 #=====  FUNCTION  =============================================================
-#          NAME:  installFiles
+#          NAME:  installRemoteFiles
 #   DESCRIPTION:  Re-loads existing dotfiles for use
 #    PARAMETERS:  None
 #       RETURNS:  0 if success, non-zero otherwise
