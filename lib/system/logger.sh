@@ -75,8 +75,7 @@ function writeLogEntry()
     log_method="${3}";
     log_line="${4}";
     log_message="${5}";
-	log_time=$(printf "%(%s)T");
-	log_date="$(date -d "@${log_time}" +"${TIMESTAMP_OPTS}")";
+    log_date="$(date -d "@$(printf "%(%s)T")" +"${TIMESTAMP_OPTS}")";
 
     case "${log_level}" in
         [Ss][Tt][Dd][Oo][Uu][Tt]) printf "%s\n" "${log_message}" >&1; write_to_log="${_FALSE}" ;;
@@ -97,7 +96,6 @@ function writeLogEntry()
         printf "${CONVERSION_PATTERN}\n" "${log_date}" "${PPID}" "${log_file}" "${log_level}" "${log_source}" "${log_line}" "${log_method}" "${log_message}" >> "${LOG_ROOT}/${log_file}";
     fi
 
-	[[ -n "${log_time}" ]] && unset -v log_time;
     [[ -n "${log_date}" ]] && unset -v log_date;
     [[ -n "${log_level}" ]] && unset -v log_level;
     [[ -n "${log_method}" ]] && unset -v log_method;
