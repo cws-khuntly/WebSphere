@@ -170,6 +170,7 @@ function installLocalFiles()
     set +o noclobber;
     cname="installutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
+    ret_code=0;
     return_code=0;
     error_count=0;
 
@@ -198,9 +199,6 @@ function installLocalFiles()
         cd "${HOME}";
 
         if [[ "${PWD}" == "${HOME}" ]] && [[ -w "${HOME}" ]]; then
-            [[ ! -d "${HOME}"/.ssh ]] && mkdir -p "${HOME}"/.ssh;
-            [[ ! -d "${HOME}"/.gnupg ]] && mkdir -p "${HOME}"/.gnupg;
-
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Processing entries from ${INSTALL_CONF}"; fi
 
             if [[ -s "${INSTALL_CONF}" ]]; then
@@ -208,8 +206,7 @@ function installLocalFiles()
                 IFS="${MODIFIED_IFS}";
 
                 ## clean up home directory first
-                for entry in $(< "${INSTALL_CONF}")
-                do
+                for entry in $(< "${INSTALL_CONF}"); do
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
 
                     [[ -z "${entry}" ]] && continue;
@@ -329,6 +326,58 @@ function installLocalFiles()
                 chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
                 chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
                 chmod 600 "${DOTFILES_INSTALL_PATH}"/m2/settings.xml "${DOTFILES_INSTALL_PATH}"/etc/ldaprc "${DOTFILES_INSTALL_PATH}"/etc/curlrc "${DOTFILES_INSTALL_PATH}"/etc/netrc "${HOME}"/.dotfiles/etc/wgetrc;
+
+                ## generate SSH keys if not already present
+                if [[ -n "${GENERATE_SSH_KEYS}" ]] && [[ "${GENERATE_SSH_KEYS}" == "${_TRUE}" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "SSH key generation has been selected. Generating keys...";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateSshKeys";
+                    fi
+
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                    generateSshKeys;
+                    ret_code="${?}";
+
+                    cname="installutils.sh";
+                    function_name="${cname}#${FUNCNAME[0]}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+                    fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                    fi
+                fi
+
+                ## generate GPG keys if not already present
+                if [[ -n "${GENERATE_GPG_KEYS}" ]] && [[ "${GENERATE_GPG_KEYS}" == "${_TRUE}" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "GPG key generation has been selected. Generating keys...";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateGpgKeys";
+                    fi
+
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                    generateGpgKeys;
+                    ret_code="${?}";
+
+                    cname="installutils.sh";
+                    function_name="${cname}#${FUNCNAME[0]}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+                    fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                    fi
+                fi
             else
                 (( error_count += 1 ));
 
