@@ -24,7 +24,7 @@ function installFiles()
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -35,7 +35,7 @@ function installFiles()
     install_user="${4}";
     force_push="${5}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_mode -> ${install_mode}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_host -> ${install_host}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_port -> ${install_port}";
@@ -45,7 +45,7 @@ function installFiles()
 
     case "${install_mode}" in
         "${INSTALL_LOCATION_LOCAL}")
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: installLocalFiles"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: installLocalFiles"; fi
 
             [[ -n "${cname}" ]] && unset -v cname;
             [[ -n "${function_name}" ]] && unset -v function_name;
@@ -57,23 +57,23 @@ function installFiles()
             cname="installutils.sh";
             function_name="${cname}#${FUNCNAME[0]}";
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 (( error_count += 1 ))
 
-                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Local installation of package failed. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Local installation of package failed. Please review logs.";
             fi
             ;;
         "${INSTALL_LOCATION_REMOTE}")
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_host -> ${install_host}";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_user -> ${install_user}";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_push -> ${force_push}";
             fi
 
             if [[ -n "${force_push}" ]] && [[ "${force_push}" == "${_FALSE}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Checking host availibility for ${install_host}";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: validateHostAddress ${install_host} ${install_port}";
                 fi
@@ -88,18 +88,18 @@ function installFiles()
                 cname="installutils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     continue_exec="${_FALSE}";
 
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${install_host}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${install_host}. Please review logs.";
                 fi
             fi
 
             if [[ -n "${continue_exec}" ]] && [[ "${continue_exec}" == "${_TRUE}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: installRemoteFiles ${install_host} ${install_port} ${install_user} ${force_push}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: installRemoteFiles ${install_host} ${install_port} ${install_user} ${force_push}"; fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
@@ -111,23 +111,23 @@ function installFiles()
                 cname="installutils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote installation of package failed. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote installation of package failed. Please review logs.";
                 fi
             else
                 (( error_count += 1 ));
 
-                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote host ${install_host} appears to be unavailable - continue_exec is ${continue_exec}, indicating an error has occurred. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote host ${install_host} appears to be unavailable - continue_exec is ${continue_exec}, indicating an error has occurred. Please review logs.";
             fi
             ;;
         *)
             (( error_count += 1 ));
 
-            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An invalid installation mode was specified. install_mode -> ${install_mode}. Cannot continue.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An invalid installation mode was specified. install_mode -> ${install_mode}. Cannot continue.";
             ;;
     esac
 
@@ -179,26 +179,20 @@ function installLocalFiles()
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find ${DOTFILES_INSTALL_PATH} -type d -exec chmod 755 {} \;";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find ${DOTFILES_INSTALL_PATH} -type f -exec chmod 644 {} \;";
     fi
 
-    if [[ -d "${DOTFILES_INSTALL_PATH}" ]] && [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
-        find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
-        find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
+    if [[ ! -d "${DOTFILES_INSTALL_PATH}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mkdir \"${DOTFILES_INSTALL_PATH}\""; fi
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
-                chmod 755 ${DOTFILES_INSTALL_PATH}/bin/*;
-                chmod 600 ${DOTFILES_INSTALL_PATH}/m2/settings.xml ${DOTFILES_INSTALL_PATH}/etc/ldaprc \
-                ${DOTFILES_INSTALL_PATH}/etc/curlrc ${DOTFILES_INSTALL_PATH}/etc/netrc ${HOME}/.dotfiles/etc/wgetrc";
-        fi
+        mkdir "${DOTFILES_INSTALL_PATH}";
+    fi
 
-        chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*; ## 755 on all files in bin
-        chmod 600 "${DOTFILES_INSTALL_PATH}"/m2/settings.xml "${DOTFILES_INSTALL_PATH}"/etc/ldaprc "${DOTFILES_INSTALL_PATH}"/etc/curlrc "${DOTFILES_INSTALL_PATH}"/etc/netrc "${DOTFILES_INSTALL_PATH}"/etc/wgetrc;
+    if [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
+        ## extract the archive to the appropriate place
+        cd "${DOTFILES_INSTALL_PATH}"; ${UNARCHIVE_PROGRAM} -c ${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION} | tar -xf -;
 
         ## switch to homedir
         cd "${HOME}";
@@ -207,11 +201,7 @@ function installLocalFiles()
             [[ ! -d "${HOME}"/.ssh ]] && mkdir -p "${HOME}"/.ssh;
             [[ ! -d "${HOME}"/.gnupg ]] && mkdir -p "${HOME}"/.gnupg;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 ${HOME}/.ssh ${HOME}/.gnupg"; fi
-
-            chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg; ## ssh/gpg wants 700
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Processing entries from ${INSTALL_CONF}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Processing entries from ${INSTALL_CONF}"; fi
 
             if [[ -s "${INSTALL_CONF}" ]]; then
                 ## change the IFS
@@ -220,7 +210,7 @@ function installLocalFiles()
                 ## clean up home directory first
                 for entry in $(< "${INSTALL_CONF}")
                 do
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
 
                     [[ -z "${entry}" ]] && continue;
                     [[ "${entry}" =~ ^\# ]] && continue;
@@ -229,7 +219,7 @@ function installLocalFiles()
                     entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
                     entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
                         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_source -> ${entry_source}";
                         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_target -> ${entry_target}";
@@ -238,28 +228,28 @@ function installLocalFiles()
                     if [[ -z "${entry_command}" ]]; then
                         (( error_count += 1 ));
 
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
 
                         continue;
                     elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
                         (( error_count += 1 ));
 
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
 
                         continue;
                     elif [[ -z "${entry_target}" ]] && [[ "${entry_command}" == "ln" ]]; then
                         (( error_count += 1 ));
 
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
 
                         continue;
                     fi
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}"; fi
 
                     case "${entry_command}" in
                         "mkdir")
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating directory ${entry_target}";
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mkdir -p ${entry_target}";
                             fi
@@ -271,7 +261,7 @@ function installLocalFiles()
                             then
                                 (( error_count += 1 ));
 
-                                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_target}.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_target}.";
 
                                 continue;
                             fi
@@ -279,7 +269,7 @@ function installLocalFiles()
                             writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
                             ;;
                         "ln")
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target} if exists...";
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
                                     [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
@@ -289,7 +279,7 @@ function installLocalFiles()
                             [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
                             [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
 
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating symbolic link ${entry_source} -> ${entry_target}";
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ln -s eval printf \"%s\" ${entry_source} eval printf \"%s\" ${entry_target}";
                             fi
@@ -301,7 +291,7 @@ function installLocalFiles()
                             then
                                 (( error_count += 1 ));
 
-                                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
 
                                 continue;
                             fi
@@ -324,20 +314,29 @@ function installLocalFiles()
 
                 ## restore the original ifs
                 IFS="${CURRENT_IFS}";
+
+                ## set appropriate permissions
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type d -exec chmod 755 {} \;";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh "${HOME}"/.gnupg";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/m2/settings.xml ${DOTFILES_INSTALL_PATH}/etc/ldaprc \"${DOTFILES_INSTALL_PATH}\"/etc/curlrc \"${DOTFILES_INSTALL_PATH}\"/etc/netrc \"${HOME}\"/.dotfiles/etc/wgetrc;";
+                fi
             else
                 (( error_count += 1 ));
 
-                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
             fi
         else
             (( error_count += 1 ));
 
-            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
         fi
     else
         (( error_count += 1 ));
 
-        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Package appears to be missing: DOTFILES_INSTALL_PATH -> ${DOTFILES_INSTALL_PATH} - directory is either missing or unwriteable. ";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Package appears to be missing: DOTFILES_INSTALL_PATH -> ${DOTFILES_INSTALL_PATH} - directory is either missing or unwriteable. ";
     fi
 
     ## cleanup
@@ -345,7 +344,7 @@ function installLocalFiles()
 
     cleanup_list="${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${TMPDIR:-${USABLE_TMP_DIR}},";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
     fi
@@ -359,10 +358,10 @@ function installLocalFiles()
     set +o noclobber;
     function_name="${cname}#${FUNCNAME[0]}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
@@ -373,7 +372,7 @@ function installLocalFiles()
     [[ -n "${entry_target}" ]] && unset -v entry_target;
     [[ -n "${entry}" ]] && unset -v entry;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
@@ -418,7 +417,7 @@ function installRemoteFiles()
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -428,7 +427,7 @@ function installRemoteFiles()
     install_as_user="${3}";
     force_push="${4}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_to_host -> ${install_to_host}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_to_port -> ${install_to_port}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_as_user -> ${install_as_user}";
@@ -438,21 +437,21 @@ function installRemoteFiles()
     fi
 
     ## verify the txfr
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating validation script...";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p ${TMPDIR:-${USABLE_TMP_DIR}}";
     fi
 
     file_verification_script="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_verification_script -> ${file_verification_script}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_verification_script -> ${file_verification_script}"; fi
 
     if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
         (( error_count += 1 ))
 
-        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
     else
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating file verification script ${file_verification_script}...";
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
                 printf \"%s\n\n\" #!/usr/bin/env bash
@@ -478,19 +477,19 @@ function installRemoteFiles()
         if [[ ! -s "${file_verification_script}" ]]; then
             (( error_count += 1 ))
 
-            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
         else
             [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
 
             transfer_file_list="${file_verification_script}|${DEPLOY_TO_DIR}/$(basename "${file_verification_script}"),";
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}"
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Sending file verification script ${transfer_file_list} to host ${install_to_host} as user ${install_as_user}...";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${install_to_host} ${install_to_port} ${install_as_user} ${install_as_user} ${force_push}";
             fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
+            [[ -n "${cname}" ]] && unset -v cname;
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -500,20 +499,20 @@ function installRemoteFiles()
             cname="installutils.sh";
             function_name="${cname}#${FUNCNAME[0]}";
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 (( error_count += 1 ))
 
-                writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
             else
                 ## verify files have been transferred
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh -ql ${install_as_user} -p ${install_to_port} ${install_to_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${file_verification_script}")\""; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh -ql ${install_as_user} -p ${install_to_port} ${install_to_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${file_verification_script}")\""; fi
 
                 verify_response=$(ssh -ql "${install_as_user}" -p "${install_to_port}" "${install_to_host}" "bash -s" < "${DEPLOY_TO_DIR}/$(basename "${file_verification_script}")");
                 ret_code="${?}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "verify_response -> ${verify_response}";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
                 fi
@@ -521,18 +520,18 @@ function installRemoteFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )) && [[ -z "${verify_response}" ]] || (( verify_response != 0 )); then
                     return_code="${error_count}";
 
-                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while verifying files on remote host ${install_to_host}.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while verifying files on remote host ${install_to_host}.";
                 else                
                     installation_script="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "installation_script -> ${installation_script}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "installation_script -> ${installation_script}"; fi
 
                     if [[ ! -e "${installation_script}" ]] || [[ ! -w "${installation_script}" ]]; then
                         (( error_count += 1 ))
 
-                        writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating installation script ${installation_script}...";
                             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
                                 printf \"%s\n\n\" #!/usr/bin/env bash
@@ -559,19 +558,19 @@ function installRemoteFiles()
                         if [[ ! -s "${installation_script}" ]]; then
                             (( error_count += 1 ))
 
-                            writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
                         else
                             [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
 
                             transfer_file_list="${installation_script}|${DEPLOY_TO_DIR}/$(basename "${installation_script}"),";
 
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "transfer_file_list -> ${transfer_file_list}"
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Sending installation script ${installation_script} to host ${install_to_host} as user ${install_as_user}...";
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${install_to_host} ${install_to_port} ${install_as_user} ${install_as_user} ${force_push}";
                             fi
 
-                            [[ -n "${CNAME}" ]] && unset -v CNAME;
+                            [[ -n "${cname}" ]] && unset -v cname;
                             [[ -n "${function_name}" ]] && unset -v function_name;
                             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -581,20 +580,20 @@ function installRemoteFiles()
                             cname="installutils.sh";
                             function_name="${cname}#${FUNCNAME[0]}";
 
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                                 (( error_count += 1 ))
 
-                                writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
                             else
                                 ## ok, files should be out there. lets go
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh -ql ${install_as_user} -p ${install_to_port} ${install_to_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${installation_script}")\""; fi
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh -ql ${install_as_user} -p ${install_to_port} ${install_to_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${installation_script}")\""; fi
 
                                 install_response=$(ssh -ql "${install_as_user}" -p "${install_to_port}" "${install_to_host}" "bash -s" < "${DEPLOY_TO_DIR}/$(basename "${installation_script}")");
                                 ret_code="${?}";
 
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_response -> ${install_response}";
                                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
                                 fi
@@ -602,7 +601,7 @@ function installRemoteFiles()
                                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                                     return_code="${ret_code}";
 
-                                    writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while performing installation on remote host ${install_to_host}. install_response -> ${install_response}";
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while performing installation on remote host ${install_to_host}. install_response -> ${install_response}";
                                 else
                                     ## done
                                     writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "dotfiles successfully installed to host ${install_to_host}";
@@ -624,12 +623,12 @@ function installRemoteFiles()
     cleanup_list+="$(basename "${file_verification_script}")|${DEPLOY_TO_DIR}";
     cleanup_list+="$(basename "${installation_script}")|${DEPLOY_TO_DIR}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_REMOTE} ${cleanup_list} ${install_host} ${install_port} ${install_user}";
     fi
 
-    [[ -n "${CNAME}" ]] && unset -v CNAME;
+    [[ -n "${cname}" ]] && unset -v cname;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -639,10 +638,10 @@ function installRemoteFiles()
     cname="installutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_REMOTE}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_REMOTE}. Please review logs.";
     fi
 
     ## cleanup (local)
@@ -652,12 +651,12 @@ function installRemoteFiles()
     cleanup_list+="$(basename "${file_verification_script}")|${TMPDIR:-${USABLE_TMP_DIR}},";
     cleanup_list+="$(basename "${installation_script}")|${TMPDIR:-${USABLE_TMP_DIR}},";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
     fi
 
-    [[ -n "${CNAME}" ]] && unset -v CNAME;
+    [[ -n "${cname}" ]] && unset -v cname;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -667,10 +666,10 @@ function installRemoteFiles()
     cname="installutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -679,7 +678,7 @@ function installRemoteFiles()
     [[ -n "${entry_target}" ]] && unset -v entry_target;
     [[ -n "${entry}" ]] && unset -v entry;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
