@@ -29,7 +29,6 @@ if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging
 if [[ -r "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]]; then LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties"; fi ## if its here, override the above and use it
 
 ## load application logging
-# shellcheck source=../etc/logging.properties
 if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
@@ -52,7 +51,6 @@ if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}"; fi
 
-    # shellcheck source=../etc/application.properties
     source "${WORKING_CONFIG_FILE}";
 else
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
@@ -89,7 +87,7 @@ function main()
     return_code=0;
     error_count=0;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
 
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
@@ -395,7 +393,7 @@ function main()
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch=$(printf "%(%s)T");
         runtime=$(( start_epoch - end_epoch ));
 
@@ -430,19 +428,19 @@ function usage()
 
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${method_name}" "${LINENO}" "${CNAME} - Deploy and install dotfiles.";
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${method_name}" "${LINENO}" "Usage: ${CNAME} [ options ]
-            -> (--config | c <configuration file>) - (Optional) The location to an alternative configuration file for this utility. Default configuration file -> ${CONFIG_FILE_LOCATION}
+            -> (--config | -c <configuration file>) - (Optional) The location to an alternative configuration file for this utility. Default configuration file -> ${CONFIG_FILE_LOCATION}
                 NOTE: While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options.
-            -> --servername | s <hostname> - The target system name to process against. Default value -> ${TARGET_HOST}.
-            -> --username | u <username> - The username to utilize for the target system. Default value -> ${TARGET_USER}.
-            -> --action | a <action> - The type of process to execute. One of the following. Default value -> ${DEFAULT_RUNTIME_OPTION}
+            -> --servername | -s <hostname> - The target system name to process against. Default value -> ${TARGET_HOST}.
+            -> --username | -u <username> - The username to utilize for the target system. Default value -> ${TARGET_USER}.
+            -> --action | -a <action> - The type of process to execute. One of the following. Default value -> ${DEFAULT_RUNTIME_OPTION}
                 -> deployFiles: Pushes dotfiles to the selected system but does not install/apply
                 -> installFiles: Installs dotfiles to the selected system - assumes the package has already been sent to the target system
                 -> deployAndInstall: Pushes dotfiles to the selected system and installs
                 NOTE: These values are NOT case-sensitive.
-            -> --generate-ssh-keys - Determines whether or not to generate SSH keys on the target host. Default value -> ${GENERATE_SSH_KEYS}. No option file is required.
-            -> --generate-gpg-keys - Determines whether or not to generate GPG keys on the target host. Default value -> ${GENERATE_GPG_KEYS}. An option file is required, and must be specified as an argument.
-            -> --force | f - If passed as an argument, hostname validation is disabled and target hosts will NOT be checked for life. Default value -> ${_FALSE}
-            -> --help | ? | h - Show this help menu.";
+            -> --generate-ssh-keys - Determines whether or not to generate SSH keys on the target host. Default value -> ${GENERATE_SSH_KEYS}.
+            -> --generate-gpg-keys - Determines whether or not to generate GPG keys on the target host. Default value -> ${GENERATE_GPG_KEYS}.
+            -> --force | -f - If passed as an argument, hostname validation is disabled and target hosts will NOT be checked for life. Default value -> ${_FALSE}
+            -> --help | -? | -h - Show this help menu.";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${method_name}" "${LINENO}" "${method_name} -> exit"; fi
 
@@ -453,6 +451,20 @@ function usage()
 )
 
 if (( ${#} == 0 )); then usage; RETURN_CODE="${?}"; fi
+
+## bring in any library scripts
+## we have this here because of the possibility of a different config file other than the default being used
+if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
+	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${DOTFILES_LIB_PATH}"; fi
+
+	for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
+		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
+
+		[[ -z "${LIBENTRY}" ]] && continue;
+
+		if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
+	done
+fi
 
 while (( ${#} > 0 )); do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Provided Argument -> ${1}"; fi
@@ -527,33 +539,88 @@ while (( ${#} > 0 )); do
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "FORCE_PUSH -> ${FORCE_PUSH}"; fi
             ;;
-        generate-ssh-keys)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
-
-            declare GENERATE_SSH_KEYS="${_TRUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}"; fi
-            ;;
-        generate-gpg-keys)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
-
-            declare GENERATE_GPG_KEYS="${_TRUE}";
-            declare GPG_OPTION_FILE="${ARGUMENT_VALUE}";
-
+        generatekeys)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}";
-                writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG_OPTION_FILE -> ${GPG_OPTION_FILE}";
-            fi
+				writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}";
+			fi
 
-            ## make the selected config active and continue forward
-            if [[ -z "${GPG_OPTION_FILE}" ]] || [[ ! -r "${GPG_OPTION_FILE}" ]]; then
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist.";
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist. The file must be provided to perform key generation.";
+			case "${ARGUMENT_VALUE}" in
+				[Ss][Ss][Hh])
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
 
-                declare GENERATE_GPG_KEYS="${_FALSE}";
+					declare GENERATE_SSH_KEYS="${_TRUE}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
-            fi
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}"; fi
+					;;
+				[Gg][Pp][Gg])
+				    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: captureGpgData";
+					fi
+
+					[[ -n "${CNAME}" ]] && unset -v CNAME;
+					[[ -n "${function_name}" ]] && unset -v function_name;
+					[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+					captureGpgData;
+					ret_code="${?}";
+
+					set +o noclobber;
+					CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
+					function_name="${CNAME}#${FUNCNAME[0]}";
+
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+					if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+					elif [[ -z "${GPG_OPTION_FILE}" ]] || [[ ! -r "${GPG_OPTION_FILE}" ]]; then
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist. The file must be provided to perform key generation.";
+					else
+						declare GENERATE_GPG_KEYS="${_TRUE}";
+
+						if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
+					fi
+					;;
+				[Bb][Oo][Tt][Hh])
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+
+					declare GENERATE_SSH_KEYS="${_TRUE}";
+
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}";
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: captureGpgData";
+					fi
+
+					[[ -n "${CNAME}" ]] && unset -v CNAME;
+					[[ -n "${function_name}" ]] && unset -v function_name;
+					[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+					captureGpgData;
+					ret_code="${?}";
+
+					set +o noclobber;
+					CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
+					function_name="${CNAME}#${FUNCNAME[0]}";
+
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+					if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+					elif [[ -z "${GPG_OPTION_FILE}" ]] || [[ ! -r "${GPG_OPTION_FILE}" ]]; then
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist. The file must be provided to perform key generation.";
+					else
+						declare GENERATE_GPG_KEYS="${_TRUE}";
+
+						if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
+					fi
+					;;
+				*)
+					[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An invalid option has been provided and has been ignored. Option -> ${ARGUMENT_NAME}, Value -> ${ARGUMENT_VALUE}";
+					;;
+			esac
             ;;
         help|\?|h)
             [[ -n "${function_name}" ]] && unset -v function_name;
@@ -586,6 +653,8 @@ if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_USER -> ${TARGET_USER}";
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_ACTION -> ${TARGET_ACTION}";
     writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "FORCE_PUSH -> ${FORCE_PUSH}";
+	writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}";
+	writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}";
 fi
 
 if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then
@@ -612,20 +681,6 @@ else
 
         RETURN_CODE="1";
     else
-        ## bring in any library scripts
-        ## we have this here because of the possibility of a different config file other than the default being used
-        if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${DOTFILES_LIB_PATH}"; fi
-
-            for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
-
-                [[ -z "${LIBENTRY}" ]] && continue;
-
-                if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
-            done
-        fi
-
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: main"; fi
 
         main;
@@ -657,4 +712,4 @@ fi
 [[ -n "${GENERATE_GPG_KEYS}" ]] && unset -v GENERATE_GPG_KEYS;
 [[ -n "${GPG_OPTION_FILE}" ]] && unset -v GPG_OPTION_FILE;
 
-exit "${RETURN_CODE}";
+exit ${RETURN_CODE};
