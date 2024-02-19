@@ -202,8 +202,8 @@ function captureGpgData()
 
 	## at this point we should have enough information to populate the file
 	sed -e "s/&key-algo/${key_algo}/" -e "s/&key-bits/${key_bits}/" -e "s/&key-type/${subkey_type}/" \
-		"s/&key-length/${subkey_length}/" -e "s/&real-name/${real_name}/" -e "s/&emailaddr/${email_address}/" \
-		"s/&expiry/${key_lifetime}/" -e "s/&passphrase/${key_passphrase}/" "${GPG_OPTION_TEMPLATE}" >| "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")";
+		-e "s/&key-length/${subkey_length}/" -e "s/&real-name/${real_name}/" -e "s/&emailaddr/${email_address}/" \
+		-e "s/&expiry/${key_lifetime}/" -e "s/&passphrase/${key_passphrase}/" "${GPG_OPTION_TEMPLATE}" >| "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")";
 
 	if [[ ! -s "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")" ]]; then
 		## looks like something happened creating the file
@@ -214,6 +214,9 @@ function captureGpgData()
 		(( error_count += 1 ));
 
 		writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while transferring the input to the answer file.";
+	else
+		## file written, change permissions
+		chmod 0600 "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")";
 	fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
