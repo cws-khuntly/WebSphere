@@ -609,8 +609,8 @@ while (( ${#} > 0 )); do
 						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
 						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
 					elif [[ -z "${GPG_OPTION_FILE}" ]] || [[ ! -r "${GPG_OPTION_FILE}" ]]; then
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist.";
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GPG Option File was not provided or does not exist. The file must be provided to perform key generation.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
 					else
 						declare GENERATE_GPG_KEYS="${_TRUE}";
 
