@@ -4,7 +4,6 @@ Key-Length: &key-bits
 Subkey-Type: &key-type
 Subkey-Length: &key-length
 Name-Real: &real-name
-Name-Comment: &comment
 Name-Email: &emailaddr
 Expire-Date: &expiry
 Passphrase: &passphrase
