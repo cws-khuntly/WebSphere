@@ -368,6 +368,29 @@ function main()
                 fi
             fi
             ;;
+        [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: reloadDotFiles"; fi
+
+			[[ -n "${CNAME}" ]] && unset -v CNAME;
+			[[ -n "${function_name}" ]] && unset -v function_name;
+			[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+			reloadDotFiles;
+			ret_code="${?}";
+
+			CNAME="$(basename "${BASH_SOURCE[0]}")";
+			function_name="${CNAME}#${FUNCNAME[0]}";
+		
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+				writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+			fi
+
+			if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+				(( error_count += 1 ))
+
+				[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
+			fi
+            ;;
         *)
             (( error_count += 1 ));
 
@@ -436,9 +459,13 @@ function usage()
                 -> deployFiles: Pushes dotfiles to the selected system but does not install/apply
                 -> installFiles: Installs dotfiles to the selected system - assumes the package has already been sent to the target system
                 -> deployAndInstall: Pushes dotfiles to the selected system and installs
+				-> refreshDotFiles: Performs a refresh of the existing dotfiles.
                 NOTE: These values are NOT case-sensitive.
-            -> --generate-ssh-keys - Determines whether or not to generate SSH keys on the target host. Default value -> ${GENERATE_SSH_KEYS}.
-            -> --generate-gpg-keys - Determines whether or not to generate GPG keys on the target host. Default value -> ${GENERATE_GPG_KEYS}.
+            -> --generatekeys | -k <type> - Determines whether or not to generate GPG/SSH keys
+                -> ssh: Generate SSH keys ONLY. Default value -> ${GENERATE_SSH_KEYS}
+                -> gpg/pgp: Generate GPG keys ONLY. Default value -> ${GENERATE_GPG_KEYS}
+                -> both: Generate both SSH and GPG keys
+                NOTE: These values are NOT case-sensitive.
             -> --force | -f - If passed as an argument, hostname validation is disabled and target hosts will NOT be checked for life. Default value -> ${_FALSE}
             -> --help | -? | -h - Show this help menu.";
 
@@ -451,20 +478,6 @@ function usage()
 )
 
 if (( ${#} == 0 )); then usage; RETURN_CODE="${?}"; fi
-
-## bring in any library scripts
-## we have this here because of the possibility of a different config file other than the default being used
-if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
-	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${DOTFILES_LIB_PATH}"; fi
-
-	for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
-		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
-
-		[[ -z "${LIBENTRY}" ]] && continue;
-
-		if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
-	done
-fi
 
 while (( ${#} > 0 )); do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Provided Argument -> ${1}"; fi
@@ -512,109 +525,61 @@ while (( ${#} > 0 )); do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_HOST -> ${TARGET_HOST}"; fi
             ;;
         port|p)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting SSH_PORT_NUMBER..."; fi
 
             declare SSH_PORT_NUMBER="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "SSH_PORT_NUMBER -> ${SSH_PORT_NUMBER}"; fi
             ;;
         username|u)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting TARGET_USER..."; fi
 
             declare TARGET_USER="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_USER -> ${TARGET_USER}"; fi
             ;;
         action|a)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting TARGET_ACTION..."; fi
 
             declare TARGET_ACTION="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "TARGET_ACTION -> ${TARGET_ACTION}"; fi
             ;;
         force|f)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting FORCE_PUSH..."; fi
 
             declare FORCE_PUSH="${_TRUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "FORCE_PUSH -> ${FORCE_PUSH}"; fi
             ;;
-        generatekeys)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-				writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}";
-			fi
-
-			case "${ARGUMENT_VALUE}" in
+        generatekeys|k)
+            case "${ARGUMENT_VALUE}" in
 				[Ss][Ss][Hh])
-					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting GENERATE_SSH_KEYS..."; fi
 
 					declare GENERATE_SSH_KEYS="${_TRUE}";
 
 					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}"; fi
 					;;
-				[Gg][Pp][Gg])
-				    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: captureGpgData";
-					fi
+				[Gg][Pp][Gg]|[Pp][Gg][Pp])
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting GENERATE_GPG_KEYS..."; fi
 
-					[[ -n "${CNAME}" ]] && unset -v CNAME;
-					[[ -n "${function_name}" ]] && unset -v function_name;
-					[[ -n "${ret_code}" ]] && unset -v ret_code;
+					declare GENERATE_GPG_KEYS="${_TRUE}";
 
-					captureGpgData;
-					ret_code="${?}";
-
-					set +o noclobber;
-					CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
-					function_name="${CNAME}#${FUNCNAME[0]}";
-
-					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
-
-					if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-					elif [[ ! -s "${GPG_OPTION_TEMPLATE}" ]]; then
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-					else
-						declare GENERATE_GPG_KEYS="${_TRUE}";
-
-						if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
-					fi
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
 					;;
 				[Bb][Oo][Tt][Hh])
-					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting GENERATE_SSH_KEYS...";
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting GENERATE_GPG_KEYS...";
+					fi
 
 					declare GENERATE_SSH_KEYS="${_TRUE}";
+					declare GENERATE_GPG_KEYS="${_TRUE}";
 
 					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
 						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}";
-						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: captureGpgData";
-					fi
-
-					[[ -n "${CNAME}" ]] && unset -v CNAME;
-					[[ -n "${function_name}" ]] && unset -v function_name;
-					[[ -n "${ret_code}" ]] && unset -v ret_code;
-
-					captureGpgData;
-					ret_code="${?}";
-
-					set +o noclobber;
-					CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
-					function_name="${CNAME}#${FUNCNAME[0]}";
-
-					if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
-
-					if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-					elif [[ ! -s "${GPG_OPTION_TEMPLATE}" ]]; then
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-						[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
-					else
-						declare GENERATE_GPG_KEYS="${_TRUE}";
-
-						if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
+						writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}";
 					fi
 					;;
 				*)
@@ -681,6 +646,47 @@ else
 
         RETURN_CODE="1";
     else
+		## bring in any library scripts
+		## we have this here because of the possibility of a different config file other than the default being used
+		if [[ -n "${DOTFILES_LIB_PATH}" ]] && [[ -d "${DOTFILES_LIB_PATH}" ]]; then
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Found library directory ${DOTFILES_LIB_PATH}"; fi
+
+			for LIBENTRY in "${DOTFILES_LIB_PATH}"/*.sh; do
+				if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "LIBENTRY -> ${LIBENTRY}"; fi
+
+				[[ -z "${LIBENTRY}" ]] && continue;
+
+				if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
+			done
+		fi
+
+		if [[ -n "${GENERATE_GPG_KEYS}" ]] && [[ "${GENERATE_GPG_KEYS}" == "${_TRUE}" ]]; then
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+				writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: captureGpgData";
+			fi
+
+			[[ -n "${CNAME}" ]] && unset -v CNAME;
+			[[ -n "${function_name}" ]] && unset -v function_name;
+			[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+			captureGpgData;
+			ret_code="${?}";
+
+			set +o noclobber;
+			CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
+			function_name="${CNAME}#${FUNCNAME[0]}";
+
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+			if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+				[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+				[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+			elif [[ ! -s "${GPG_OPTION_TEMPLATE}" ]]; then
+				[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+				[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An error occurred while generating the GPG option file. Please review logs.";
+			fi
+		fi
+
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "EXEC: main"; fi
 
         main;
