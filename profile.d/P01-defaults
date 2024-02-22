@@ -60,7 +60,7 @@ case "$(uname -s)" in
         ;;
 esac
 
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
     writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LANG -> ${LANG}";
     writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LC_ALL -> ${LC_ALL}";
     writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "TIMEFORMAT -> ${TIMEFORMAT}";
