@@ -399,7 +399,7 @@ function main()
     esac
 
     if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
-        writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
         writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
     else
         return_code="${error_count}"
