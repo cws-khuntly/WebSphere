@@ -24,7 +24,7 @@ if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set
 declare -x MAIL="/var/spool/mail/${LOGNAME:?}";
 declare -ix MAILCHECK=10;
 
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
     writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAIL -> ${MAIL}";
     writeLogEntry "DEBUG" "${CNAME}" "P10-mail" "${LINENO}" "MAILCHECK -> ${MAILCHECK}";
 fi
