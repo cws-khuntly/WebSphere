@@ -16,13 +16,13 @@ function returnRandomCharacters()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]  && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -30,7 +30,7 @@ function returnRandomCharacters()
     string_length=32;
     use_special=0;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}";
     fi
@@ -38,7 +38,7 @@ function returnRandomCharacters()
     if (( ${#} == 1 )); then string_length="${1}"; fi
     if (( ${#} == 2 )); then string_length="${1}"; use_special="${2}"; fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}";
     fi
@@ -49,18 +49,18 @@ function returnRandomCharacters()
         returned_characters=$(tr -cd '[:graph:]' < /dev/urandom | head -c "${string_length}");
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returned_characters -> ${returned_characters}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returned_characters -> ${returned_characters}"; fi
 
-    writeLogEntry "STDOUT" "${cname}" "${function_name}" "${LINENO}" "${returned_characters}";
+    printf "%s\n" "${returned_characters}" >&1;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
 
     [[ -n "${returned_characters}" ]] && unset -v returned_characters;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch=$(printf "%(%s)T");
         runtime=$(( start_epoch - end_epoch ));
 
@@ -94,13 +94,13 @@ function wchmod()
     error_count=0;
     return_code=0;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
 
         writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -109,17 +109,17 @@ function wchmod()
         if (( ${#} != 2 )); then
             return_code=3;
 
-            writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "${function_name} - Change the permissions on a target file";
-            writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "Usage: ${function_name} [ permissions ] [ file ]
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "${function_name} - Change the permissions on a target file";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "Usage: ${function_name} [ permissions ] [ file ]
                     -> The permissions to apply
                     -> The file to apply permissions to";
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
             fi
 
-            if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+            if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 end_epoch=$(printf "%(%s)T");
                 runtime=$(( start_epoch - end_epoch ));
 
@@ -140,40 +140,40 @@ function wchmod()
         requested_permissions="${1}";
         target_files="${2}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "requested_permissions -> ${requested_permissions}";
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_files -> ${target_files}";
         fi
 
         if [[ -r "${target_files}" ]]; then mapfile -t file_listing < "${2}"; else setArray file_listing "${2}"; fi
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_listing -> ${file_listing[*]}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_listing -> ${file_listing[*]}"; fi
 
         user_perms="${requested_permissions:0:1}";
         group_perms="${requested_permissions:1:1}";
         world_perms="${requested_permissions:2:1}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "user_perms -> ${user_perms}";
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "group_perms -> ${group_perms}";
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "world_perms -> ${world_perms}";
         fi
 
         for file_entry in "${target_files[@]}"; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_entry -> ${file_entry}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_entry -> ${file_entry}"; fi
 
             [[ -n "${file_entry}" ]] && continue;
 
             if [[ ! -w "${file_entry}" ]]; then
-                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
-                writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Unable to modify file security for ${file_entry}";
 
                 (( error_count += 1 ));
 
                 continue;
             fi
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: setfacl -s u::${user_perms},g::${group_perms},${world_perms} ${file_entry}"; fi
 
             setfacl -s u::"${user_perms}",g::"${group_perms}","${world_perms}" "${file_entry}";
             ret_code="${?}";
@@ -181,8 +181,8 @@ function wchmod()
             if [[ -n "${ENABLE_DEBUG}" ]] &&[[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}";
-                writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to modify file security for ${file_entry}. Return code -> ${ret_code}";
 
                 (( error_count += 1 ));
 
@@ -201,12 +201,12 @@ function wchmod()
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch=$(printf "%(%s)T");
         runtime=$(( start_epoch - end_epoch ));
 
