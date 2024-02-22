@@ -263,7 +263,7 @@ function installLocalFiles()
                                 continue;
                             fi
 
-                            writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
                             ;;
                         "ln")
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -293,10 +293,10 @@ function installLocalFiles()
                                 continue;
                             fi
 
-                            writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
                             ;;
                         *)
-                            writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
 
                             continue;
                             ;;
@@ -660,7 +660,7 @@ function installRemoteFiles()
                                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while performing installation on remote host ${install_to_host}. install_response -> ${install_response}";
                                 else
                                     ## done
-                                    writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "dotfiles successfully installed to host ${install_to_host}";
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "dotfiles successfully installed to host ${install_to_host}";
                                 fi
                             fi
                         fi
@@ -854,7 +854,7 @@ function reloadDotFiles()
                             fi
                         fi
 
-                        writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
                         ;;
                     "ln")
                         if [[ ! -L "${entry_target}" ]] || [[ ! -f "${entry_target}" ]]; then
@@ -875,11 +875,11 @@ function reloadDotFiles()
                                 continue;
                             fi
 
-                            writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
                         fi
                         ;;
                     *)
-                        writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
 
                         continue;
                         ;;
