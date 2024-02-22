@@ -21,7 +21,7 @@ function showHostInfo()
         writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -34,7 +34,7 @@ function showHostInfo()
     host_cpu_info="$(grep -E "model name" < /proc/cpuinfo | uniq | cut -d ":" -f 2 | sed -e 's/^ *//g;s/ *$//g' | tr -s " ")";
     host_memory_size="$(( $(grep -E MemTotal /proc/meminfo | awk '{print $2}') / 1024 ^ 2 ))";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "host_system_name -> ${host_system_name}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "host_ip_address -> ${host_ip_address}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "host_kernel_version -> ${host_kernel_version}";
@@ -48,7 +48,7 @@ function showHostInfo()
     system_process_count=$(ps -ef | tail -n +1 | wc -l | awk '{print $1}');
     user_process_count=$(ps -ef | tail -n +1 | grep -c "${LOGNAME}");
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "user_disk_usage -> ${user_disk_usage}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "system_process_count -> ${system_process_count}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "user_process_count -> ${user_process_count}";
@@ -91,7 +91,7 @@ function showHostInfo()
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
@@ -110,167 +110,6 @@ function showHostInfo()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return "${return_code}";
-}
-
-#=====  FUNCTION  =============================================================
-#          NAME:  reloadDotFiles
-#   DESCRIPTION:  Re-loads existing dotfiles for use
-#    PARAMETERS:  None
-#       RETURNS:  0 if success, non-zero otherwise
-#==============================================================================
-function reloadDotFiles()
-{
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    function_name="F01-userProfile#${FUNCNAME[0]}";
-    error_count=0;
-    return_code=0;
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        start_epoch=$(printf "%(%s)T");
-
-        writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
-    fi
-
-    dotfiles_home="${HOME}/.dotfiles";
-    install_conf="${dotfiles_home}/etc/install.conf";
-    current_ifs="${IFS}";
-    modified_ifs=$'\n'
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles_home -> ${dotfiles_home}";
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "install_conf -> ${install_conf}";
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "current_ifs -> ${current_ifs}";
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "modified_ifs -> ${modified_ifs}";
-    fi
-
-    ## change the IFS
-    IFS="${modified_ifs}";
-
-    ## clean up home directory first
-    for entry in $(< "${install_conf}")
-    do
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
-
-        [[ -z "${entry}" ]] && continue;
-        [[ "${entry}" =~ ^\# ]] && continue;
-
-        entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
-        entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
-        entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
-            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry_source -> ${entry_source}";
-            writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry_target -> ${entry_target}";
-        fi
-
-        case "${entry_command}" in
-            "mkdir")
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
-                    writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Creating directory ${entry_source}";
-                fi
-
-                mkdir -pv "${entry_source}";
-                ret_code="${?}";
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                then
-                    (( error_count +_= 0 ));
-
-                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_source} on host ${HOSTNAME}";
-                    writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_source} on host ${HOSTNAME}";
-
-                    continue;
-                fi
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Directory ${entry_source} created"; fi
-                ;;
-            "ln")
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
-                    writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target}";
-                fi
-
-                [[ -L "${entry_target}" ]] && unlink "${entry_target}";
-                [[ -f "${entry_target}" ]] && rm -f "${entry_target}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Creating symbolic link ${entry_source} -> ${entry_target}"; fi
-
-                ln -s "${entry_source}" "${entry_target}";
-                ret_code="${?}";
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                then
-                    (( error_count +_= 0 ));
-
-                    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source} on host ${HOSTNAME}";
-                    writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source} on host ${HOSTNAME}";
-
-                    continue;
-                fi
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created."; fi
-                ;;
-            *)
-                writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
-
-                continue;
-                ;;
-        esac
-
-        [[ -n "${ret_code}" ]] && unset -v ret_code;
-        [[ -n "${entry_command}" ]] && unset -v entry_command;
-        [[ -n "${entry_source}" ]] && unset -v entry_source;
-        [[ -n "${entry_target}" ]] && unset -v entry_target;
-        [[ -n "${entry}" ]] && unset -v entry;
-    done
-
-    ## restore the original ifs
-    IFS="${current_ifs}";
-
-    if (( error_count == 0 )); then
-        case "$(awk -F "/" '{print $NF}' <<< ${SHELL})" in
-            [Kk][Ss][Hh]) . "${HOME}/.kshrc"; ;;
-            [Bb][Aa][Ss][Hh]) source "${HOME}/.bash_profile"; ;;
-        esac
-    fi
-
-    [[ -n "${dotfiles_home}" ]] && unset -v dotfiles_home;
-    [[ -n "${install_conf}" ]] && unset -v install_conf;
-    [[ -n "${current_ifs}" ]] && unset -v current_ifs;
-    [[ -n "${modified_ifs}" ]] && unset -v modified_ifs;
-
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        end_epoch=$(printf "%(%s)T");
-        runtime=$(( start_epoch - end_epoch ));
-
-        writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-    fi
-
-    [[ -n "${error_count}" ]] && unset -v error_count;
-    [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    return ${return_code};
 }
 
 #=====  FUNCTION  =============================================================
@@ -294,7 +133,7 @@ function setPromptCommand()
         writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
@@ -316,7 +155,7 @@ function setPromptCommand()
             ;;
     esac
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
@@ -359,14 +198,14 @@ function logoutUser()
         writeLogEntry "PERFORMANCE" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> enter";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
     shell_name="$(pgrep "${PPID}" | head -1 | awk '{print $NF}' | cut -d "-" -f 2)";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "shell_name -> ${shell_name}"; fi
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "shell_name -> ${shell_name}"; fi
 
     ## check for screen/tmux. if we're in a screen session dont do any of this shit
     (( "$(grep -qE "^screen" <<< "$(compgen -c)"; printf "%s" "${?}")" == 0 )) && [[ -n "${STY}" ]] && return;
@@ -379,7 +218,7 @@ function logoutUser()
     ## clear terminal scrollback
     printf "\033c";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO"
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
         writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
