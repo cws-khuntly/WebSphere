@@ -31,7 +31,7 @@ declare -x LIBPATH="${LD_LIBRARY_PATH}";
 declare -x LIB_PATH="${LD_LIBRARY_PATH}";
 declare -x LD_RUN_PATH="${LD_LIBRARY_PATH}";
 
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
     writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "PATH -> ${PATH}";
     writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "MANPATH -> ${MANPATH}";
     writeLogEntry "DEBUG" "${CNAME}" "P02-path" "${LINENO}" "LD_LIBRARY_PATH -> ${LD_LIBRARY_PATH}";
