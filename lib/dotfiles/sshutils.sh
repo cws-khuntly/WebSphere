@@ -234,7 +234,7 @@ function copyKeysToTarget()
 
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to copy SSH identity ${keyfile} to host ${target_host}";
                     else
-                        writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "SSH keyfile ${keyfile} applied to host ${target_host} as user ${target_user}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "SSH keyfile ${keyfile} applied to host ${target_host} as user ${target_user}";
                     fi
                 else
                     ## NOT incrementing an error counter here because im not sure we actually need it
