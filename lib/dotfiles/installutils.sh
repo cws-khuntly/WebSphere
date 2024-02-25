@@ -318,14 +318,14 @@ function installLocalFiles()
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh "${HOME}"/.gnupg";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/m2/settings.xml ${DOTFILES_INSTALL_PATH}/etc/ldaprc \"${DOTFILES_INSTALL_PATH}\"/etc/curlrc \"${DOTFILES_INSTALL_PATH}\"/etc/netrc \"${HOME}\"/.dotfiles/etc/wgetrc;";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}/etc/ldaprc \"${DOTFILES_INSTALL_PATH}\"/etc/curlrc \"${DOTFILES_INSTALL_PATH}\"/etc/netrc \"${HOME}\"/.dotfiles/etc/wgetrc;";
                 fi
 
                 find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
                 find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
                 chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
                 chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
-                chmod 600 "${DOTFILES_INSTALL_PATH}"/m2/settings.xml "${DOTFILES_INSTALL_PATH}"/etc/ldaprc "${DOTFILES_INSTALL_PATH}"/etc/curlrc "${DOTFILES_INSTALL_PATH}"/etc/netrc "${HOME}"/.dotfiles/etc/wgetrc;
+                chmod 600 "${DOTFILES_INSTALL_PATH}"/etc/ldaprc "${DOTFILES_INSTALL_PATH}"/etc/curlrc "${DOTFILES_INSTALL_PATH}"/etc/netrc "${HOME}"/.dotfiles/etc/wgetrc;
 
                 ## generate SSH keys if not already present
                 if [[ -n "${GENERATE_SSH_KEYS}" ]] && [[ "${GENERATE_SSH_KEYS}" == "${_TRUE}" ]]; then

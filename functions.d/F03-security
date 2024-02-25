@@ -109,8 +109,8 @@ function wchmod()
         if (( ${#} != 2 )); then
             return_code=3;
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "${function_name} - Change the permissions on a target file";
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "Usage: ${function_name} [ permissions ] [ file ]
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "${function_name} - Change the permissions on a target file";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${LINENO}" "${function_name}" "Usage: ${function_name} [ permissions ] [ file ]
                     -> The permissions to apply
                     -> The file to apply permissions to";
 

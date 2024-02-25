@@ -59,9 +59,6 @@ alias disableVerbose="declare -x ENABLE_VERBOSE=\"${_FALSE}"\";
 alias disableTrace="declare -x ENABLE_TRACE=\"${_FALSE}"\";
 alias disablePerf="declare -x ENABLE_PERFORMANCE=\"${_FALSE}"\";
 
-## nmap on windows
-alias nmap="/cygdrive/c/Program\ Files\ \(x86\)/nmap/nmap.exe";
-
 ## expect
 alias scp.exp="${HOME}/lib/scp.exp";
 alias ssh.exp="${HOME}/lib/ssh.exp";

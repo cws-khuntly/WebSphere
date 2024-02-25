@@ -21,7 +21,7 @@
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
 ## get the available log config
-if [[ -r "/etc/logging.properties" ]] && [[ -s "/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/etc/logging.properties"; fi ## if its here, use it
+if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; fi ## if its here, use it
 if [[ -r "${HOME}"/etc/logging.properties ]] && [[ -s "${HOME}"/etc/logging.properties ]]; then LOGGING_PROPERTIES="${HOME}"/etc/logging.properties; fi ## if its here, use it
 
 ## load application logging
@@ -40,14 +40,14 @@ declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${
 ## load profile
 for file_entry in "${HOME}"/.profile.d/*
 do
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}"; fi
 
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
         for dir_entry in "${HOME}"/.profile.d/"${file_entry}"/*
         do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
 
             [[ -z "${dir_entry}" ]] && continue;
 
