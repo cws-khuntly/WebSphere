@@ -21,12 +21,12 @@
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
 ## get the available log config
-if [[ -r "/etc/logging.properties" ]] && [[ -s "/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/etc/logging.properties"; fi ## if its here, use it
+if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; fi ## if its here, use it
 if [[ -r "${HOME}"/etc/logging.properties ]] && [[ -s "${HOME}"/etc/logging.properties ]]; then LOGGING_PROPERTIES="${HOME}"/etc/logging.properties; fi ## if its here, use it
 
 ## load application logging
 if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
-if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then source "/usr/local/lib/logger.sh"; fi
+if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; fi;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
@@ -75,7 +75,7 @@ source "${HOME}"/.functions;
 showHostInfo;
 
 ## trap logout
-trap 'source ~/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
+trap 'source ${HOME}/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
 ## run tmux (we're going to finally learn it)
 ## support both tmux and screen, use the flag files appropriately
@@ -84,6 +84,9 @@ trap 'source ~/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
 ## make the umask sane
 umask 022;
+
+[[ -n "${CNAME}" ]] && unset -v CNAME;
+[[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
