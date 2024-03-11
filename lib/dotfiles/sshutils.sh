@@ -71,7 +71,11 @@ function generateSshKeys()
 
         ## if it doesnt exist then make it. if it does exist skip it
         if [[ ! -f "${HOME}"/.ssh/"${SSH_KEY_FILENAME}" ]]; then
-            ssh-keygen -b "${SSH_KEY_SIZE}" -t "${SSH_KEY_TYPE}" -f "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}";
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ${SSH_KEYGEN_PROGRAM} -b ${SSH_KEY_SIZE} -t ${SSH_KEY_TYPE} -f ${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}";
+            fi
+
+            "${SSH_KEYGEN_PROGRAM}" -b "${SSH_KEY_SIZE}" -t "${SSH_KEY_TYPE}" -f "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}";
             ret_code="${?}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
