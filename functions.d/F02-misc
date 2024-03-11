@@ -477,3 +477,80 @@ function extract()
 
     return ${return_code};
 }
+
+#=====  FUNCTION  =============================================================
+#          NAME:  returnRandomCharacters
+#   DESCRIPTION:  Returns a random string of alphanumeric characters
+#    PARAMETERS:  Length of string, include special characters
+#       RETURNS:  0 regardless of result.
+#==============================================================================
+function returnRandomCharacters()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F03-security";
+    function_name="${cname}#${FUNCNAME[0]}";
+    return_code=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]  && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        start_epoch=$(printf "%(%s)T");
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
+    fi
+
+    string_length=32;
+    use_special=0;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}";
+    fi
+
+    if (( ${#} == 1 )); then string_length="${1}"; fi
+    if (( ${#} == 2 )); then string_length="${1}"; use_special="${2}"; fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "string_length -> ${string_length}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "use_special -> ${use_special}";
+    fi
+
+    if (( use_special == 0 )); then
+        returned_characters=$(tr -cd '[:alnum:]' < /dev/urandom | head -c "${string_length}");
+    else
+        returned_characters=$(tr -cd '[:graph:]' < /dev/urandom | head -c "${string_length}");
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "returned_characters -> ${returned_characters}"; fi
+
+    printf "%s\n" "${returned_characters}" >&1;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
+    fi
+
+    [[ -n "${returned_characters}" ]] && unset -v returned_characters;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        end_epoch=$(printf "%(%s)T");
+        runtime=$(( start_epoch - end_epoch ));
+
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+    fi
+
+    [[ -n "${cname}" ]] && unset -v cname;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
