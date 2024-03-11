@@ -18,9 +18,6 @@
 
 declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
-## Application constants
-CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
-
 ## get the available log config
 if [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "${_FALSE}" ]]
 then
@@ -75,7 +72,7 @@ function writeLogEntry()
     log_method="${3}";
     log_line="${4}";
     log_message="${5}";
-	log_date="$(date -d "@$(printf "%(%s)T")" +"${TIMESTAMP_OPTS}")";
+    log_date="$(date -d "@$(printf "%(%s)T")" +"${TIMESTAMP_OPTS}")";
 
     case "${log_level}" in
         [Ss][Tt][Dd][Oo][Uu][Tt]) printf "%s\n" "${log_message}" >&1; write_to_log="${_FALSE}" ;;
@@ -112,3 +109,4 @@ function writeLogEntry()
 
     return 0;
 }
+
