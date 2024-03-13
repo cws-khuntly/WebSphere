@@ -7,7 +7,7 @@
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function validateHostAvailability()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -148,7 +148,7 @@ function validateHostAvailability()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -157,7 +157,7 @@ function validateHostAvailability()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function isValidHost()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -288,7 +288,7 @@ function isValidHost()
 
     [[ -n "${returnedHostname}" ]] && printf "%s" "${returnedHostname}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -297,7 +297,7 @@ function isValidHost()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function isValidAddress()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -421,7 +421,7 @@ function isValidAddress()
 
     [[ -n "${returnedHostAddress}" ]] && printf "%s" "${returnedHostAddress}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -430,7 +430,7 @@ function isValidAddress()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function isValidPort()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -499,7 +499,7 @@ function isValidPort()
 
     [[ -n "${returnedPortNumber}" ]] && printf "%s" "${returnedPortNumber}";
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  isValidHost
@@ -508,7 +508,7 @@ function isValidPort()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function isValidNetworkName()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -641,4 +641,4 @@ function isValidNetworkName()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
