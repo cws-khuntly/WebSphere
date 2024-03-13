@@ -55,7 +55,7 @@ function generateSshKeys()
         fi
     fi
 
-    for AVAILABLE_SSH_KEY_TYPE in ${SSH_KEY_TYPES[@]}; do
+    for AVAILABLE_SSH_KEY_TYPE in "${SSH_KEY_TYPES[@]}"; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "AVAILABLE_SSH_KEY_TYPE -> ${AVAILABLE_SSH_KEY_TYPE}";
         fi
@@ -98,11 +98,11 @@ function generateSshKeys()
                     fi
 
                     ## relocate the keyfiles to the user home directory
-                    mv "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}" "${HOME}"/.ssh/"${SSH_KEY_FILENAME}";
-                    mv "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}.pub" "${HOME}"/.ssh/"${SSH_KEY_FILENAME}.pub";
+                    mv "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}" "${HOME}/.ssh/${SSH_KEY_FILENAME}";
+                    mv "${TMPDIR:-${USABLE_TMP_DIR}}/${SSH_KEY_FILENAME}.pub" "${HOME}/.ssh/${SSH_KEY_FILENAME}.pub";
 
                     ## make sure they exist
-                    if [[ ! -f "${HOME}"/.ssh/"${SSH_KEY_FILENAME}" ]] || [[ ! -f "${HOME}"/.ssh/"${SSH_KEY_FILENAME}.pub" ]]; then
+                    if [[ ! -f "${HOME}/.ssh/${SSH_KEY_FILENAME}" ]] || [[ ! -f "${HOME}/.ssh/${SSH_KEY_FILENAME}.pub" ]]; then
                         (( error_count += 1 ));
 
                         writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "SSH keyfile generation for type ${SSH_KEY_TYPE} failed with return code ${ret_code}";
