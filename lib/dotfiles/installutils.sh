@@ -192,201 +192,214 @@ function installLocalFiles()
     fi
 
     if [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Switch into ${DOTFILES_INSTALL_PATH}...";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cd ${DOTFILES_INSTALL_PATH}";
+        fi
+
         ## extract the archive to the appropriate place
-        cd "${DOTFILES_INSTALL_PATH}"; "${UNARCHIVE_PROGRAM}" -c "${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" | tar -xf -;
+        cd "${DOTFILES_INSTALL_PATH}" || (( error_count += 1 ));
 
-        ## switch to homedir
-        cd "${HOME}";
+        if [[ "${PWD}" == "${DOTFILES_BASE_PATH}" ]]; then
+            "${UNARCHIVE_PROGRAM}" -c "${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" | tar -xf -;
 
-        if [[ "${PWD}" == "${HOME}" ]] && [[ -w "${HOME}" ]]; then
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Processing entries from ${INSTALL_CONF}"; fi
+            ## switch to homedir
+            cd "${HOME}" || (( error_count += 1 ));
 
-            if [[ -s "${INSTALL_CONF}" ]]; then
-                ## change the IFS
-                IFS="${MODIFIED_IFS}";
+            if [[ "${PWD}" == "${HOME}" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Processing entries from ${INSTALL_CONF}"; fi
 
-                ## clean up home directory first
-                for entry in $(< "${INSTALL_CONF}"); do
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
+                if [[ -s "${INSTALL_CONF}" ]]; then
+                    ## change the IFS
+                    IFS="${MODIFIED_IFS}";
 
-                    [[ -z "${entry}" ]] && continue;
-                    [[ "${entry}" =~ ^\# ]] && continue;
+                    ## clean up home directory first
+                    for entry in $(< "${INSTALL_CONF}"); do
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry -> ${entry}"; fi
 
-                    entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
-                    entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
-                    entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
+                        [[ -z "${entry}" ]] && continue;
+                        [[ "${entry}" =~ ^\# ]] && continue;
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_source -> ${entry_source}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_target -> ${entry_target}";
-                    fi
+                        entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
+                        entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
+                        entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
 
-                    if [[ -z "${entry_command}" ]]; then
-                        (( error_count += 1 ));
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_source -> ${entry_source}";
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_target -> ${entry_target}";
+                        fi
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
+                        if [[ -z "${entry_command}" ]]; then
+                            (( error_count += 1 ));
 
-                        continue;
-                    elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
-                        (( error_count += 1 ));
-
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
-
-                        continue;
-                    elif [[ -z "${entry_target}" ]] && [[ "${entry_command}" == "ln" ]]; then
-                        (( error_count += 1 ));
-
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
-
-                        continue;
-                    fi
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}"; fi
-
-                    case "${entry_command}" in
-                        "mkdir")
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating directory ${entry_target}";
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mkdir -p ${entry_target}";
-                            fi
-
-                            mkdir -p "$(eval printf "%s" "${entry_target}")";
-                            ret_code="${?}";
-
-                            if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                            then
-                                (( error_count += 1 ));
-
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_target}.";
-
-                                continue;
-                            fi
-
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
-                            ;;
-                        "ln")
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target} if exists...";
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
-                                    [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
-                                    [[ -f \$(eval printf \"%s\" ${entry_target}) ]] && rm -f \$(eval printf \"%s\" ${entry_target})";
-                            fi
-
-                            [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
-                            [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating symbolic link ${entry_source} -> ${entry_target}";
-                                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ln -s eval printf \"%s\" ${entry_source} eval printf \"%s\" ${entry_target}";
-                            fi
-
-                            ln -s "$(eval printf "%s" "${entry_source}")" "$(eval printf "%s" "${entry_target}")";
-                            ret_code="${?}";
-
-                            if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                            then
-                                (( error_count += 1 ));
-
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
-
-                                continue;
-                            fi
-
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
-                            ;;
-                        *)
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
 
                             continue;
-                            ;;
-                    esac
+                        elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
+                            (( error_count += 1 ));
 
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-                    [[ -n "${entry_command}" ]] && unset -v entry_command;
-                    [[ -n "${entry_source}" ]] && unset -v entry_source;
-                    [[ -n "${entry_target}" ]] && unset -v entry_target;
-                    [[ -n "${entry}" ]] && unset -v entry;
-                done
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
 
-                ## restore the original ifs
-                IFS="${CURRENT_IFS}";
+                            continue;
+                        elif [[ -z "${entry_target}" ]] && [[ "${entry_command}" == "ln" ]]; then
+                            (( error_count += 1 ));
 
-                ## set appropriate permissions
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type d -exec chmod 755 {} \;";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh \"${HOME}\"/.gnupg";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/ldaprc \"${DOTFILES_INSTALL_PATH}\"/curlrc \"${DOTFILES_INSTALL_PATH}\"/netrc \"${HOME}\"/.dotfiles/wgetrc;";
-                fi
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
 
-                find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
-                find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
-                chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
-                chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
-                chmod 600 "${DOTFILES_INSTALL_PATH}"/ldaprc "${DOTFILES_INSTALL_PATH}"/curlrc "${DOTFILES_INSTALL_PATH}"/netrc "${HOME}"/.dotfiles/wgetrc;
+                            continue;
+                        fi
 
-                ## generate SSH keys if not already present
-                if [[ -n "${GENERATE_SSH_KEYS}" ]] && [[ "${GENERATE_SSH_KEYS}" == "${_TRUE}" ]]; then
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}"; fi
+
+                        case "${entry_command}" in
+                            "mkdir")
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating directory ${entry_target}";
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mkdir -p ${entry_target}";
+                                fi
+
+                                mkdir -p "$(eval printf "%s" "${entry_target}")";
+                                ret_code="${?}";
+
+                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                                then
+                                    (( error_count += 1 ));
+
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_target}.";
+
+                                    continue;
+                                fi
+
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
+                                ;;
+                            "ln")
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target} if exists...";
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
+                                        [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
+                                        [[ -f \$(eval printf \"%s\" ${entry_target}) ]] && rm -f \$(eval printf \"%s\" ${entry_target})";
+                                fi
+
+                                [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
+                                [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
+
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating symbolic link ${entry_source} -> ${entry_target}";
+                                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ln -s eval printf \"%s\" ${entry_source} eval printf \"%s\" ${entry_target}";
+                                fi
+
+                                ln -s "$(eval printf "%s" "${entry_source}")" "$(eval printf "%s" "${entry_target}")";
+                                ret_code="${?}";
+
+                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                                then
+                                    (( error_count += 1 ));
+
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
+
+                                    continue;
+                                fi
+
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                                ;;
+                            *)
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
+
+                                continue;
+                                ;;
+                        esac
+
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
+                        [[ -n "${entry_command}" ]] && unset -v entry_command;
+                        [[ -n "${entry_source}" ]] && unset -v entry_source;
+                        [[ -n "${entry_target}" ]] && unset -v entry_target;
+                        [[ -n "${entry}" ]] && unset -v entry;
+                    done
+
+                    ## restore the original ifs
+                    IFS="${CURRENT_IFS}";
+
+                    ## set appropriate permissions
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "SSH key generation has been selected. Generating keys...";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateSshKeys";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type d -exec chmod 755 {} \;";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh \"${HOME}\"/.gnupg";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/ldaprc \"${DOTFILES_INSTALL_PATH}\"/curlrc \"${DOTFILES_INSTALL_PATH}\"/netrc \"${HOME}\"/.dotfiles/wgetrc;";
                     fi
 
-                    [[ -n "${cname}" ]] && unset -v cname;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+                    find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
+                    find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
+                    chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
+                    chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
+                    chmod 600 "${DOTFILES_INSTALL_PATH}"/ldaprc "${DOTFILES_INSTALL_PATH}"/curlrc "${DOTFILES_INSTALL_PATH}"/netrc "${HOME}"/.dotfiles/wgetrc;
 
-                    generateSshKeys;
-                    ret_code="${?}";
+                    ## generate SSH keys if not already present
+                    if [[ -n "${GENERATE_SSH_KEYS}" ]] && [[ "${GENERATE_SSH_KEYS}" == "${_TRUE}" ]]; then
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "SSH key generation has been selected. Generating keys...";
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateSshKeys";
+                        fi
 
-                    cname="installutils.sh";
-                    function_name="${cname}#${FUNCNAME[0]}";
+                        [[ -n "${cname}" ]] && unset -v cname;
+                        [[ -n "${function_name}" ]] && unset -v function_name;
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+                        generateSshKeys;
+                        ret_code="${?}";
+
+                        cname="installutils.sh";
+                        function_name="${cname}#${FUNCNAME[0]}";
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+                        fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                        fi
                     fi
 
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                    ## generate GPG keys if not already present
+                    if [[ -n "${GENERATE_GPG_KEYS}" ]] && [[ "${GENERATE_GPG_KEYS}" == "${_TRUE}" ]]; then
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "GPG key generation has been selected. Generating keys...";
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateGpgKeys";
+                        fi
+
+                        [[ -n "${cname}" ]] && unset -v cname;
+                        [[ -n "${function_name}" ]] && unset -v function_name;
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                        generateGpgKeys;
+                        ret_code="${?}";
+
+                        cname="installutils.sh";
+                        function_name="${cname}#${FUNCNAME[0]}";
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
+                        fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                        fi
                     fi
-                fi
+                else
+                    (( error_count += 1 ));
 
-                ## generate GPG keys if not already present
-                if [[ -n "${GENERATE_GPG_KEYS}" ]] && [[ "${GENERATE_GPG_KEYS}" == "${_TRUE}" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "GPG key generation has been selected. Generating keys...";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: generateGpgKeys";
-                    fi
-
-                    [[ -n "${cname}" ]] && unset -v cname;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    generateGpgKeys;
-                    ret_code="${?}";
-
-                    cname="installutils.sh";
-                    function_name="${cname}#${FUNCNAME[0]}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "WARN" "${cname}" "${function_name}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
-                    fi
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
                 fi
             else
                 (( error_count += 1 ));
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
             fi
         else
             (( error_count += 1 ));
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to switch to ${DOTFILES_INSTALL_PATH}. Please ensure the path exists and can be read from.";
         fi
     else
         (( error_count += 1 ));
