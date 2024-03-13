@@ -69,18 +69,11 @@ alias gpg.exp="${HOME}/lib/gpg.exp";
 alias keychain.exp="${HOME}/lib/keychain.exp";
 alias telnet.exp="${HOME}/lib/telnet.exp";
 
-case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
-    [Kk][Ss][Hh])
-        alias reload=". ${HOME}/.kshrc";
-        alias shell="selectProfile";
-        alias listFunctions="typeset -f | grep function | awk '{print \$NF}'";
-        ;;
-    [Bb][Aa][Ss][Hh])
-        alias reload="source ${HOME}/.bashrc";
-        alias shell="selectProfile";
-        alias listFunctions="compgen -A function";
-        ;;
-esac
+if [[ "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" =~ [Bb][Aa][Ss][Hh]* ]]; then
+    alias reload="source ${HOME}/.bashrc";
+    alias shell="selectProfile";
+    alias listFunctions="compgen -A function";
+fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
