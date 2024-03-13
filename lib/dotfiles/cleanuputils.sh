@@ -16,7 +16,6 @@ function cleanupFiles()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
-    continue_exec="${_TRUE}";
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
@@ -89,15 +88,14 @@ function cleanupFiles()
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        continue_exec="${_FALSE}";
+                        (( error_count += 1 ));
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
                     fi
                 fi
 
-                if [[ -n "${continue_exec}" ]] && [[ "${continue_exec}" == "${_TRUE}" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupRemoteFiles ${cleanup_file_list} ${cleanup_host} ${cleanup_user}"; fi
+                if [[ -n "${force_push}" ]] && [[ "${force_push}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupRemoteFiles ${cleanup_file_list} ${cleanup_host} ${cleanup_port} ${cleanup_user}"; fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
@@ -114,12 +112,8 @@ function cleanupFiles()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ))
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute remote file cleanup. Please review logs.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred executing the cleanup on the remote system. Please review logs.";
                     fi
-                else
-                    (( error_count += 1 ));
-
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to perform cleanup on remote host ${cleanup_host} as user ${cleanup_port} - resume_cleanup is ${resume_cleanup}, indicating an error has occurred. Please review logs.";
                 fi
                 ;;
             *)
@@ -140,7 +134,6 @@ function cleanupFiles()
     [[ -n "${force_push}" ]] && unset -v force_push;
     [[ -n "${cleanup_file_list}" ]] && unset -v cleanup_file_list;
     [[ -n "${operating_mode}" ]] && unset -v operating_mode;
-    [[ -n "${continue_exec}" ]] && unset -v continue_exec;
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
@@ -325,10 +318,10 @@ function cleanupRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_host -> ${remote_host}";
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating file cleanup file...";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p ${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
 
-        file_cleanup_file="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+        file_cleanup_file="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_cleanup_file -> ${file_cleanup_file}"; fi
 
