@@ -193,7 +193,7 @@ function installLocalFiles()
 
     if [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
         ## extract the archive to the appropriate place
-        cd "${DOTFILES_INSTALL_PATH}"; ${UNARCHIVE_PROGRAM} -c ${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION} | tar -xf -;
+        cd "${DOTFILES_INSTALL_PATH}"; "${UNARCHIVE_PROGRAM}" -c "${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" | tar -xf -;
 
         ## switch to homedir
         cd "${HOME}";
@@ -317,7 +317,7 @@ function installLocalFiles()
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type d -exec chmod 755 {} \;";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh "${HOME}"/.gnupg";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 700 \"${HOME}\"/.ssh \"${HOME}\"/.gnupg";
                     writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/ldaprc \"${DOTFILES_INSTALL_PATH}\"/curlrc \"${DOTFILES_INSTALL_PATH}\"/netrc \"${HOME}\"/.dotfiles/wgetrc;";
                 fi
 
@@ -488,17 +488,11 @@ function installRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_to_port -> ${install_to_port}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "install_as_user -> ${install_as_user}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_push -> ${force_push}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating installation script...";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p ${TMPDIR:-${USABLE_TMP_DIR}}";
-    fi
-
-    ## verify the txfr
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating validation script...";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p ${TMPDIR:-${USABLE_TMP_DIR}}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}";
     fi
 
-    file_verification_script="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+    file_verification_script="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_verification_script -> ${file_verification_script}"; fi
 
@@ -577,8 +571,10 @@ function installRemoteFiles()
                     return_code="${error_count}";
 
                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while verifying files on remote host ${install_to_host}.";
-                else                
-                    installation_script="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+                else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}"; fi
+                
+                    installation_script="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "installation_script -> ${installation_script}"; fi
 
