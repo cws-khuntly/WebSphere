@@ -44,7 +44,7 @@ function buildPackage()
     if [[ -d "${DOTFILES_BASE_PATH}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Switching to ${DOTFILES_BASE_PATH} to generate package"; fi
 
-        cd "${DOTFILES_BASE_PATH}" || return 2;
+        cd "${DOTFILES_BASE_PATH}" || (( error_count += 1 ));
 
         if [[ "${PWD}" == "${DOTFILES_BASE_PATH}" ]]; then
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: tar --exclude-vcs --exclude=README.md --exclude=LICENSE.md -cvf - * | ${ARCHIVE_PROGRAM} > ${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}"; fi
