@@ -31,7 +31,7 @@ fi
 #       RETURNS:  0 regardless of result.
 #==============================================================================
 function writeLogEntry()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
     if [[ -n "${ENABLE_LOGGER_VERBOSE}" ]] && [[ "${ENABLE_LOGGER_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
@@ -108,5 +108,4 @@ function writeLogEntry()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     return 0;
-}
-
+)
