@@ -46,110 +46,106 @@ function captureGpgData()
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDOUT" "${cname}" "${function_name}" "${LINENO}" "Further information is required to generate GPG keys.";
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDOUT" "${cname}" "${function_name}" "${LINENO}" "Please provide the requested information:";
 
-    while true; do
-        while [[ -z "${key_algo}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key algorithm: \" key_algo";
-            fi
+    while [[ -z "${key_algo}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key algorithm: \" key_algo";
+        fi
 
-            read -p "Desired key algorithm: " key_algo;
+        read -rp "Desired key algorithm: " key_algo;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_algo -> ${key_algo}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_algo -> ${key_algo}";
+        fi
+    done
 
-        while [[ -z "${key_bits}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key bitsize: \" key_bits";
-            fi
+    while [[ -z "${key_bits}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key bitsize: \" key_bits";
+        fi
 
-            read -p "Desired key length: " key_bits;
+        read -rp "Desired key length: " key_bits;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_bits -> ${key_bits}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_bits -> ${key_bits}";
+        fi
+    done
 
-        while [[ -z "${subkey_type}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired subkey type: \" subkey_type";
-            fi
+    while [[ -z "${subkey_type}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired subkey type: \" subkey_type";
+        fi
 
-            read -p "Desired subkey type: " subkey_type;
+        read -rp "Desired subkey type: " subkey_type;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "subkey_type -> ${subkey_type}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "subkey_type -> ${subkey_type}";
+        fi
+    done
 
-        while [[ -z "${subkey_length}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired subkey length: \" subkey_length";
-            fi
+    while [[ -z "${subkey_length}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired subkey length: \" subkey_length";
+        fi
 
-            read -p "Desired subkey length: " subkey_length;
+        read -rp "Desired subkey length: " subkey_length;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "subkey_length -> ${subkey_length}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "subkey_length -> ${subkey_length}";
+        fi
+    done
 
-        while [[ -z "${real_name}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Provide your real name: \" real_name";
-            fi
+    while [[ -z "${real_name}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Provide your real name: \" real_name";
+        fi
 
-            read -p "Provide your name: " real_name;
+        read -rp "Provide your name: " real_name;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "real_name -> ${real_name}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "real_name -> ${real_name}";
+        fi
+    done
 
-        while [[ -z "${email_address}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Provide your email address: \" email_address";
-            fi
+    while [[ -z "${email_address}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Provide your email address: \" email_address";
+        fi
 
-            read -p "Provide your email address: " email_address;
+        read -rp "Provide your email address: " email_address;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "email_address -> ${email_address}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "email_address -> ${email_address}";
+        fi
+    done
 
-        while [[ -z "${key_lifetime}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key lifetime: \" key_lifetime";
-            fi
+    while [[ -z "${key_lifetime}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key lifetime: \" key_lifetime";
+        fi
 
-            read -p "Desired key lifetime: " key_lifetime;
+        read -rp "Desired key lifetime: " key_lifetime;
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_lifetime -> ${key_lifetime}";
-            fi
-        done
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "key_lifetime -> ${key_lifetime}";
+        fi
+    done
 
-        while [[ -z "${key_passphrase}" ]]; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key passphrase: \" key_passphrase";
-            fi
+    while [[ -z "${key_passphrase}" ]]; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Capture user input:";
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: read -p \"Desired key passphrase: \" key_passphrase";
+        fi
 
-            stty -echo;
-            read -p "Desired key passphrase: " key_passphrase;
-            stty echo;
-        done
-
-        break;
+        stty -echo;
+        read -rp "Desired key passphrase: " key_passphrase;
+        stty echo;
     done
 
     ## at this point we should have enough information to populate the file
@@ -261,10 +257,10 @@ function generateGpgKeys()
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Create temporary directory for GNUPGHOME...";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -d ${TMPDIR:-${USABLE_TMP_DIR}})";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -d --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}})";
     fi
 
-    GNUPGHOME="$(mktemp -d "${TMPDIR:-${USABLE_TMP_DIR}}")";
+    GNUPGHOME="$(mktemp -d --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "GNUPGHOME -> ${GNUPGHOME}";
@@ -279,7 +275,7 @@ function generateGpgKeys()
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
         (( error_count += 1 ))
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to generate GPG keys using the provided template. Return code -> ${ret_code}";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate GPG keys using the provided template. Return code -> ${ret_code}";
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
