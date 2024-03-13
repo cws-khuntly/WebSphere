@@ -24,12 +24,12 @@ declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")"; declare SCRIPT_ROOT;
 
-## get the available log config
+## get the available log config and load it
 if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; fi ## if its here, use it
 if [[ -r "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/dotfiles/logging.properties" ]]; then LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties"; fi ## if its here, override the above and use it
-
-## load application logging
 if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
+
+## load the logger
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
@@ -78,7 +78,7 @@ fi
 #       RETURNS:  0 regardless of result.
 #==============================================================================
 function main()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -536,7 +536,7 @@ function main()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #======  FUNCTION  ============================================================
 #          NAME:  usage
@@ -545,7 +545,7 @@ function main()
 #       RETURNS:  0 regardless of result.
 #==============================================================================
 function usage()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -582,7 +582,7 @@ function usage()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 if (( ${#} == 0 )); then usage; RETURN_CODE="${?}"; fi
 
@@ -618,6 +618,8 @@ while (( ${#} > 0 )); do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}"; fi
 
                 if [[ -n "${WORKING_CONFIG_FILE}" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Loading configuration file ${WORKING_CONFIG_FILE}"; fi
+
                     source "${WORKING_CONFIG_FILE}";
                 else
                     RETURN_CODE=2;
@@ -674,6 +676,8 @@ while (( ${#} > 0 )); do
                 fi
 
                 declare IS_SSH_AVAILABLE="${_FALSE}";
+
+                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "IS_SSH_AVAILABLE -> ${IS_SSH_AVAILABLE}"; fi
             fi
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -688,13 +692,15 @@ while (( ${#} > 0 )); do
                 fi
 
                 declare IS_GPG_AVAILABLE="${_FALSE}";
+
+                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "IS_GPG_AVAILABLE -> ${IS_GPG_AVAILABLE}"; fi
             fi
 
             case "${ARGUMENT_VALUE}" in
                 [Ss][Ss][Hh])
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting GENERATE_SSH_KEYS..."; fi
 
-                    declare GENERATE_SSH_KEYS="${_TRUE}";
+                    if [[ -z "${IS_SSH_AVAILABLE}" ]] || [[ "${IS_SSH_AVAILABLE}" != "${_FALSE}" ]]; then declare GENERATE_SSH_KEYS="${_TRUE}"; fi
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}"; fi
                     ;;
