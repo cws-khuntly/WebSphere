@@ -54,23 +54,13 @@ alias curl="curl --dump-header ${HOME}/log/curl-headers";
 alias xlaunch="nohup xlaunch -run ${HOME}/etc/config.xlaunch &";
 
 ## make some customizations IF the command exists
-(( $(compgen -c | grep -E -w "^vim" > /dev/null 2>&1; echo ${?}) > 0 )) && alias vi="vim";
-(( $(compgen -c | grep -E -w "^colordiff" > /dev/null 2>&1; echo ${?}) > 0 )) && alias diff="colordiff";
+[[ -n "$(compgen -c | grep -E -w "^vim" 2> /dev/null)" ]] && alias vi="vim";
+[[ -n "$(compgen -c | grep -E -w "^colordiff" 2> /dev/null)" ]] && alias diff="colordiff";
 
-case $(uname -s) in
-    [Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
-        unalias ls; alias ls="/usr/ucb/ls";
-        unalias ps; alias ps="/usr/ucb/ps -auxww";
-        unalias whoami; alias whoami="/usr/ucb/whoami";
-        unalias grep; alias grep="/usr/xpg4/bin/grep -v grep";
-        unalias egrep; alias egrep="/usr/xpg4/bin/egrep -v grep";
-        unalias fgrep; alias fgrep="/usr/xpg4/bin/fgrep -v grep";
-        ;;
-    [Cc][Yy][Gg][Ww][Ii][Nn]*)
-        alias sudo="cygstart --action=runas";
-        alias gpg="gpg2";
-        ;;
-esac
+if [[ "$(uname -s)" =~ [Cc][Yy][Gg][Ww][Ii][Nn]* ]]; then
+    alias sudo="cygstart --action=runas";
+    alias gpg="gpg2";
+fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
