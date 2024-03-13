@@ -562,7 +562,7 @@ function usage()
                 NOTE: While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options.
             -> --servername | -s <hostname> - (Optional) The target system name to process against. Default value -> ${TARGET_HOST}.
             -> --username | -u <username> - (Optional) The username to utilize for the target system. Default value -> ${TARGET_USER}.
-            -> --action | -a <action> - (Optional) The type of process to execute. One of the following. Default value -> ${RUNTIME_ACTION_COMBINED}
+            -> --action | -a <action> - (Optional) The type of process to execute. One of the following. Default value -> ${DEFAULT_RUNTIME_OPTION}
                 -> deployFiles: Pushes dotfiles to the selected system but does not install/apply
                 -> installFiles: Installs dotfiles to the selected system - assumes the package has already been sent to the target system
                 -> deployAndInstall: Pushes dotfiles to the selected system and installs
@@ -590,13 +590,25 @@ while (( ${#} > 0 )); do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Provided Argument -> ${1}"; fi
 
     ARGUMENT="${1}";
-    ARGUMENT_NAME="$(cut -d "=" -f 1 <<< "${ARGUMENT// }" | sed -e "s/--//g" -e "s/-//g")";
-    ARGUMENT_VALUE="$(cut -d "=" -f 2 <<< "${ARGUMENT}")";
 
-    shift;
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT -> ${ARGUMENT}"; fi
+
+    case "${ARGUMENT}" in
+	    *=*)
+            ARGUMENT_NAME="$(cut -d "=" -f 1 <<< "${ARGUMENT// }" | sed -e "s/--//g" -e "s/-//g")";
+            ARGUMENT_VALUE="$(cut -d "=" -f 2 <<< "${ARGUMENT}")";
+
+            shift 1;
+            ;;
+	    *)
+            ARGUMENT_NAME="$(cut -d "-" -f 2 <<< "${ARGUMENT}")";
+            ARGUMENT_VALUE="${2}";
+
+            shift 2;
+            ;;
+    esac
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT -> ${ARGUMENT}";
         writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_NAME -> ${ARGUMENT_NAME}";
         writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}";
     fi
