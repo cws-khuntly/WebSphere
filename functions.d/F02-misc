@@ -7,7 +7,7 @@
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function mkcd()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -107,7 +107,7 @@ function mkcd()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  lsz
@@ -116,7 +116,7 @@ function mkcd()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function lsz()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -174,7 +174,7 @@ function lsz()
 
     file_to_view="${1}";
     file_of_type="${file_to_view##*.}";
-    extract_to_dir="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+    extract_to_dir="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_to_view -> ${file_to_view}";
@@ -223,7 +223,7 @@ function lsz()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  extract
@@ -232,7 +232,7 @@ function lsz()
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
 function extract()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -294,7 +294,7 @@ function extract()
 
     file_to_extract="${1}";
     file_of_type="${file_to_extract##*.}";
-    extract_to_dir="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+    extract_to_dir="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_to_extract -> ${file_to_extract}";
@@ -352,7 +352,7 @@ function extract()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
 
 #=====  FUNCTION  =============================================================
 #          NAME:  returnRandomCharacters
@@ -361,7 +361,7 @@ function extract()
 #       RETURNS:  0 regardless of result.
 #==============================================================================
 function returnRandomCharacters()
-{
+(
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -429,4 +429,4 @@ function returnRandomCharacters()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-}
+)
