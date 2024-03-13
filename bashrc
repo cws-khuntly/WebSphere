@@ -79,8 +79,8 @@ trap 'source ${HOME}/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
 ## run tmux (we're going to finally learn it)
 ## support both tmux and screen, use the flag files appropriately
-[[ -n "$(compgen -c | grep -E -w ^tmux)" ]] && [[ -z "$(tmux info 2> /dev/null)" ]] && [[ -f ${HOME}/etc/run-tmux ]] && tmux attach;
-[[ -n "$(compgen -c | grep -E -w ^screen)" ]] && [[ -z "${STY}" ]] && [[ -f ${HOME}/etc/run-screen ]] && screen -RR;
+[[ -n "$(compgen -c | grep -E -qw ^tmux)" ]] && [[ -z "$(tmux info 2> /dev/null)" ]] && [[ -f ${HOME}/etc/run-tmux ]] && tmux attach;
+[[ -n "$(compgen -c | grep -E -qw ^screen)" ]] && [[ -z "${STY}" ]] && [[ -f ${HOME}/etc/run-screen ]] && screen -RR;
 
 ## make the umask sane
 umask 022;
