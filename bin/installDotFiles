@@ -562,11 +562,11 @@ function usage()
                 NOTE: While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options.
             -> --servername | -s <hostname> - (Optional) The target system name to process against. Default value -> ${TARGET_HOST}.
             -> --username | -u <username> - (Optional) The username to utilize for the target system. Default value -> ${TARGET_USER}.
-            -> --action | -a <action> - (Optional) The type of process to execute. One of the following. Default value -> ${DEFAULT_RUNTIME_OPTION}
+            -> --action | -a <action> - (Optional) The type of process to execute. One of the following. Default value -> ${RUNTIME_ACTION_COMBINED}
                 -> deployFiles: Pushes dotfiles to the selected system but does not install/apply
                 -> installFiles: Installs dotfiles to the selected system - assumes the package has already been sent to the target system
                 -> deployAndInstall: Pushes dotfiles to the selected system and installs
-                -> refreshDotFiles: Performs a refresh of the existing dotfiles.
+                -> refreshDotFiles: Performs a refresh of the existing dotfiles, adding/removing entries as necessary
                 NOTE: These values are NOT case-sensitive.
             -> --generatekeys | -k <type> - (Optional) Determines whether or not to generate GPG/SSH keys
                 -> ssh: Generate SSH keys ONLY. Default value -> ${GENERATE_SSH_KEYS}
