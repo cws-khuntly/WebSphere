@@ -17,7 +17,6 @@ function transferFiles()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
-    continue_exec="${_TRUE}";
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
@@ -97,14 +96,13 @@ function transferFiles()
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        continue_exec="${_FALSE}";
+                        (( error_count += 1 ));
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
                     fi
                 fi
 
-                if [[ -n "${continue_exec}" ]] && [[ "${continue_exec}" == "${_TRUE}" ]]; then
+                if [[ -n "${force_push}" ]] && [[ "${force_push}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: transferRemoteFiles ${files_to_process} ${target_host} ${target_port} ${target_user}"; fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
@@ -122,12 +120,8 @@ function transferFiles()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ))
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to execute remote file transfer. Please review logs.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred while transferring files on the remote system. Please review logs.";
                     fi
-                else
-                    (( error_count += 1 ));
-
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
                 fi
                 ;;
             *)
@@ -298,7 +292,6 @@ function transferRemoteFiles()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
-    continue_exec="${_TRUE}";
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch=$(printf "%(%s)T");
@@ -324,10 +317,10 @@ function transferRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_user -> ${target_user}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_push -> ${force_push}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating sFTP batch send file...";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp -p \"${TMPDIR:-${USABLE_TMP_DIR}}\"";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=\"${TMPDIR:-${USABLE_TMP_DIR}}\"";
     fi
 
-    sftp_send_file="$(mktemp -p "${TMPDIR:-${USABLE_TMP_DIR}}")";
+    sftp_send_file="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "sftp_send_file -> ${sftp_send_file}"; fi
 
@@ -355,13 +348,13 @@ function transferRemoteFiles()
 
             if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
                 if (( file_counter == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >| ${file_cleanup_file}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >| ${sftp_send_file}"; fi
 
                     { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >| "${sftp_send_file}";
 
                     (( file_counter += 1 ));
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >> ${file_cleanup_file}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >> ${sftp_send_file}"; fi
 
                     { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >> "${sftp_send_file}";
                 fi
