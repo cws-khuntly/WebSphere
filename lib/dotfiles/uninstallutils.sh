@@ -174,6 +174,12 @@ function uninstallLocalFiles()
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
 
                 continue;
+            elif [[ -z "${entry_target}" ]]; then
+                (( error_count += 1 ));
+
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
+
+                continue;
             elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
                 (( error_count += 1 ));
 
@@ -193,53 +199,47 @@ function uninstallLocalFiles()
             case "${entry_command}" in
                 "mkdir")
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating directory ${entry_target}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mkdir -p ${entry_target}";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing directory ${entry_target}";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: rmdir ${entry_target}";
                     fi
 
-                    mkdir -p "$(eval printf "%s" "${entry_target}")";
-                    ret_code="${?}";
+                    if [[ -d "${entry_target}" ]]; then
+                        rmdir "$(eval printf "%s" "${entry_target}")";
+                        ret_code="${?}";
 
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                    then
-                        (( error_count += 1 ));
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                        then
+                            (( error_count += 1 ));
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create directory ${entry_target}.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to remove directory ${entry_target}.";
 
-                        continue;
+                            continue;
+                        fi
+
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} removed.";
                     fi
-
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Directory ${entry_target} created";
                     ;;
                 "ln")
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target} if exists...";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC:
-                            [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
-                            [[ -f \$(eval printf \"%s\" ${entry_target}) ]] && rm -f \$(eval printf \"%s\" ${entry_target})";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target}";
+                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: unlink ${entry_target}";
                     fi
 
-                    [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
-                    [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
+                    if [[ -L "${entry_target}" ]]; then
+                        unlink "${entry_target}";
+                        ret_code="${?}";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Creating symbolic link ${entry_source} -> ${entry_target}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ln -s eval printf \"%s\" ${entry_source} eval printf \"%s\" ${entry_target}";
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                        then
+                            (( error_count += 1 ));
+
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to unlink ${entry_target}.";
+
+                            continue;
+                        fi
+
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_target} removed.";
                     fi
-
-                    ln -s "$(eval printf "%s" "${entry_source}")" "$(eval printf "%s" "${entry_target}")";
-                    ret_code="${?}";
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                    then
-                        (( error_count += 1 ));
-
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
-
-                        continue;
-                    fi
-
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
                     ;;
                 *)
                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
@@ -440,6 +440,12 @@ function uninstallRemoteFiles()
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
 
                         continue;
+                    elif [[ -z "${entry_source}" ]]; then
+                        (( error_count += 1 ));
+
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
+
+                        continue;
                     elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
                         (( error_count += 1 ));
 
@@ -463,7 +469,7 @@ function uninstallRemoteFiles()
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: { printf \"%s %s %s\n\" \"-\" \"rm\" \"${entry_target}\"; } >> \"${file_removal_script}\"";
                             fi
 
-                            { printf "%s %s %s\n" "-" "rm" "${entry_target}"; } >> "${file_removal_script}";
+                            { printf "%s %s %s\n" "-" "rmdir" "${entry_target}"; } >> "${file_removal_script}";
                             ;;
                         "ln")
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -471,7 +477,7 @@ function uninstallRemoteFiles()
                                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: { printf \"%s %s %s\n\" \"-\" \"unlink\" \"${entry_target}\"; } >> \"${file_removal_script}\"";
                             fi
 
-                            { printf "%s %s %s\n" "-" "unlink" "${entry_target}"; } >> "${file_removal_script}";
+                            { printf "%s %s %s\n" "-" "rm" "${entry_target}"; } >> "${file_removal_script}";
                             ;;
                         *)
                             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Skipping entry ${entry_command}.";
