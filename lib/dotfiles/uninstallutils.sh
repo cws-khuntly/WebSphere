@@ -160,11 +160,13 @@ function uninstallLocalFiles()
             entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
             entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
             entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
+            removable_entry="$(eval printf "%s" "${entry_target}")";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_command -> ${entry_command}";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_source -> ${entry_source}";
                 writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "entry_target -> ${entry_target}";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "removable_entry -> ${removable_entry}";
             fi
 
             if [[ -z "${entry_command}" ]]; then
@@ -195,26 +197,24 @@ function uninstallLocalFiles()
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}"; fi
 
-            if [[ "${entry_command}" == "ln" ]]; then
-                if [[ -L "${entry_target}" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${entry_target}";
-                        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: unlink ${entry_target}";
-                    fi
+            if [[ "${entry_command}" == "ln" ]] && [[ -L "${removable_entry}" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing symbolic link ${removable_entry}";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: unlink ${removable_entry}";
+                fi
 
-                    unlink "${entry_target}";
-                    ret_code="${?}";
+                unlink "${removable_entry}";
+                ret_code="${?}";
 
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                    then
-                        (( error_count += 1 ));
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                then
+                    (( error_count += 1 ));
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to unlink ${entry_target}.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to unlink ${entry_target}.";
 
-                        continue;
-                    else
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_target} removed.";
-                    fi
+                    continue;
+                else
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Symbolic link ${entry_target} removed.";
                 fi
             fi
 
@@ -222,6 +222,7 @@ function uninstallLocalFiles()
             [[ -n "${entry_command}" ]] && unset -v entry_command;
             [[ -n "${entry_source}" ]] && unset -v entry_source;
             [[ -n "${entry_target}" ]] && unset -v entry_target;
+            [[ -n "${removable_entry}" ]] && unset -v removable_entry;
             [[ -n "${entry}" ]] && unset -v entry;
         done
 
