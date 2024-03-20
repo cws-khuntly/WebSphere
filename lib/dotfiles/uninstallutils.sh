@@ -206,6 +206,8 @@ function uninstallLocalFiles()
                 unlink "${removable_entry}";
                 ret_code="${?}";
 
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
                 then
                     (( error_count += 1 ));
@@ -228,6 +230,28 @@ function uninstallLocalFiles()
 
         ## restore the original ifs
         IFS="${CURRENT_IFS}";
+
+        ## remove the installation directory
+        if [[ -d "${DOTFILES_INSTALL_PATH}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing installation directory ${DOTFILES_INSTALL_PATH}";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: rm -rf ${DOTFILES_INSTALL_PATH}";
+            fi
+
+            rm -rf ${DOTFILES_INSTALL_PATH};
+            ret_code=${?};
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                (( error_count += 1 ));
+
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to remove dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${function_name}" "${LINENO}" "Failed to remove dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
+            else
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "${cname}" "${function_name}" "${LINENO}" "Removed dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
+            fi
+        fi
     else
         (( error_count += 1 ));
 
