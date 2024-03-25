@@ -21,49 +21,10 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-case "$(who am i | awk '{print $1}')" in
-    "${LOGNAME}")
-        ;;
-    *)
-        REAL_USER="$(who am i | awk '{print $1}')"; declare -x REAL_USER
-        ;;
-esac
-
-declare -x PS2="continue -> ";
-declare -x PS3="Enter selection: ";
-declare -x PS4="[Time: $(printf "%($(printf "%s" "${TIMESTAMP_OPTS}"))T %s")][Thread: ${0}][Log: -][Level: TRACE] - [File: ${FUNCNAME[0]:-${SHELL}}] [Method: -] - ";
-
-case "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" in
-    [Kk][Ss][Hh])
-        PS1="";
-
-        case "${REAL_USER}" in
-            "")
-                echo -ne "\033]0;$(printf "[%s:%s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${PWD}")\007";
-                PS1+='$(printf "\e[00;32m[%s:%s]\e[m \e[00;00m:\e[m \e[00;33m<%s $([ $(git status > /dev/null 2>&1 ; echo $?) == 0 ] && printf "[\e[01;34m%s\e[00;33m]" "$(git branch 2> /dev/null | grep "*")")>\e[m \e[00;00m\e[m \n\n$ " "${HOSTNAME}" "${LOGNAME}" "${PWD}")';
-                ;;
-            *)
-                echo -ne "\033]0;$(printf "[%s:%s as %s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${REAL_USER}" "${PWD}")\007";
-                PS1+='$(printf "\e[00;31mNOTE: YOU ARE %s\e[00;32m.\n\e[00;32m[%s:%s as \e[00;31m%s\e[00;32m]\e[m \e[00;00m:\e[m \e[00;33m<%s $([ $(git status > /dev/null 2>&1 ; echo $?) == 0 ] && printf "[\e[01;34m%s\e[00;33m]" "$(git branch 2> /dev/null | grep "*")")>\e[m \e[00;00m\e[m \n\n$ " "${REAL_USER}" "${HOSTNAME}" "${REAL_USER}" "${LOGNAME}" "${PWD}")';
-                ;;
-        esac
-        ;;
-    [Bb][Aa][Ss][Hh])
-        declare -x PROMPT_COMMAND=setPromptCommand;
-        ;;
-    *)
-        echo "NO SHELL FOUND!!!!";
-        ;;
-esac
+declare -x PROMPT_COMMAND=setPromptCommand;
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTFILE -> ${HISTFILE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTSIZE -> ${HISTSIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "EXTENDED_HISTORY -> ${EXTENDED_HISTORY}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTFILESIZE -> ${HISTFILESIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTTIMEFORMAT -> ${HISTTIMEFORMAT}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTCONTROL -> ${HISTCONTROL}";
-    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "HISTIGNORE -> ${HISTIGNORE}";
+    writeLogEntry "DEBUG" "${CNAME}" "P08-prompt" "${LINENO}" "PROMPT_COMMAND -> ${PROMPT_COMMAND}";
 fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
