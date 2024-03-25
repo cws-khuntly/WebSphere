@@ -516,14 +516,14 @@ function main()
                         (( error_count += 1 ))
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-						    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
-						    writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
-						fi
+                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
+                            writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
+                        fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-						    writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-						    writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-						fi
+                            writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                        fi
                     fi
                 else
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: uninstallFiles ${UNINSTALL_LOCATION_LOCAL}"; fi
@@ -544,14 +544,14 @@ function main()
                         (( error_count += 1 ))
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-						    writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-						    writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-						fi
+                            writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
+                            writeLogEntry "STDERR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
+                        fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-						    writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-						    writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-						fi
+                            writeLogEntry "INFO" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntry "STDOUT" "${CNAME}" "${function_name}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                        fi
                     fi
                 fi
             ;;
