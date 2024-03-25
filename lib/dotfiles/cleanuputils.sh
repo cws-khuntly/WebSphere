@@ -169,7 +169,8 @@ function cleanupLocalFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
     fi
 
-    readarray -td "," files_to_process <<< "${requested_files}";
+    #readarray -td "," files_to_process <<< "${requested_files}";
+    requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -288,7 +289,8 @@ function cleanupRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
     fi
 
-    readarray -td "," files_to_process <<< "${requested_files}";
+    #readarray -td "," files_to_process <<< "${requested_files}";
+    requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
 
