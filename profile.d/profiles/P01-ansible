@@ -21,7 +21,7 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-(( "$(grep -qE "^ansible" <<< "$(compgen -c)"; printf "%s" "${?}")" != 0 )) && return;
+[[ -z "$(compgen -c | grep -E -qw ^ansible)" ]] && return;
 
 declare -x ANSIBLE_HOSTS="${HOME}/etc/ansible/hosts";
 
