@@ -48,6 +48,9 @@ alias fortune="fortune -a -e";
 alias ipv4sort="sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4";
 alias minicom="sudo -u root minicom -s /dev/ttyS0";
 alias tailf="tail -f";
+alias reload="source ${HOME}/.bashrc";
+alias shell="selectProfile";
+alias listFunctions="compgen -A function";
 
 ## script tracing
 alias enableDebug="declare -x ENABLE_DEBUG=\"${_TRUE}"\";
@@ -68,12 +71,6 @@ alias rsync.exp="${HOME}/lib/rsync.exp";
 alias gpg.exp="${HOME}/lib/gpg.exp";
 alias keychain.exp="${HOME}/lib/keychain.exp";
 alias telnet.exp="${HOME}/lib/telnet.exp";
-
-if [[ "$(awk -F "/" '{print $NF}' <<< "${SHELL}")" =~ [Bb][Aa][Ss][Hh]* ]]; then
-    alias reload="source ${HOME}/.bashrc";
-    alias shell="selectProfile";
-    alias listFunctions="compgen -A function";
-fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
