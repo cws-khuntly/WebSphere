@@ -53,5 +53,8 @@ do
     [[ -n "${file_entry}" ]] && unset -v file_entry;
 done
 
+[[ -n "${CNAME}" ]] && unset -v CNAME;
+[[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
+
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
