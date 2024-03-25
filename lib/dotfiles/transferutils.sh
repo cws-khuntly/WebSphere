@@ -202,7 +202,8 @@ function transferLocalFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${file_listing}\"";
     fi
 
-    readarray -td "," files_to_process <<< "${file_listing}";
+    #readarray -td "," files_to_process <<< "${file_listing}";
+    files_to_process=( $(printf "%s" "${file_listing}" | tr "," "\n") );
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -316,6 +317,8 @@ function transferRemoteFiles()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_port -> ${remote_port}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_user -> ${target_user}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_exec -> ${force_exec}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating sFTP batch send file...";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=\"${TMPDIR:-${USABLE_TMP_DIR}}\"";
     fi
 
     if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
@@ -379,9 +382,8 @@ function transferRemoteFiles()
 
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the sFTP batch send file ${sftp_send_file}. Please ensure the file exists and can be written to.";
         else
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${file_list}\""; fi
-
-            readarray -td "," files_to_process <<< "${file_list}";
+            #readarray -td "," files_to_process <<< "${file_list}";
+            requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating batch file ${sftp_send_file}..."; fi
 
