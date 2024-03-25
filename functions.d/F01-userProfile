@@ -29,7 +29,7 @@ function showHostInfo()
 
     ## system information
     host_system_name="$(hostname -f | tr '[:upper:]' '[:lower:]')";
-    host_ip_address="$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "inet6|127.0.0.1" | awk '{print $2}')";
+    host_ip_address=( "$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "inet6|127.0.0.1" | awk '{print $2}')" );
     host_kernel_version="$(uname -r)";
     host_cpu_count=$(grep -c "model name" < /proc/cpuinfo);
     host_cpu_info="$(grep -E "model name" < /proc/cpuinfo | uniq | cut -d ":" -f 2 | sed -e 's/^ *//g;s/ *$//g' | tr -s " ")";
@@ -37,7 +37,7 @@ function showHostInfo()
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_system_name -> ${host_system_name}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_ip_address -> ${host_ip_address}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_ip_address -> ${host_ip_address[@]}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_kernel_version -> ${host_kernel_version}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_cpu_count -> ${host_cpu_count}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "host_cpu_info -> ${host_cpu_info}";
@@ -70,7 +70,7 @@ function showHostInfo()
     fi
 
     printf "%s\n" "+---------------------- System Information -------------------------+" >&2;
-    printf "%-16s : %-10s\n" "+ IP Address" "${host_ip_address}" >&2;
+    printf "%-16s : %-10s\n" "+ IP Address" "${host_ip_address[@]}" >&2;
     printf "%-16s : %-10s\n" "+ Kernel version" "${host_kernel_version}" >&2;
     printf "%-16s : %-10s\n" "+ CPU" "${host_cpu_count} / ${host_cpu_info}" >&2;
     printf "%-16s : %-10s\n" "+ Memory" "${host_memory_size} MB" >&2;
@@ -120,7 +120,7 @@ function showHostInfo()
 #       RETURNS:  0 regardless of result
 #==============================================================================
 function setPromptCommand()
-(
+{
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -140,27 +140,45 @@ function setPromptCommand()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
-    PS1="";
-
+    color_off='\033[0m'
+    color_red='\033[0;31m';
+    color_green='\033[0;32m';
+    color_yellow='\033[0;33m';
+    color_blue='\033[0;34m';
+    real_user="$(who am i | awk '{print $1}')";
+    PS2="continue -> ";
+    PS3="Enter selection: ";
+    PS4='[Time: $(date -d "@$(printf "%(%s)T")" +"${TIMESTAMP_OPTS}")][Thread: ${0}][Log: -][Level: TRACE] - [File: ${FUNCNAME[0]:-${SHELL}}] [Method: -] - '; declare -x PS4;
     git_status="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)";
 
-    ## save/export history
-    history -a;
-    history -n;
+    [[ -n "${PS1}" ]] && unset -v PS1;
 
-    case "${REAL_USER}" in
-        "")
-            echo -ne "\033]0;$(printf "[%s:%s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${PWD}")\007";
-            PS1='$(printf "\e[00;32m[\u:\H]\e[m \e[00;00m:\e[m \e[00;33m<\w $([[ -n "${git_status}" ]] && ( ${git_status} ))>\e[m \e[00;00m\e[m\n\n$ ")';
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "git_status -> ${git_status}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Setting PS1...";
+    fi
+
+    case "${real_user}" in
+        "${LOGNAME}")
+            echo -ne "\033]0; $(printf "[%s:%s] : <%s>" "${LOGNAME}" "${HOSTNAME}" "$(basename "${PWD}")")\007";
+
+            case "${git_status}" in
+                "") PS1='$(printf "${color_green}[\u:\H] ${color_black}: ${color_green}<${color_yellow}\w${color_green}>\n\n$ ${color_off}")'; ;;
+                *) PS1='$(printf "${color_green}[\u:\H] ${color_black}: ${color_green}<${color_yellow}\w ${color_blue}($(printf "%s" "${git_status}"))${color_green}>\n\n$ ${color_off}")'; ;;
+            esac
             ;;
         *)
-            echo -ne "\033]0;$(printf "[%s:%s as %s] : <%s>" "${HOSTNAME}" "${LOGNAME}" "${REAL_USER}" "${PWD}")\007";
-            PS1='$(printf "\e[00;31mNOTE: YOU ARE ${REAL_USER}\e[00;32m.\n\e[00;32m[\u:\h as \e[00;31m%s\e[00;32m]\e[m \e[00;00m:\e[m \e[00;33m<\w $([[ -n "${git_status}" ]] && ( ${git_status} ))>\e[m \e[00;00m\e[m \n\n$ ")';
+            echo -ne "\033]0; $(printf "[%s:%s as %s] : <%s>" "${LOGNAME}" "${HOSTNAME}" "${real_user}" "$(basename "${PWD}")")\007";
+
+            case "${git_status}" in
+                "") PS1='$(printf "${color_red}NOTE: YOU ARE ${real_user}\n${color_green}[\u:\h as ${color_red}%s ${color_black}: ${color_green}<${color_yellow}\w${color_green}>\n\n$ ${color_off}")'; ;;
+                *) PS1='$(printf "${color_red}NOTE: YOU ARE ${real_user}\n${color_green}[\u:\h as ${color_red}%s ${color_black}: ${color_green}<${color_yellow}\w ${color_blue}($(printf "%s" "${git_status}")${color_green})\n\n$ ${color_off}")'; ;;
+            esac
             ;;
     esac
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "return_code -> ${return_code}";
+        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "PS1 -> ${PS1}";
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> exit";
     fi
 
@@ -178,7 +196,7 @@ function setPromptCommand()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-)
+}
 
 #=====  FUNCTION  =============================================================
 #          NAME:  logoutUser
