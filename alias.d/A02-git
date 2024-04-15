@@ -32,6 +32,7 @@ alias gd="git diff";
 alias gdc="git diff --cached";
 alias gm="git commit -m";
 alias gma="git commit -am";
+alias gms="git commit -Ssm";
 alias rgc="git commit -m \"\$(curl -s https://whatthecommit.com/index.txt)"\";
 alias gb="git branch";
 alias gc="git checkout";
