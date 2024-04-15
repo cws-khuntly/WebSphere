@@ -39,30 +39,41 @@ function getHostKeys()
     for keytype in ${SSH_HOST_KEYS[*]}; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "keytype -> ${keytype}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s\n\" \"~\" | nc \"${remote_host}\" ${remote_port}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh-keyscan -t \"${keytype}\" -p ${remote_port} -H \"${remote_host}\"";
-        fi
+            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh-keygen -F ${remote_host} 2>/dev/null | grep ${keytype}";
+         fi
 
-        remote_ssh_version="$(printf "%s\n" "~" |  nc "${remote_host}" ${remote_port} | head -1)";
-        remote_ssh_key="$(ssh-keyscan -t "${keytype}" -p ${remote_port} -H "${remote_host}")";
+        does_key_exist="$(ssh-keygen -F "${remote_host}" 2>/dev/null | grep "${keytype}")";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_ssh_version -> ${remote_ssh_version}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_ssh_key -> ${remote_ssh_key}";
-        fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "does_key_exist -> ${does_key_exist}"; fi
 
-        if [[ -n "${remote_ssh_key}" ]] && [[ -n "${remote_ssh_version}" ]]; then
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Found key ${remote_ssh_key} of type ${keytype}";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"# %s:%d %s\n\" \"${remote_host}\" \"${remote_port}\" \"${remote_ssh_version}\" >> \"${SSH_KNOWN_HOSTS}\"";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s\n\" \"${remote_ssh_key}\" >> \"${SSH_KNOWN_HOSTS}\"";
+        if [[ -z "${does_key_exist}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then 
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s\n\" \"~\" | nc \"${remote_host}\" ${remote_port}";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: ssh-keyscan -t \"${keytype}\" -p ${remote_port} -H \"${remote_host}\"";
             fi
 
-            printf "# %s:%d %s\n" "${remote_host}" "${remote_port}" "${remote_ssh_version}" >> "${SSH_KNOWN_HOSTS}";
-            printf "%s\n" "${remote_ssh_key}" >> "${SSH_KNOWN_HOSTS}";
+            remote_ssh_version="$(printf "%s" "~" | nc "${remote_host}" ${remote_port} 2>/dev/null | head -1)";
+            remote_ssh_key="$(ssh-keyscan -t "${keytype}" -p ${remote_port} -H "${remote_host}")";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_ssh_version -> ${remote_ssh_version}";
+                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "remote_ssh_key -> ${remote_ssh_key}";
+            fi
+
+            if [[ -n "${remote_ssh_key}" ]] && [[ -n "${remote_ssh_version}" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Found key ${remote_ssh_key} of type ${keytype}";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"# %s:%d %s\n\" \"${remote_host}\" \"${remote_port}\" \"${remote_ssh_version}\" >> \"${SSH_KNOWN_HOSTS}\"";
+                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s\n\" \"${remote_ssh_key}\" >> \"${SSH_KNOWN_HOSTS}\"";
+                fi
+
+                printf "# %s:%d %s %s\n" "${remote_host}" "${remote_port}" "${keytype}" "${remote_ssh_version}" >> "${SSH_KNOWN_HOSTS}";
+                printf "%s\n" "${remote_ssh_key}" >> "${SSH_KNOWN_HOSTS}";
+            fi
         fi
 
         [[ -n "${keytype}" ]] && unset -v keytype;
+        [[ -n "${does_key_exist}" ]] && unset -v does_key_exist;
         [[ -n "${remote_ssh_key}" ]] && unset -v remote_ssh_key;
     done
 
