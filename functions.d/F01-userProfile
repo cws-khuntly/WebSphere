@@ -29,7 +29,7 @@ function showHostInfo()
 
     ## system information
     host_system_name="$(hostname -f | tr '[:upper:]' '[:lower:]')";
-    host_ip_address=( "$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "inet6|127.0.0.1" | awk '{print $2}')" );
+    host_ip_address=( "$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "inet6|127.0.0.1" | awk '{print $2}' | tr '\n' ' ')" );
     host_kernel_version="$(uname -r)";
     host_cpu_count=$(grep -c "model name" < /proc/cpuinfo);
     host_cpu_info="$(grep -E "model name" < /proc/cpuinfo | uniq | cut -d ":" -f 2 | sed -e 's/^ *//g;s/ *$//g' | tr -s " ")";
