@@ -28,8 +28,106 @@ function validateHostAvailability()
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
-    provided_hostname="${1}";
-    provided_port="${2}";
+    #======  FUNCTION  ============================================================
+    #          NAME:  usage
+    #   DESCRIPTION:  
+    #    PARAMETERS:  None
+    #       RETURNS:  0 regardless of result.
+    #==============================================================================
+    function usage()
+    (
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+		set +o noclobber;
+		cname="F04-network";
+		function_name="${cname}#${FUNCNAME[1]}";
+		return_code=3;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${method_name}" "${LINENO}" "${method_name} -> enter"; fi
+
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${method_name}" "${LINENO}" "${function_name} - Return a string of random characters.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "${cname}" "${method_name}" "${LINENO}" "Usage: ${function_name} [ options ]
+                -> --host=value| -n value - The hostname/IP address of the target host.
+                -> --port=value | -p value - (Optional) The port number to test against.
+                -> --help | -? | -h - Show this help menu.";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${method_name}" "${LINENO}" "${method_name} -> exit"; fi
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    )
+
+    if (( ${#} == 0 )); then usage; RETURN_CODE="${?}"; fi
+
+	if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then return ${RETURN_CODE}; fi
+
+    while (( ${#} > 0 )); do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Provided Argument -> ${1}"; fi
+
+        ARGUMENT="${1}";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT -> ${ARGUMENT}"; fi
+
+        case "${ARGUMENT}" in
+            *=*)
+                ARGUMENT_NAME="$(cut -d "=" -f 1 <<< "${ARGUMENT// }" | sed -e "s/--//g" -e "s/-//g")";
+                ARGUMENT_VALUE="$(cut -d "=" -f 2 <<< "${ARGUMENT}")";
+
+                shift 1;
+                ;;
+            *)
+                ARGUMENT_NAME="$(cut -d "-" -f 2 <<< "${ARGUMENT}")";
+                ARGUMENT_VALUE="${2}";
+
+                shift 2;
+                ;;
+        esac
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_NAME -> ${ARGUMENT_NAME}";
+            writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}";
+        fi
+
+        case "${ARGUMENT_NAME}" in
+            host|n)
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
+
+                declare provided_hostname="${ARGUMENT_VALUE}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "provided_hostname -> ${provided_hostname}"; fi
+                ;;
+            port|p)
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "Setting port..."; fi
+
+                declare provided_port="${ARGUMENT_VALUE}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "provided_port -> ${provided_port}"; fi
+                ;;
+            help|\?|h)
+                [[ -n "${function_name}" ]] && unset -v function_name;
+                [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+                usage;
+                RETURN_CODE="${?}";
+
+                set +o noclobber;
+                function_name="${CNAME}#${FUNCNAME[0]}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+
+                if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+                if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+                ;;
+            *)
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${METHOD_NAME}" "${LINENO}" "An invalid option has been provided and has been ignored. Option -> ${ARGUMENT_NAME}, Value -> ${ARGUMENT_VALUE}";
+                ;;
+        esac
+    done
+
+	if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then return ${RETURN_CODE}; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "provided_hostname -> ${provided_hostname}";
