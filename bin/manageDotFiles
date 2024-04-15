@@ -414,7 +414,7 @@ function main()
 
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${CNAME}" "${function_name}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}"; fi
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${function_name}" "${LINENO}" "EXEC: installFiles ${INSTALL_LOCATION_LOCAL}"; fi
 
                         [[ -n "${CNAME}" ]] && unset -v CNAME;
                         [[ -n "${function_name}" ]] && unset -v function_name;
