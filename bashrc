@@ -30,9 +30,6 @@ if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] &&
 if [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "${HOME}/lib/system/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
 
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#loadProfile";
 
@@ -41,15 +38,11 @@ declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${
 ## load profile
 for file_entry in "${HOME}"/.profile.d/*
 do
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "file_entry -> ${file_entry}"; fi
-
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
         for dir_entry in "${HOME}"/.profile.d/"${file_entry}"/*
         do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${LINENO}" "dir_entry -> ${dir_entry}"; fi
-
             [[ -z "${dir_entry}" ]] && continue;
 
             if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi
@@ -78,16 +71,8 @@ showHostInfo;
 ## trap logout
 trap 'source ${HOME}/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
-## run tmux (we're going to finally learn it)
-## support both tmux and screen, use the flag files appropriately
-[[ -n "$(compgen -c | grep -E -qw ^tmux)" ]] && [[ -z "$(tmux info 2> /dev/null)" ]] && [[ -f ${HOME}/etc/run-tmux ]] && tmux attach;
-[[ -n "$(compgen -c | grep -E -qw ^screen)" ]] && [[ -z "${STY}" ]] && [[ -f ${HOME}/etc/run-screen ]] && screen -RR;
-
 ## make the umask sane
 umask 022;
 
 [[ -n "${CNAME}" ]] && unset -v CNAME;
 [[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
