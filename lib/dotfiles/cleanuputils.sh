@@ -18,14 +18,14 @@ function cleanupFiles()
     error_count=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch=$(printf "%(%s)T");
+        start_epoch="$(date +"%s")";
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
     operating_mode="${1}";
@@ -36,18 +36,18 @@ function cleanupFiles()
     force_exec="${6}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "operating_mode -> ${operating_mode}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_file_list -> ${cleanup_file_list}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_host -> ${cleanup_host}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_port -> ${cleanup_port}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_user -> ${cleanup_user}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_exec -> ${force_exec}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "operating_mode -> ${operating_mode}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_file_list -> ${cleanup_file_list}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_host -> ${cleanup_host}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_port -> ${cleanup_port}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_user -> ${cleanup_user}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "force_exec -> ${force_exec}";
     fi
 
     if [[ -n "${cleanup_file_list}" ]]; then
         case "${operating_mode}" in
             "${CLEANUP_LOCATION_LOCAL}")
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: cleanupLocalFiles ${cleanup_file_list}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: cleanupLocalFiles ${cleanup_file_list}"; fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
@@ -59,22 +59,22 @@ function cleanupFiles()
                 cname="cleanuputils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
                 fi
                 ;;
             "${CLEANUP_LOCATION_REMOTE}")
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_host -> ${cleanup_host}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_port -> ${cleanup_port}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "cleanup_user -> ${cleanup_user}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "force_exec -> ${force_exec}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: installRemoteFiles ${cleanup_host} ${cleanup_port} ${cleanup_user} ${force_exec}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_host -> ${cleanup_host}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_port -> ${cleanup_port}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_user -> ${cleanup_user}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "force_exec -> ${force_exec}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: installRemoteFiles ${cleanup_host} ${cleanup_port} ${cleanup_user} ${force_exec}";
                 fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
@@ -87,24 +87,24 @@ function cleanupFiles()
                 cname="cleanuputils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote cleanup of temporary files has failed. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "Remote cleanup of temporary files has failed. Please review logs.";
                 fi
                 ;;
             *)
                 (( error_count += 1 ));
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An invalid operation mode was specified. operating_mode -> ${operating_mode}. Cannot continue.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An invalid operation mode was specified. operating_mode -> ${operating_mode}. Cannot continue.";
                 ;;
         esac
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "The list of files to operate against appears to be empty. Cannot continue.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "The list of files to operate against appears to be empty. Cannot continue.";
     fi
 
     [[ -n "${cleanup_user}" ]] && unset -v cleanup_user;
@@ -117,11 +117,11 @@ function cleanupFiles()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch=$(printf "%(%s)T");
+        end_epoch="$(date +"%s")"
         runtime=$(( start_epoch - end_epoch ));
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
@@ -152,32 +152,32 @@ function cleanupLocalFiles()
     error_count=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch=$(printf "%(%s)T");
+        start_epoch="$(date +"%s")";
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
     requested_files="${1}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "requested_files -> ${requested_files[*]}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "requested_files -> ${requested_files[*]}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
     fi
 
     #readarray -td "," files_to_process <<< "${requested_files}";
     requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
 
     for eligibleFile in "${files_to_process[@]}"; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
         fi
 
         [[ -z "${eligibleFile}" ]] && continue;
@@ -186,23 +186,23 @@ function cleanupLocalFiles()
         targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetFile -> ${targetFile}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetDir -> ${targetDir}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${targetDir}/${targetFile} exists and removing if necessary";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "targetFile -> ${targetFile}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "targetDir -> ${targetDir}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Check if file ${targetDir}/${targetFile} exists and removing if necessary";
         fi
 
         if [[ -n "${targetFile}" ]] && [[ -n "${targetDir}" ]]; then
             if [[ -d "${targetDir}/${targetFile}" ]] && [[ -w "${targetDir}/${targetFile}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing directory ${targetDir}/${targetFile}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: rm -rf ${targetDir}/${targetFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Removing directory ${targetDir}/${targetFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: rm -rf ${targetDir}/${targetFile}";
                 fi
 
                 rm -rf "${targetDir:?}/${targetFile}";
             elif [[ -e "${targetDir}/${targetFile}" ]] && [[ -w "${targetDir}/${targetFile}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Removing file ${targetDir}/${targetFile}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: rm -f ${targetDir}/${targetFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Removing file ${targetDir}/${targetFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: rm -f ${targetDir}/${targetFile}";
                 fi
 
                 rm -f "${targetDir:?}/${targetFile}";
@@ -211,10 +211,10 @@ function cleanupLocalFiles()
             if [[ -e "${targetDir}/${targetFile}" ]] || [[ -w "${targetDir}/${targetFile}" ]]; then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to remove target file ${targetDir}/${targetFile}. Please remove the file manually.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "Failed to remove target file ${targetDir}/${targetFile}. Please remove the file manually.";
             fi
         else
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
         
             continue;
         fi
@@ -231,11 +231,11 @@ function cleanupLocalFiles()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch=$(printf "%(%s)T");
+        end_epoch="$(date +"%s")"
         runtime=$(( start_epoch - end_epoch ));
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
@@ -266,14 +266,14 @@ function cleanupRemoteFiles()
     error_count=0;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch=$(printf "%(%s)T");
+        start_epoch="$(date +"%s")";
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} START: $(date -d "@${start_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
     fi
 
     requested_files="${1}";
@@ -282,22 +282,22 @@ function cleanupRemoteFiles()
     target_user="${4}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "requested_files -> ${requested_files}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_host -> ${target_host}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_port -> ${target_port}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_user -> ${target_user}";
-        writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "requested_files -> ${requested_files}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "target_host -> ${target_host}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "target_port -> ${target_port}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "target_user -> ${target_user}";
+        writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
     fi
 
     #readarray -td "," files_to_process <<< "${requested_files}";
     requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "files_to_process -> ${files_to_process[*]}"; fi
 
     if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Checking host availibility for ${target_host}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: validateHostAddress ${target_host} ${target_port}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Checking host availibility for ${target_host}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: validateHostAddress ${target_host} ${target_port}";
         fi
 
         [[ -n "${cname}" ]] && unset -v cname;
@@ -310,18 +310,18 @@ function cleanupRemoteFiles()
         cname="cleanuputils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
         fi
     fi
 
     if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Getting SSH host keys for host ${target_host}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: getHostKeys \"${target_host}\" \"${target_port}\"";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Getting SSH host keys for host ${target_host}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: getHostKeys \"${target_host}\" \"${target_port}\"";
         fi
 
         [[ -n "${cname}" ]] && unset -v cname;
@@ -334,38 +334,38 @@ function cleanupRemoteFiles()
         cname="cleanuputils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred getting SSH host keys from host ${target_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred getting SSH host keys from host ${target_host}. Please review logs.";
         fi
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "target_host -> ${target_host}";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Generating file cleanup file...";
-            writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "target_host -> ${target_host}";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Generating file cleanup file...";
+            writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
 
         file_cleanup_file="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_cleanup_file -> ${file_cleanup_file}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_cleanup_file -> ${file_cleanup_file}"; fi
 
         if [[ ! -e "${file_cleanup_file}" ]] || [[ ! -w "${file_cleanup_file}" ]]; then
             (( error_count += 1 ))
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to generate the file cleanup script ${file_cleanup_file}. Please ensure the file exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "Failed to generate the file cleanup script ${file_cleanup_file}. Please ensure the file exists and can be written to.";
         else
             file_counter=0;
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "file_counter -> ${file_counter}";
-                writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Populating file cleanup file ${file_cleanup_file}...";
+                writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_counter -> ${file_counter}";
+                writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Populating file cleanup file ${file_cleanup_file}...";
             fi
 
             for eligibleFile in "${files_to_process[@]}"; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "eligibleFile -> ${eligibleFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Check if file ${eligibleFile} exists and removing if necessary";
                 fi
 
                 [[ -z "${eligibleFile}" ]] && continue;
@@ -374,24 +374,24 @@ function cleanupRemoteFiles()
                 targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetFile -> ${targetFile}";
-                    writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "targetDir -> ${targetDir}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "targetFile -> ${targetFile}";
+                    writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "targetDir -> ${targetDir}";
                 fi
 
                 if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
                     if (( file_counter == 0 )); then
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >| ${file_cleanup_file}"; fi
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >| ${file_cleanup_file}"; fi
 
                         { printf "%s %s %s\n" "-" "rm" "${targetDir:?}/${targetFile}"; } >| "${file_cleanup_file}";
 
                         (( file_counter += 1 ));
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >> ${file_cleanup_file}"; fi
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: printf \"%s %s %s\n\" \"-\" \"rm\" \"${targetDir:?}/${targetFile}\" >> ${file_cleanup_file}"; fi
 
                         { printf "%s %s %s\n" "-" "rm" "${targetDir:?}/${targetFile}"; } >> "${file_cleanup_file}";
                     fi
                 else
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
                 
                     continue;
                 fi
@@ -404,26 +404,26 @@ function cleanupRemoteFiles()
             if [[ ! -s "${file_cleanup_file}" ]]; then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Failed to populate the file cleanup file ${file_cleanup_file}. Please ensure the file exists and can be written to.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "Failed to populate the file cleanup file ${file_cleanup_file}. Please ensure the file exists and can be written to.";
             else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "EXEC: sftp -b ${file_cleanup_file} -oPort=${target_port} ${target_user}@${target_host} > /dev/null 2>&1"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: sftp -b ${file_cleanup_file} -oPort=${target_port} ${target_user}@${target_host} > /dev/null 2>&1"; fi
 
                 sftp -b "${file_cleanup_file}" -oPort="${target_port}" "${target_user}@${target_host}" > /dev/null 2>&1;
                 ret_code="${?}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "DEBUG" "${cname}" "${function_name}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "An error occurred during the file cleanup process on host ${target_host} as user ${target_user}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "An error occurred during the file cleanup process on host ${target_host} as user ${target_user}. Please review logs.";
                 fi
             fi
         fi
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "ERROR" "${cname}" "${function_name}" "${LINENO}" "Remote host ${cleanup_host} appears to be unavailable. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "Remote host ${cleanup_host} appears to be unavailable. Please review logs.";
     fi
 
     [[ -w "${file_cleanup_file}" ]] && rm -f "${file_cleanup_file}";
@@ -443,11 +443,11 @@ function cleanupRemoteFiles()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch=$(printf "%(%s)T");
+        end_epoch="$(date +"%s")"
         runtime=$(( start_epoch - end_epoch ));
 
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntry "PERFORMANCE" "${cname}" "${function_name}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntryToFile "PERFORMANCE" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
