@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 history -a;
 history -n;
 
@@ -30,16 +27,3 @@ declare -ix HISTFILESIZE=10000;
 declare -x HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S ";
 declare -x HISTCONTROL="ignoredups:ignorespace";
 declare -x HISTIGNORE="ls:ll:lt:la:l:cd:pwd:exit:mc:su:df:clear:cls:bg:fg";
-
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTFILE -> ${HISTFILE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTSIZE -> ${HISTSIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "EXTENDED_HISTORY -> ${EXTENDED_HISTORY}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTFILESIZE -> ${HISTFILESIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTTIMEFORMAT -> ${HISTTIMEFORMAT}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTCONTROL -> ${HISTCONTROL}";
-    writeLogEntry "DEBUG" "${CNAME}" "P09-history" "${LINENO}" "HISTIGNORE -> ${HISTIGNORE}";
-fi
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
