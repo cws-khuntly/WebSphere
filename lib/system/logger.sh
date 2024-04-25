@@ -24,6 +24,9 @@ then
     if [[ -r "/usr/local/etc/logging.properties" ]]; then source "/usr/local/etc/logging.properties"; fi
 fi
 
+## create the directory if it doesn't already exist
+if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
+
 #======  FUNCTION  ============================================================
 #          NAME:  usage
 #   DESCRIPTION:  Rotates log files in logs directory
@@ -32,13 +35,8 @@ fi
 #==============================================================================
 function usage()
 (
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
     method_name="${CNAME}#${FUNCNAME[0]}";
     return_code=3;
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${method_name} -> enter"; fi
 
     printf "%s %s\n" "${method_name}" "Write a log message to stdout/err or to a logfile" >&2;
     printf "%s %s\n" "Usage: ${method_name}" "[ <options> ]" >&2;
@@ -57,11 +55,6 @@ function usage()
     printf "    %s: %s\n" "Line number" "The line on which the message was produced." >&2;
     printf "    %s: %s\n" "Message" "The data to write to the logfile." >&2;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${CNAME}" "${method_name}" "${$}" "${LINENO}" "${method_name} -> exit"; fi
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
     return ${return_code};
 )
 
@@ -73,11 +66,6 @@ function usage()
 #==============================================================================
 function writeLogEntryToStdWriter()
 (
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-    if [[ -n "${ENABLE_LOGGER_VERBOSE}" ]] && [[ "${ENABLE_LOGGER_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_LOGGER_TRACE}" ]] && [[ "${ENABLE_LOGGER_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
     ## create the directory if it doesn't already exist
     if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
 
@@ -92,11 +80,6 @@ function writeLogEntryToStdWriter()
     [[ -n "${log_level}" ]] && unset -v log_level;
     [[ -n "${log_message}" ]] && unset -v log_message;
 
-    if [[ -n "${ENABLE_LOGGER_VERBOSE}" ]] && [[ "${ENABLE_LOGGER_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_LOGGER_TRACE}" ]] && [[ "${ENABLE_LOGGER_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
     return 0;
 )
 
@@ -108,14 +91,6 @@ function writeLogEntryToStdWriter()
 #==============================================================================
 function writeLogEntryToFile()
 (
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-    if [[ -n "${ENABLE_LOGGER_VERBOSE}" ]] && [[ "${ENABLE_LOGGER_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_LOGGER_TRACE}" ]] && [[ "${ENABLE_LOGGER_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    ## create the directory if it doesn't already exist
-    if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
-
     set +o noclobber;
     log_level="${1}";
     log_source="${2}";
@@ -149,11 +124,6 @@ function writeLogEntryToFile()
     [[ -n "${log_message}" ]] && unset -v log_message;
     [[ -n "${log_file}" ]] && unset -v log_file;
     [[ -n "${write_to_log}" ]] && unset -v write_to_log;
-
-    if [[ -n "${ENABLE_LOGGER_VERBOSE}" ]] && [[ "${ENABLE_LOGGER_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_LOGGER_TRACE}" ]] && [[ "${ENABLE_LOGGER_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     return 0;
 )
