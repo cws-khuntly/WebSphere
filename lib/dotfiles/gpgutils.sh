@@ -22,24 +22,24 @@ function captureGpgData()
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch="$(date +"%s")";
 
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     if [[ ! -d "${TMPDIR:-${USABLE_TMP_DIR}}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Temporary directory ${TMPDIR:-${USABLE_TMP_DIR}} does not exist. Creating.";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: mkdir -p ${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Temporary directory ${TMPDIR:-${USABLE_TMP_DIR}} does not exist. Creating.";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
 
         mkdir -p "${TMPDIR:-${USABLE_TMP_DIR}}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Directory created: ${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory created: ${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
     fi
 
@@ -48,99 +48,99 @@ function captureGpgData()
 
     while [[ -z "${key_algo}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired key algorithm: \" key_algo";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired key algorithm: \" key_algo";
         fi
 
         read -rp "Desired key algorithm: " key_algo;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "key_algo -> ${key_algo}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "key_algo -> ${key_algo}";
         fi
     done
 
     while [[ -z "${key_bits}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired key bitsize: \" key_bits";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired key bitsize: \" key_bits";
         fi
 
         read -rp "Desired key length: " key_bits;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "key_bits -> ${key_bits}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "key_bits -> ${key_bits}";
         fi
     done
 
     while [[ -z "${subkey_type}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired subkey type: \" subkey_type";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired subkey type: \" subkey_type";
         fi
 
         read -rp "Desired subkey type: " subkey_type;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "subkey_type -> ${subkey_type}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "subkey_type -> ${subkey_type}";
         fi
     done
 
     while [[ -z "${subkey_length}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired subkey length: \" subkey_length";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired subkey length: \" subkey_length";
         fi
 
         read -rp "Desired subkey length: " subkey_length;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "subkey_length -> ${subkey_length}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "subkey_length -> ${subkey_length}";
         fi
     done
 
     while [[ -z "${real_name}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Provide your real name: \" real_name";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Provide your real name: \" real_name";
         fi
 
         read -rp "Provide your name: " real_name;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "real_name -> ${real_name}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "real_name -> ${real_name}";
         fi
     done
 
     while [[ -z "${email_address}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Provide your email address: \" email_address";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Provide your email address: \" email_address";
         fi
 
         read -rp "Provide your email address: " email_address;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "email_address -> ${email_address}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "email_address -> ${email_address}";
         fi
     done
 
     while [[ -z "${key_lifetime}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired key lifetime: \" key_lifetime";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired key lifetime: \" key_lifetime";
         fi
 
         read -rp "Desired key lifetime: " key_lifetime;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "key_lifetime -> ${key_lifetime}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "key_lifetime -> ${key_lifetime}";
         fi
     done
 
     while [[ -z "${key_passphrase}" ]]; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Capture user input:";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: read -p \"Desired key passphrase: \" key_passphrase";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Capture user input:";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: read -p \"Desired key passphrase: \" key_passphrase";
         fi
 
         stty -echo;
@@ -157,11 +157,11 @@ function captureGpgData()
         ## looks like something happened creating the file
         (( error_count += 1 ));
 
-        writeLogEntryToFile "ERROR" "${cname}" "${method_name}" "${$}" "${LINENO}" "An error occurred while transferring the input to the answer file.";
+        writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred while transferring the input to the answer file.";
     elif (( $(grep -c "&" "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")") != 0 )); then
         (( error_count += 1 ));
 
-        writeLogEntryToFile "ERROR" "${cname}" "${method_name}" "${$}" "${LINENO}" "An error occurred while transferring the input to the answer file.";
+        writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred while transferring the input to the answer file.";
     else
         ## file written, change permissions
         chmod 0600 "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")";
@@ -180,16 +180,16 @@ function captureGpgData()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch="$(date +"%s")"
         runtime=$(( start_epoch - end_epoch ));
 
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
@@ -223,59 +223,59 @@ function generateGpgKeys()
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch="$(date +"%s")";
 
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     if [[ ! -d "${TMPDIR:-${USABLE_TMP_DIR}}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Temporary directory ${TMPDIR:-${USABLE_TMP_DIR}} does not exist. Creating.";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: mkdir -p ${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Temporary directory ${TMPDIR:-${USABLE_TMP_DIR}} does not exist. Creating.";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
 
         mkdir -p "${TMPDIR:-${USABLE_TMP_DIR}}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Directory created: ${TMPDIR:-${USABLE_TMP_DIR}}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory created: ${TMPDIR:-${USABLE_TMP_DIR}}";
         fi
     fi
 
     if [[ ! -d "${HOME}"/.gnupg ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "GnuPG user configuration directory does not exist. Creating.";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: mkdir -p ${HOME}/.gnupg";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "GnuPG user configuration directory does not exist. Creating.";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${HOME}/.gnupg";
         fi
 
         mkdir -p "${HOME}"/.gnupg;
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Directory created: ${HOME}/.gnupg;"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory created: ${HOME}/.gnupg;"; fi
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Create temporary directory for GNUPGHOME...";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: mktemp -d --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}})";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Create temporary directory for GNUPGHOME...";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mktemp -d --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}})";
     fi
 
     GNUPGHOME="$(mktemp -d --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "GNUPGHOME -> ${GNUPGHOME}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: ${GPG_APPLICATION_PROGRAM} --batch --gen-key ${TMPDIR:-${USABLE_TMP_DIR}}/$(basename ${GPG_OPTION_TEMPLATE})";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "GNUPGHOME -> ${GNUPGHOME}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ${GPG_APPLICATION_PROGRAM} --batch --gen-key ${TMPDIR:-${USABLE_TMP_DIR}}/$(basename ${GPG_OPTION_TEMPLATE})";
     fi
 
     "${GPG_APPLICATION_PROGRAM}" --homedir="${GNUPGHOME}" --batch --gen-key "${TMPDIR:-${USABLE_TMP_DIR}}/$(basename "${GPG_OPTION_TEMPLATE}")";
     ret_code=${?};
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
         (( error_count += 1 ))
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${method_name}" "${$}" "${LINENO}" "Failed to generate GPG keys using the provided template. Return code -> ${ret_code}";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to generate GPG keys using the provided template. Return code -> ${ret_code}";
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -286,8 +286,8 @@ function generateGpgKeys()
     cleanup_list="$(basename "${GPG_OPTION_TEMPLATE}")|${TMPDIR:-${USABLE_TMP_DIR}},";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "cleanup_list -> ${cleanup_list}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_list -> ${cleanup_list}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
     fi
 
     [[ -n "${function_name}" ]] && unset -v function_name;
@@ -299,25 +299,25 @@ function generateGpgKeys()
     set +o noclobber;
     function_name="${cname}#${FUNCNAME[0]}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${method_name}" "${$}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch="$(date +"%s")"
         runtime=$(( start_epoch - end_epoch ));
 
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-        writeLogEntryToFile "PERFORMANCE" "${cname}" "${method_name}" "${$}" "${LINENO}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+        writeLogEntryToFile "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
     fi
 
     [[ -n "${cname}" ]] && unset -v cname;
