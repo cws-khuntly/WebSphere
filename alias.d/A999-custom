@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 ## customs
 alias lt="ls -ltrhpF --color=auto";
 alias la="ls -ltrahpF --color=auto";
@@ -70,6 +67,3 @@ alias keychain.exp="${HOME}/lib/keychain.exp";
 alias telnet.exp="${HOME}/lib/telnet.exp";
 alias reload="source ${HOME}/.bashrc";
 alias listFunctions="compgen -A function";
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
