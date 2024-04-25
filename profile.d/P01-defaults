@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 [[ -z "${LOGNAME}" ]] && LOGNAME="$(whoami)"; declare -x LOGNAME;
 
 declare -x LANG="en_US.UTF-8";
@@ -57,31 +54,3 @@ case "$(uname -s)" in
         declare -x PATHSEP=":";
         ;;
 esac
-
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LANG -> ${LANG}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LC_ALL -> ${LC_ALL}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "TIMEFORMAT -> ${TIMEFORMAT}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "LESS -> ${LESS}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "IGNOREEOF -> ${IGNOREEOF}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "GPG_TTY -> ${GPG_TTY}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "BLOCKSIZE -> ${BLOCKSIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "PAGER -> ${PAGER}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "EDITOR -> ${EDITOR}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "FCEDIT -> ${FCEDIT}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "VISUAL -> ${VISUAL}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "DISPLAY -> ${DISPLAY}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "_TRUE -> ${_TRUE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "_FALSE -> ${_FALSE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "THREAD_TIMEOUT -> ${THREAD_TIMEOUT}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "MODIFIED_IFS -> ${MODIFIED_IFS}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "RANDOM_GENERATOR -> ${RANDOM_GENERATOR}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "ENTROPY_FILE -> ${ENTROPY_FILE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "ENTROPY_FILE_SIZE -> ${ENTROPY_FILE_SIZE}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "SSH_AUTH_SOCK -> ${SSH_AUTH_SOCK}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "TERM -> ${TERM}";
-    writeLogEntry "DEBUG" "${CNAME}" "P01-defaults" "${LINENO}" "PATHSEP -> ${PATHSEP}";
-fi
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
