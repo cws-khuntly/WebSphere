@@ -35,11 +35,11 @@ if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT
 #==============================================================================
 function usage()
 (
-    method_name="${CNAME}#${FUNCNAME[0]}";
+    function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=3;
 
-    printf "%s %s\n" "${method_name}" "Write a log message to stdout/err or to a logfile" >&2;
-    printf "%s %s\n" "Usage: ${method_name}" "[ <options> ]" >&2;
+    printf "%s %s\n" "${function_name}" "Write a log message to stdout/err or to a logfile" >&2;
+    printf "%s %s\n" "Usage: ${function_name}" "[ <options> ]" >&2;
     printf "    %s: %s\n" "The level to write for." "Supported levels (not case-sensitive):" >&2;
     printf "        %s: %s\n" "STDOUT" "Write the provided data to standard output - commonly a terminal screen." >&2;
     printf "        %s: %s\n" "STDERR" "Write the provided data to standard error - commonly a terminal screen." >&2;
@@ -66,9 +66,6 @@ function usage()
 #==============================================================================
 function writeLogEntryToStdWriter()
 (
-    ## create the directory if it doesn't already exist
-    if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
-
     set +o noclobber;
     log_level="${1}";
     log_message="${2}";
@@ -93,10 +90,10 @@ function writeLogEntryToFile()
 (
     set +o noclobber;
     log_level="${1}";
-    log_source="${2}";
-    log_method="${3}";
+    log_pid="${2}";
+    log_source="${3}";
     log_line="${4}";
-    log_pid="${5}";
+    log_method="${5}";
     log_message="${6}";
     log_date="$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
 
