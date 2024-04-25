@@ -2,9 +2,9 @@
 
 #==============================================================================
 #
-#          FILE:  P12-sdkman
-#         USAGE:  . P12-sdkman
-#   DESCRIPTION:  sets up sdkman
+#          FILE:  defaults
+#         USAGE:  . defaults
+#   DESCRIPTION:  Sets default commandline options and variables for various programs
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -21,8 +21,67 @@
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-# shellcheck source=/dev/null
-[[ -d "${HOME}/.sdkman/bin/sdkman-init.sh" ]] && source "${HOME}/.sdkman/bin/sdkman-init.sh";
+[[ -z "${LOGNAME}" ]] && LOGNAME="$(whoami)"; declare -x LOGNAME;
+
+declare -x LANG="en_US.UTF-8";
+declare -x LC_ALL="en_US.UTF-8";
+declare -x TIMEFORMAT=$'\nreal %3R\tuser %3U\tsys %3S\tpcpu %P\n';
+declare -x LESS="-QR";
+declare -ix IGNOREEOF=1;
+declare -x BLOCKSIZE="K";
+declare -x PAGER="less";
+declare -x EDITOR="vim";
+declare -x FCEDIT="vim";
+declare -x VISUAL="vim";
+declare -x DISPLAY=":0.0";
+declare -x _TRUE="true";
+declare -x _FALSE="false";
+declare -ix THREAD_TIMEOUT=10;
+declare -x MODIFIED_IFS="^";
+declare -x RANDOM_GENERATOR="/dev/urandom";
+declare -x ENTROPY_FILE="${HOME}/etc/entropy";
+declare -ix ENTROPY_FILE_SIZE=16384;
+declare -x SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
+
+case "$(uname -s)" in
+    [Cc][Yy][Gg]][Ww][Ii][Nn]*)
+        declare -x TERM="ansi";
+        declare -x PATHSEP=";";
+        ;;
+    [Ll][Ii]][Nn][Uu][Xx])
+        declare -x TERM="linux";
+        declare -x PATHSEP=":";
+        ;;
+    [Aa][Ii][Xx]|[Ss][Uu][Nn][Oo][Ss]|[Ss][Oo]][Ll][Aa][Rr][Ii][Ss])
+        declare -x TERM="ansi";
+        declare -x PATHSEP=":";
+        ;;
+esac
+
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "LANG -> ${LANG}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "LC_ALL -> ${LC_ALL}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "TIMEFORMAT -> ${TIMEFORMAT}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "LESS -> ${LESS}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "IGNOREEOF -> ${IGNOREEOF}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "GPG_TTY -> ${GPG_TTY}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "BLOCKSIZE -> ${BLOCKSIZE}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "PAGER -> ${PAGER}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "EDITOR -> ${EDITOR}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "FCEDIT -> ${FCEDIT}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "VISUAL -> ${VISUAL}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "DISPLAY -> ${DISPLAY}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "_TRUE -> ${_TRUE}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "_FALSE -> ${_FALSE}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "THREAD_TIMEOUT -> ${THREAD_TIMEOUT}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "MODIFIED_IFS -> ${MODIFIED_IFS}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "RANDOM_GENERATOR -> ${RANDOM_GENERATOR}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "ENTROPY_FILE -> ${ENTROPY_FILE}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "ENTROPY_FILE_SIZE -> ${ENTROPY_FILE_SIZE}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "SSH_AUTH_SOCK -> ${SSH_AUTH_SOCK}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "TERM -> ${TERM}";
+    writeLogEntryToFile "DEBUG" "${CNAME}" "P01-defaults" "${$}" "${LINENO}" "PATHSEP -> ${PATHSEP}";
+fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
