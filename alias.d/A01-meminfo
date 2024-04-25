@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 ## meminfo
 alias meminfo="free -m -l -t";
 alias psmem="ps auxf | sort -nr -k 4";
@@ -31,6 +28,3 @@ alias gpumeminfo="grep -i --color memory /var/log/Xorg.0.log";
 alias hogc="ps -e -o %cpu,pid,ppid,user,cmd | sort -nr | head";
 alias hogm="ps -e -o %mem,pid,ppid,user,cmd | sort -nr | head";
 alias cpuCount="grep -c \"^processor\" /proc/cpuinfo";
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
