@@ -51,9 +51,10 @@ function usage()
     printf "        %s: %s\n" "WARN" "Warning messages usually related to configuration." >&2;
     printf "        %s: %s\n" "AUDIT" "Performs an audit log write." >&2; ## TODO: This should also be able to send email, write to a db, etc
     printf "        %s: %s\n" "DEBUG" "Messaging related to immediate runtime actions or configurations." >&2;
+    printf "    %s: %s\n" "Process IDentifier (PID)" "The process ID of the running instance." >&2;
     printf "    %s: %s\n" "Calling script" "The script calling the method to write the log entry." >&2;
-    printf "    %s: %s\n" "Calling function" "The method within the script calling the method to write the log entry." >&2;
     printf "    %s: %s\n" "Line number" "The line on which the message was produced." >&2;
+    printf "    %s: %s\n" "Calling function" "The method within the script calling the method to write the log entry." >&2;
     printf "    %s: %s\n" "Message" "The data to write to the logfile." >&2;
 
     return ${return_code};
@@ -110,9 +111,7 @@ function writeLogEntryToFile()
         *) log_file="${DEFAULT_LOG_FILE}"; ;;
     esac
 
-    if [[ "${write_to_log}" == "${_TRUE}" ]] && [[ -n "${log_file}" ]] && [[ -w "${LOG_ROOT}" ]]; then
-        printf "${CONVERSION_PATTERN}\n" "${log_date}" "${log_file}" "${log_level}" "${log_pid}" "${log_source}" "${log_line}" "${log_method}" "${log_message}" >> "${LOG_ROOT}/${log_file}";
-    fi
+    printf "${CONVERSION_PATTERN}\n" "${log_date}" "${log_file}" "${log_level}" "${log_pid}" "${log_source}" "${log_line}" "${log_method}" "${log_message}" >> "${LOG_ROOT}/${log_file}";
 
     [[ -n "${log_date}" ]] && unset -v log_date;
     [[ -n "${log_level}" ]] && unset -v log_level;
