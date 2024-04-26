@@ -64,8 +64,8 @@ function cleanupFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
                 fi
                 ;;
             "${CLEANUP_LOCATION_REMOTE}")
@@ -92,19 +92,19 @@ function cleanupFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Remote cleanup of temporary files has failed. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote cleanup of temporary files has failed. Please review logs.";
                 fi
                 ;;
             *)
                 (( error_count += 1 ));
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An invalid operation mode was specified. operating_mode -> ${operating_mode}. Cannot continue.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An invalid operation mode was specified. operating_mode -> ${operating_mode}. Cannot continue.";
                 ;;
         esac
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "The list of files to operate against appears to be empty. Cannot continue.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The list of files to operate against appears to be empty. Cannot continue.";
     fi
 
     [[ -n "${cleanup_user}" ]] && unset -v cleanup_user;
@@ -211,10 +211,10 @@ function cleanupLocalFiles()
             if [[ -e "${targetDir}/${targetFile}" ]] || [[ -w "${targetDir}/${targetFile}" ]]; then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to remove target file ${targetDir}/${targetFile}. Please remove the file manually.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove target file ${targetDir}/${targetFile}. Please remove the file manually.";
             fi
         else
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
         
             continue;
         fi
@@ -313,8 +313,8 @@ function cleanupRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
         fi
     fi
 
@@ -337,7 +337,7 @@ function cleanupRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred getting SSH host keys from host ${target_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred getting SSH host keys from host ${target_host}. Please review logs.";
         fi
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -353,7 +353,7 @@ function cleanupRemoteFiles()
         if [[ ! -e "${file_cleanup_file}" ]] || [[ ! -w "${file_cleanup_file}" ]]; then
             (( error_count += 1 ))
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to generate the file cleanup script ${file_cleanup_file}. Please ensure the file exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file cleanup script ${file_cleanup_file}. Please ensure the file exists and can be written to.";
         else
             file_counter=0;
 
@@ -391,7 +391,7 @@ function cleanupRemoteFiles()
                         { printf "%s %s %s\n" "-" "rm" "${targetDir:?}/${targetFile}"; } >> "${file_cleanup_file}";
                     fi
                 else
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
                 
                     continue;
                 fi
@@ -404,7 +404,7 @@ function cleanupRemoteFiles()
             if [[ ! -s "${file_cleanup_file}" ]]; then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to populate the file cleanup file ${file_cleanup_file}. Please ensure the file exists and can be written to.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the file cleanup file ${file_cleanup_file}. Please ensure the file exists and can be written to.";
             else
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: sftp -b ${file_cleanup_file} -oPort=${target_port} ${target_user}@${target_host} > /dev/null 2>&1"; fi
 
@@ -416,14 +416,14 @@ function cleanupRemoteFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred during the file cleanup process on host ${target_host} as user ${target_user}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the file cleanup process on host ${target_host} as user ${target_user}. Please review logs.";
                 fi
             fi
         fi
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Remote host ${cleanup_host} appears to be unavailable. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote host ${cleanup_host} appears to be unavailable. Please review logs.";
     fi
 
     [[ -w "${file_cleanup_file}" ]] && rm -f "${file_cleanup_file}";
