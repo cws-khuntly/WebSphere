@@ -62,7 +62,7 @@ function installFiles()
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Local installation of package failed. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Local installation of package failed. Please review logs.";
             fi
             ;;
         "${INSTALL_LOCATION_REMOTE}")
@@ -88,13 +88,13 @@ function installFiles()
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Remote installation of package failed. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote installation of package failed. Please review logs.";
             fi
             ;;
         *)
             (( error_count += 1 ));
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An invalid installation mode was specified. install_mode -> ${install_mode}. Cannot continue.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An invalid installation mode was specified. install_mode -> ${install_mode}. Cannot continue.";
             ;;
     esac
 
@@ -200,19 +200,19 @@ function installLocalFiles()
                         if [[ -z "${entry_command}" ]]; then
                             (( error_count += 1 ));
 
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
 
                             continue;
                         elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
                             (( error_count += 1 ));
 
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
 
                             continue;
                         elif [[ -z "${entry_target}" ]] && [[ "${entry_command}" == "ln" ]]; then
                             (( error_count += 1 ));
 
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
 
                             continue;
                         fi
@@ -233,12 +233,12 @@ function installLocalFiles()
                                 then
                                     (( error_count += 1 ));
 
-                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to create directory ${entry_target}.";
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create directory ${entry_target}.";
 
                                     continue;
                                 fi
 
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${cname}" "${function_name}" "${$}" "${LINENO}" "Directory ${entry_target} created";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${entry_target} created";
                                 ;;
                             "ln")
                                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -263,15 +263,15 @@ function installLocalFiles()
                                 then
                                     (( error_count += 1 ));
 
-                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
 
                                     continue;
                                 fi
 
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${cname}" "${function_name}" "${$}" "${LINENO}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Symbolic link ${entry_source} -> ${entry_target} created.";
                                 ;;
                             *)
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${cname}" "${function_name}" "${$}" "${LINENO}" "Skipping entry ${entry_command}.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Skipping entry ${entry_command}.";
 
                                 continue;
                                 ;;
@@ -324,7 +324,7 @@ function installLocalFiles()
                         fi
 
                         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "WARN" "${cname}" "${function_name}" "${$}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "WARN" "${$}" "${cname}" "${LINENO}" "${function_name}" "SSH key file generation failed. Please generate keys manually.";
                         fi
                     fi
 
@@ -350,28 +350,28 @@ function installLocalFiles()
                         fi
 
                         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "WARN" "${cname}" "${function_name}" "${$}" "${LINENO}" "SSH key file generation failed. Please generate keys manually.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "WARN" "${$}" "${cname}" "${LINENO}" "${function_name}" "SSH key file generation failed. Please generate keys manually.";
                         fi
                     fi
                 else
                     (( error_count += 1 ));
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
                 fi
             else
                 (( error_count += 1 ));
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
             fi
         else
             (( error_count += 1 ));
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to switch to ${DOTFILES_INSTALL_PATH}. Please ensure the path exists and can be read from.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to switch to ${DOTFILES_INSTALL_PATH}. Please ensure the path exists and can be read from.";
         fi
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Package appears to be missing: DOTFILES_INSTALL_PATH -> ${DOTFILES_INSTALL_PATH} - directory is either missing or unwriteable. ";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Package appears to be missing: DOTFILES_INSTALL_PATH -> ${DOTFILES_INSTALL_PATH} - directory is either missing or unwriteable. ";
     fi
 
     ## cleanup
@@ -397,7 +397,7 @@ function installLocalFiles()
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
@@ -491,8 +491,8 @@ function installRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred checking host availability for host ${install_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${install_host}. Please review logs.";
         fi
     fi
 
@@ -515,7 +515,7 @@ function installRemoteFiles()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred getting SSH host keys from host ${install_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred getting SSH host keys from host ${install_host}. Please review logs.";
         fi
 
         file_verification_script="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
@@ -525,7 +525,7 @@ function installRemoteFiles()
         if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
             (( error_count += 1 ))
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
         else
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating file verification script ${file_verification_script}...";
@@ -553,7 +553,7 @@ function installRemoteFiles()
             if [[ ! -s "${file_verification_script}" ]]; then
                 (( error_count += 1 ))
 
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
             else
                 [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
 
@@ -580,7 +580,7 @@ function installRemoteFiles()
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                     (( error_count += 1 ))
 
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
                 else
                     ## verify files have been transferred
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh -ql ${target_user} -p ${target_port} ${target_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${file_verification_script}")\""; fi
@@ -596,7 +596,7 @@ function installRemoteFiles()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )) && [[ -z "${verify_response}" ]] || (( verify_response != 0 )); then
                         return_code="${error_count}";
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred while verifying files on remote host ${target_host}.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred while verifying files on remote host ${target_host}.";
                     else
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}"; fi
                     
@@ -607,7 +607,7 @@ function installRemoteFiles()
                         if [[ ! -e "${installation_script}" ]] || [[ ! -w "${installation_script}" ]]; then
                             (( error_count += 1 ))
 
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to generate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
                         else
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating installation script ${installation_script}...";
@@ -636,7 +636,7 @@ function installRemoteFiles()
                             if [[ ! -s "${installation_script}" ]]; then
                                 (( error_count += 1 ))
 
-                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to populate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
+                                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
                             else
                                 [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
 
@@ -663,7 +663,7 @@ function installRemoteFiles()
                                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                                     (( error_count += 1 ))
 
-                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
                                 else
                                     ## ok, files should be out there. lets go
                                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh -ql ${target_user} -p ${target_port} ${target_host} \"bash -s\" < \"${DEPLOY_TO_DIR}/$(basename "${installation_script}")\""; fi
@@ -679,10 +679,10 @@ function installRemoteFiles()
                                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                                         return_code="${ret_code}";
 
-                                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "An error occurred while performing installation on remote host ${target_host}. install_response -> ${install_response}";
+                                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred while performing installation on remote host ${target_host}. install_response -> ${install_response}";
                                     else
                                         ## done
-                                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${cname}" "${function_name}" "${$}" "${LINENO}" "dotfiles successfully installed to host ${target_host} as user ${target_user}";
+                                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "dotfiles successfully installed to host ${target_host} as user ${target_user}";
                                     fi
                                 fi
                             fi
@@ -694,7 +694,7 @@ function installRemoteFiles()
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Remote host ${install_host} appears to be unavailable. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote host ${install_host} appears to be unavailable. Please review logs.";
     fi
 
     ## cleanup (remote)
@@ -724,7 +724,7 @@ function installRemoteFiles()
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_REMOTE}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_REMOTE}. Please review logs.";
     fi
 
     ## cleanup (local)
@@ -752,7 +752,7 @@ function installRemoteFiles()
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${cname}" "${function_name}" "${$}" "${LINENO}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
