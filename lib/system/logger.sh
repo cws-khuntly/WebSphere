@@ -8,7 +8,7 @@
 #       OPTIONS:  See usage section
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
-#         NOTES:  
+#         NOTES:
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
