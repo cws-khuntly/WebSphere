@@ -20,18 +20,10 @@
 
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
-## get the available log config and load it
-if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; fi ## if its here, use it
-if [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties"; fi ## if its here, override the above and use it
-if [[ -n "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
-
 ## load the logger
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]] && [[ -n "${LOGGING_LOADED}" ]]; then source "${HOME}/lib/system/logger.sh"; fi
-if [[ -z "$(command -v "writeLogEntry")" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
-
-CNAME="$(basename "${BASH_SOURCE[0]}")";
-FUNCTION_NAME="${CNAME}#loadProfile";
+if [[ -z "$(command -v "writeLogEntryToFile")" ]]; then printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
 
 declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${HOME}/bin";
 
@@ -73,6 +65,3 @@ trap 'source ${HOME}/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
 
 ## make the umask sane
 umask 022;
-
-[[ -n "${CNAME}" ]] && unset -v CNAME;
-[[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
