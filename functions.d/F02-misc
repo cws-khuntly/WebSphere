@@ -24,8 +24,8 @@ function mkcd()
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     #======  FUNCTION  ============================================================
@@ -62,7 +62,7 @@ function mkcd()
 
     directory_to_create="${1}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "directory_to_create -> ${directory_to_create}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "directory_to_create -> ${directory_to_create}"; fi
 
     mkdir -pv "${directory_to_create}";
 
@@ -85,8 +85,8 @@ function mkcd()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     [[ -n "${directory_to_create}" ]] && unset -v directory_to_create;
@@ -133,8 +133,8 @@ function lsz()
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     #======  FUNCTION  ============================================================
@@ -175,15 +175,15 @@ function lsz()
 
     file_to_view="${1}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_to_view -> ${file_to_view}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_to_view -> ${file_to_view}"; fi
 
     if [[ -s "${file_to_view}" ]]; then
         file_of_type="${file_to_view##*.}";
         extract_to_dir="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_of_type -> ${file_of_type}";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "extract_to_dir -> ${extract_to_dir}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_of_type -> ${file_of_type}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "extract_to_dir -> ${extract_to_dir}";
         fi
 
         case "${file_of_type}" in
@@ -209,8 +209,8 @@ function lsz()
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     [[ -n "${extract_to_dir}" ]] && unset -v extract_to_dir;
@@ -259,8 +259,8 @@ function extract()
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     #======  FUNCTION  ============================================================
@@ -297,15 +297,15 @@ function extract()
 
     file_to_extract="${1}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_to_view -> ${file_to_view}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_to_view -> ${file_to_view}"; fi
 
     if [[ -s "${file_to_view}" ]]; then
         file_of_type="${file_to_view##*.}";
         extract_to_dir="$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "file_of_type -> ${file_of_type}";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "extract_to_dir -> ${extract_to_dir}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_of_type -> ${file_of_type}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "extract_to_dir -> ${extract_to_dir}";
         fi
 
         case "${file_of_type}" in
@@ -332,7 +332,7 @@ function extract()
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "One or more errors occurred while processing. Please review logs.";
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "One or more errors occurred while processing. Please review logs.";
     else
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Switching into directory ${extract_to_dir}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Switching into directory ${extract_to_dir}"; fi
 
         cd "${extract_to_dir}";
 
@@ -351,8 +351,8 @@ function extract()
     [[ -n "${file_to_extract}" ]] && unset -v file_to_extract;
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -396,8 +396,8 @@ function returnRandomCharacters()
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     #======  FUNCTION  ============================================================
@@ -514,7 +514,7 @@ function returnRandomCharacters()
     [[ -n "${ARGUMENT_VALUE}" ]] && unset -v ARGUMENT_VALUE;
     [[ -n "${ARGUMENT}" ]] && unset -v ARGUMENT;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit"; fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch="$(date +"%s")"
@@ -544,7 +544,7 @@ function shredit
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-security";
+    cname="F02-misc";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
 
@@ -555,8 +555,8 @@ function shredit
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> enter";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "Provided arguments: ${*}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
     #======  FUNCTION  ============================================================
@@ -593,7 +593,7 @@ function shredit
 
     shred_file="${1}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "shred_file -> ${shred_file}"; fi
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "shred_file -> ${shred_file}"; fi
 
     if [[ ! -w "${shred_file}" ]]
     then
@@ -601,43 +601,43 @@ function shredit
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Requested file ${shred_file} cannot be written to or does not exist."; fi
     else
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}"; fi
 
         cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}; ## TODO: make this a property
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: shred -vzn 0 /dev/mapper/delete";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: shred -vzn 0 /dev/mapper/delete";
         fi
 
         shred -vz /dev/mapper/delete;
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}";
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: sync && sleep ${THREAD_TIMEOUT:-10}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: sync && sleep ${THREAD_TIMEOUT:-10}";
         fi
 
         sync && sleep ${THREAD_TIMEOUT:-10};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "EXEC: cryptsetup remove delete";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cryptsetup remove delete";
         fi
 
         cryptsetup remove delete;
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "ret_code -> ${ret_code}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
         fi
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "return_code -> ${return_code}";
-        writeLogEntryToFile "DEBUG" "${cname}" "${FUNCTION_NAME}" "${$}" "${LINENO}" "${function_name} -> exit";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
     fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
