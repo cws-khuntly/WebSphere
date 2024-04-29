@@ -517,7 +517,7 @@ function main()
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntryToFile "INFO" "${CNAME}" "${function_name}" "${$}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                             writeLogEntryToStdWriter "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
@@ -545,7 +545,7 @@ function main()
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntryToFile "INFO" "${CNAME}" "${function_name}" "${$}" "${LINENO}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                             writeLogEntryToStdWriter "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
@@ -554,12 +554,12 @@ function main()
         *)
             (( error_count += 1 ));
 
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${METHOD_NAME}" "${CNAME}" "${LINENO}" "An unknown action was provided. TARGET_ACTION -> ${TARGET_ACTION}";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An unknown action was provided. TARGET_ACTION -> ${TARGET_ACTION}";
             ;;
     esac
 
     if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${CNAME}" "${function_name}" "${$}" "${LINENO}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
         writeLogEntryToStdWriter "STDOUT" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
     else
         return_code="${error_count}"
