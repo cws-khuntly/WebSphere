@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-CNAME="$(basename "${BASH_SOURCE[0]}")";
-FUNCTION_NAME="${CNAME}#loadAliases";
-
 ## load aliases
 for file_entry in "${HOME}"/.alias.d/*
 do
@@ -50,6 +47,3 @@ do
     [[ -n "${file_entry}" ]] && unset -v file_entry;
     [[ -n "${osname}" ]] && unset -v osname;
 done
-
-[[ -n "${CNAME}" ]] && unset -v CNAME;
-[[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
