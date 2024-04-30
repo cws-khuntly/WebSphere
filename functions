@@ -18,9 +18,6 @@
 #
 #==============================================================================
 
-CNAME="$(basename "${BASH_SOURCE[0]}")";
-FUNCTION_NAME="${CNAME}#loadFunctions";
-
 ## load functions
 for file_entry in "${HOME}"/.functions.d/*
 do
@@ -45,6 +42,3 @@ do
     [[ -n "${dir_entry}" ]] && unset -v dir_entry;
     [[ -n "${file_entry}" ]] && unset -v file_entry;
 done
-
-[[ -n "${CNAME}" ]] && unset -v CNAME;
-[[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
