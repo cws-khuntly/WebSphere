@@ -30,7 +30,7 @@ function validateHostAvailability()
 
     #======  FUNCTION  ============================================================
     #          NAME:  usage
-    #   DESCRIPTION:  
+    #   DESCRIPTION:
     #    PARAMETERS:  None
     #       RETURNS:  0 regardless of result.
     #==============================================================================
@@ -429,7 +429,7 @@ function isValidAddress()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
         if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
-            split_up=("${checkForAddress//./ }");
+            split_up=( $(printf "%s" "${checkForAddress}" | tr "." "\n") );
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "split_up -> ${split_up[*]}"; fi
 
