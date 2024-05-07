@@ -81,7 +81,7 @@ function cleanupFiles()
                 [[ -n "${function_name}" ]] && unset -v function_name;
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                cleaupRemoteFiles "${cleanup_host}" "${cleanup_port}" "${cleanup_user}" "${force_exec}";
+                cleanupRemoteFiles "${cleanup_host}" "${cleanup_port}" "${cleanup_user}" "${force_exec}";
                 ret_code="${?}";
 
                 cname="cleanuputils.sh";
@@ -215,7 +215,7 @@ function cleanupLocalFiles()
             fi
         else
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
-        
+
             continue;
         fi
 
@@ -392,7 +392,7 @@ function cleanupRemoteFiles()
                     fi
                 else
                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
-                
+
                     continue;
                 fi
 

@@ -350,46 +350,9 @@ function checkForValidAddress()
                 [[ -n "${entry}" ]] && unset -v entry;
             done
 
-            if [[ -z "${counter}" ]] || (( counter == 0 )); then isValidAddress="${_TRUE}"; fi
+            if [[ -z "${counter}" ]] || (( counter == 0 )); then returnedHostAddress="${checkForAddress}"; else (( error_count += 1 )); fi
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "isValidAddress -> ${isValidAddress}"; fi
-
-            if [[ -n "${isValidAddress}" ]] && [[ "${isValidAddress}" == "${_TRUE}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: host -N 0 ${checkForAddress} > /dev/null 2>&1"; fi
-
-                host -N 0 "${checkForAddress}" > /dev/null 2>&1;
-                ret_code="${?}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
-
-                if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting checkForAddress to ${checkForAddress}"; fi
-
-                    returnedHostAddress="${checkForAddress}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "checkForAddress -> ${checkForAddress}"; fi
-                else
-                    ## host not found in dns, lets see if its in the hosts table
-                    ## NOTE: this assumes a properly formatted host entry in the form of <IP address> <FQDN> <alias(es)>
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Entry ${checkForAddress} was not found in DNS. Checking for entries in /etc/hosts...";
-                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: grep -m 1 ${checkForAddress} /etc/hosts | awk '{print $2}'";
-                    fi
-
-                    searchForAddressInHosts="$(grep -m 1 "${checkForAddress}" "/etc/hosts" | awk '{print $2}')";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "searchForAddressInHosts -> ${searchForAddressInHosts}"; fi
-
-                    ## entry found in /etc/hosts
-                    if [[ -n "${searchForAddressInHosts}" ]]; then
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting returnedHostAddress to ${searchForAddressInHosts}"; fi
-
-                        returnedHostAddress="${searchForAddressInHosts}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostAddress -> ${returnedHostAddress}"; fi
-                    fi
-                fi
-            fi
         else
             (( error_count += 1 ));
 
