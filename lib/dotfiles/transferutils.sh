@@ -383,7 +383,7 @@ function transferRemoteFiles()
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the sFTP batch send file ${sftp_send_file}. Please ensure the file exists and can be written to.";
         else
             #readarray -td "," files_to_process <<< "${file_list}";
-            requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
+            files_to_process=( $(printf "%s" "${file_list}" | tr "," "\n") );
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating batch file ${sftp_send_file}..."; fi
 
