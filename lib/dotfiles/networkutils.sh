@@ -226,24 +226,33 @@ function checkForValidHost()
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Looping through found search suffixes in /etc/resolv.conf"; fi
 
             ## loop through all the possible domain names in /etc/resolv.conf
-            grep "search" < "/etc/resolv.conf" | while read -r resolver_entry; do
+            ## change the IFS
+            IFS="${MODIFIED_IFS}";
+
+            ## clean up home directory first
+            for resolver_entry in $(< "/etc/resolv.conf"); do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "resolver_entry -> ${resolver_entry}"; fi
 
-                [[ "${resolver_entry}" == "search" ]] && continue;
+                [[ -z "${resolver_entry}" ]] && continue;
                 [[ "${resolver_entry}" =~ ^\# ]] && continue;
 
-                ## check if in DNS...
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: host -N 0 ${checkForHostname}.${resolver_entry} > /dev/null 2>&1"; fi
+                search_domain="$(awk '{print $NF}' <<< "${resolver_entry}")";
 
-                host -N 0 "${checkForHostname}.${resolver_entry}" > /dev/null 2>&1;
+                ## check if in DNS...
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "search_domain -> ${search_domain}";
+                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: host -N 0 ${checkForHostname}.${search_domain} > /dev/null 2>&1";
+                fi
+
+                host -N 0 "${checkForHostname}.${search_domain}" > /dev/null 2>&1;
                 ret_code="${?}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting returnedHostname to ${checkForHostname}.${resolver_entry}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting returnedHostname to ${checkForHostname}.${search_domain}"; fi
 
-                    returnedHostname="${checkForHostname}.${resolver_entry}";
+                    returnedHostname="${checkForHostname}.${search_domain}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostname -> ${returnedHostname}"; fi
 
@@ -254,8 +263,12 @@ function checkForValidHost()
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
+                [[ -n "${search_domain}" ]] && unset -v search_domain;
                 [[ -n "${resolver_entry}" ]] && unset -v resolver_entry;
             done
+
+            ## restore the original ifs
+            IFS="${CURRENT_IFS}";
         fi
     fi
 
