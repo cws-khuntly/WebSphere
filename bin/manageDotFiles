@@ -21,9 +21,12 @@ trap 'set +v; set +x' INT TERM EXIT;
 declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## Application constants
+ARG_COUNTER=0;
 CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")"; declare SCRIPT_ROOT;
-ARG_COUNTER=0;
+LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
+FUNCTION_NAME="${CNAME}#startup";
+CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 ## load the logger
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
@@ -33,20 +36,8 @@ if [[ -z "$(command -v "writeLogEntryToFile" 2>/dev/null)" ]] || [[ -z "${LOGGIN
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-declare FUNCTION_NAME="${CNAME}#startup";
-
-## set some defaults
-declare CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
-
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-    writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "CONFIG_FILE_LOCATION -> ${CONFIG_FILE_LOCATION}";
-fi
-
 if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
     declare WORKING_CONFIG_FILE="${CONFIG_FILE_LOCATION}";
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}"; fi
-
     source "${WORKING_CONFIG_FILE}";
 else
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
