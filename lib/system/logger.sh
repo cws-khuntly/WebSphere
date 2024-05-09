@@ -16,7 +16,7 @@
 #      REVISION:  ---
 #==============================================================================
 
-declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## get the available log config and load it
 if [[ -z "${LOGGING_PROPERTIES}" ]]; then
