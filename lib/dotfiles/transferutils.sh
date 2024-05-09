@@ -87,13 +87,16 @@ function transferFiles()
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    validateHostAddress "${remote_host}" "${remote_port}";
+                    returnedHostInfo="$(validateHostAddress "${remote_host}" "${remote_port}")";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
                     function_name="${cname}#${FUNCNAME[0]}";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
+                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                    fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ));
@@ -109,7 +112,7 @@ function transferFiles()
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    transferRemoteFiles "${files_to_process}" "${remote_host}" "${remote_port}" "${target_user}";
+                    transferRemoteFiles "${files_to_process}" "${returnedHostInfo[0]}" "${returnedHostInfo[1]}" "${target_user}";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
@@ -202,7 +205,8 @@ function transferLocalFiles()
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \"|\" -t files_to_process < <(printf \"%s\" \"${file_listing}\")";
     fi
 
-    mapfile -d "," -t files_to_process < <(printf "%s" "${file_listing}");
+    #mapfile -d "," -t files_to_process < <(printf "%s" "${file_listing}");
+    files_to_process=( $(printf "%s" "${file_listing}" | tr "," "\n") );
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -330,17 +334,21 @@ function transferRemoteFiles()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        validateHostAddress "${remote_host}" "${remote_port}";
+        returnedHostInfo="$(validateHostAddress "${remote_host}" "${remote_port}")";
         ret_code="${?}";
 
         cname="cleanuputils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+        fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${remote_host}. Please review logs.";
+        elif [[ -z "${returnedHostInfo[*]}" ]]; then
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "No host information was returned from the request. Assuming host unavailable.";
         fi
     fi
 
@@ -354,7 +362,7 @@ function transferRemoteFiles()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        getHostKeys "${remote_host}" ${remote_port};
+        getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]};
         ret_code=${?};
 
         cname="transferutils.sh";
@@ -383,7 +391,8 @@ function transferRemoteFiles()
         else
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \"|\" -t files_to_process < <(printf \"%s\" \"${file_list}\")"; fi
 
-            mapfile -d "|" -t files_to_process < <(printf "%s" "${file_list}");
+            #mapfile -d "," -t files_to_process < <(printf "%s" "${file_list}");
+            files_to_process=( $(printf "%s" "${file_list}" | tr "," "\n") );
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating batch file ${sftp_send_file}..."; fi
 
