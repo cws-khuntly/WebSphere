@@ -340,7 +340,7 @@ function uninstallRemoteFiles()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        validateHostAddress "${target_host}" "${target_port}";
+        returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
         ret_code="${?}";
 
         cname="uninstallutils.sh";
@@ -364,7 +364,7 @@ function uninstallRemoteFiles()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        getHostKeys "${target_host}" ${target_port};
+        getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]};
         ret_code=${?};
 
         cname="uninstallutils.sh";
