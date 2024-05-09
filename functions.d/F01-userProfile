@@ -149,7 +149,7 @@ function setPromptCommand()
     real_user="$(who am i | awk '{print $1}')";
     PS2="continue -> ";
     PS3="Enter selection: ";
-    PS4='[Time: \D{%F %T} ][Thread: ${0}][Log: -][Level: TRACE] - [File: ${FUNCNAME[0]:-${SHELL}}] [Method: -] - '; declare -x PS4;
+    PS4='[Time: \D{%F %T} ][Thread: ${0}][Log: -][Level: TRACE] - [File: ${FUNCNAME[0]:-${SHELL}}] [Method: -] - ';
     git_status="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)";
 
     [[ -n "${PS1}" ]] && unset -v PS1;
