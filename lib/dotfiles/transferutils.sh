@@ -94,7 +94,7 @@ function transferFiles()
                     function_name="${cname}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
+                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo[*]}";
                         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                     fi
 
@@ -106,13 +106,13 @@ function transferFiles()
                 fi
 
                 if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: transferRemoteFiles ${files_to_process} ${remote_host} ${remote_port} ${target_user}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: transferRemoteFiles ${files_to_process} ${returnedHostInfo[0]} ${returnedHostInfo[1]} ${target_user}"; fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    transferRemoteFiles "${files_to_process}" "${returnedHostInfo[0]}" "${returnedHostInfo[1]}" "${target_user}";
+                    transferRemoteFiles "${files_to_process}" "${returnedHostInfo[0]}" "${returnedHostInfo[1]:-${SSH_PORT_NUMBER}}" "${target_user}";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
@@ -341,7 +341,7 @@ function transferRemoteFiles()
         function_name="${cname}#${FUNCNAME[0]}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo[*]}";
             writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
         fi
 
@@ -355,14 +355,14 @@ function transferRemoteFiles()
     if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Getting SSH host keys for host ${remote_host}";
-            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: getHostKeys \"${remote_host}\" \"${remote_port}\"";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: getHostKeys \"${returnedHostInfo[0]}\" \"${returnedHostInfo[1]:-${SSH_PORT_NUMBER}}\"";
         fi
 
         [[ -n "${cname}" ]] && unset -v cname;
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]};
+        getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}};
         ret_code=${?};
 
         cname="transferutils.sh";
