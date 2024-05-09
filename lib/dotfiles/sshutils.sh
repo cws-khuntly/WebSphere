@@ -47,7 +47,7 @@ function getHostKeys()
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "does_key_exist -> ${does_key_exist}"; fi
 
         if [[ -z "${does_key_exist}" ]]; then
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then 
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s\n\" \"~\" | nc \"${remote_host}\" ${remote_port}";
                 writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-keyscan -t \"${keytype}\" -p ${remote_port} -H \"${remote_host}\"";
             fi
@@ -226,7 +226,7 @@ function generateSshKeys()
         [[ -n "${SSH_KEY_SIZE}" ]] && unset -v SSH_KEY_SIZE;
         [[ -n "${SSH_KEY_FILENAME}" ]] && unset -v SSH_KEY_FILENAME;
     done
-        
+
     [[ -n "${SSH_KEY_TYPE}" ]] && unset -v SSH_KEY_TYPE;
     [[ -n "${SSH_KEY_SIZE}" ]] && unset -v SSH_KEY_SIZE;
     [[ -n "${SSH_KEY_FILENAME}" ]] && unset -v SSH_KEY_FILENAME;
@@ -353,7 +353,7 @@ function copyKeysToTarget()
                     fi
                 else
                     ## NOT incrementing an error counter here because im not sure we actually need it
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Unable to open keyfile ${keyfile}. Please ensure the file exists and can be read by the current user.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "WARN" "${$}" "${cname}" "${LINENO}" "${function_name}" "Unable to open keyfile ${keyfile}. Please ensure the file exists and can be read by the current user.";
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;

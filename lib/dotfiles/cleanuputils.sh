@@ -74,14 +74,14 @@ function cleanupFiles()
                     writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_port -> ${cleanup_port}";
                     writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_user -> ${cleanup_user}";
                     writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "force_exec -> ${force_exec}";
-                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: installRemoteFiles ${cleanup_host} ${cleanup_port} ${cleanup_user} ${force_exec}";
+                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cleanupRemoteFiles ${cleanup_file_list} ${cleanup_host} ${cleanup_port} ${cleanup_user} ${force_exec}";
                 fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                cleanupRemoteFiles "${cleanup_host}" "${cleanup_port}" "${cleanup_user}" "${force_exec}";
+                cleanupRemoteFiles "${cleanup_file_list}" "${cleanup_host}" "${cleanup_port}" "${cleanup_user}" "${force_exec}";
                 ret_code="${?}";
 
                 cname="cleanuputils.sh";
@@ -166,11 +166,10 @@ function cleanupLocalFiles()
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "requested_files -> ${requested_files[*]}";
-        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \"|\" -t files_to_process < <(printf \"%s\" \"${requested_files}\")";
     fi
 
-    #readarray -td "," files_to_process <<< "${requested_files}";
-    requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
+    mapfile -d "," -t files_to_process < <(printf "%s" "${requested_files}");
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -286,11 +285,10 @@ function cleanupRemoteFiles()
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_user -> ${target_user}";
-        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: readarray -td \",\" files_to_process <<< \"${requested_files}\"";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile \"|\" -t files_to_process < <(printf \"%s\" \"${requested_files}\")";
     fi
 
-    #readarray -td "," files_to_process <<< "${requested_files}";
-    requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
+    mapfile -d "," -t files_to_process < <(printf "%s" "${requested_files}")
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 

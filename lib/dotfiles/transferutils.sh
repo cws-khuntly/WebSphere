@@ -199,11 +199,10 @@ function transferLocalFiles()
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_listing -> ${file_listing}";
-        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: readarray -td \",\" files_to_process <<< \"${file_listing}\"";
+        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \"|\" -t files_to_process < <(printf \"%s\" \"${file_listing}\")";
     fi
 
-    #readarray -td "," files_to_process <<< "${file_listing}";
-    files_to_process=( $(printf "%s" "${file_listing}" | tr "," "\n") );
+    mapfile -d "," -t files_to_process < <(printf "%s" "${file_listing}");
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -229,7 +228,7 @@ function transferLocalFiles()
                 if [[ ! -f "${targetFile}" ]]; then
                     cp "${targetFile}" "${targetDir}";
                     ret_code="${?}";
-                
+
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
@@ -240,12 +239,12 @@ function transferLocalFiles()
                 fi
             else
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetFile} is not readable. Skipping entry.";
-            
+
                 continue;
             fi
         else
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
-        
+
             continue;
         fi
 
@@ -382,8 +381,9 @@ function transferRemoteFiles()
 
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the sFTP batch send file ${sftp_send_file}. Please ensure the file exists and can be written to.";
         else
-            #readarray -td "," files_to_process <<< "${file_list}";
-            requested_files=( $(printf "%s" "${requested_files}" | tr "," "\n") );
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \"|\" -t files_to_process < <(printf \"%s\" \"${file_list}\")"; fi
+
+            mapfile -d "|" -t files_to_process < <(printf "%s" "${file_list}");
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating batch file ${sftp_send_file}..."; fi
 
@@ -414,7 +414,7 @@ function transferRemoteFiles()
                     fi
                 else
                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
-                
+
                     continue;
                 fi
 

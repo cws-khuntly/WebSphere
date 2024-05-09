@@ -8,7 +8,7 @@
 #       OPTIONS:  See usage section
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
-#         NOTES:  
+#         NOTES:
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
@@ -108,7 +108,7 @@ function main()
 
                 CNAME="$(basename "${BASH_SOURCE[0]}")";
                 function_name="${CNAME}#${FUNCNAME[0]}";
-            
+
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                 fi
@@ -130,7 +130,7 @@ function main()
 
                 CNAME="$(basename "${BASH_SOURCE[0]}")";
                 function_name="${CNAME}#${FUNCNAME[0]}";
-            
+
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
@@ -164,7 +164,7 @@ function main()
                 transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
                 transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi 
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
                 if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}"; fi
@@ -256,7 +256,7 @@ function main()
                 transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
                 transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi 
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
                 if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}"; fi
@@ -359,7 +359,7 @@ function main()
 
                                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_REMOTE}. Please review logs.";
                             fi
-                        fi    
+                        fi
                     fi
                 fi
             fi
@@ -388,7 +388,7 @@ function main()
                 transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
                 transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi 
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
                 if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}"; fi
@@ -471,7 +471,7 @@ function main()
 
                         CNAME="$(basename "${BASH_SOURCE[0]}")";
                         function_name="${CNAME}#${FUNCNAME[0]}";
-                    
+
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                         fi
@@ -517,7 +517,7 @@ function main()
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntryToFile "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                             writeLogEntryToStdWriter "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
@@ -545,7 +545,7 @@ function main()
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntryToFile "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntryToFile "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                             writeLogEntryToStdWriter "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
