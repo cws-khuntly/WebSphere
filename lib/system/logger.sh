@@ -24,7 +24,7 @@ if [[ -z "${LOGGING_PROPERTIES}" ]]; then
     if [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties"; fi ## if its here, override the above and use it
 fi
 
-if [[ -r "${LOGGING_PROPERTIES}" ]] && [[ -s "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
+if [[ -n "${LOGGING_PROPERTIES}" ]] && [[ -r "${LOGGING_PROPERTIES}" ]] && [[ -s "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
 
 #======  FUNCTION  ============================================================
