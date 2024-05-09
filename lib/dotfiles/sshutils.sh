@@ -309,23 +309,23 @@ function copyKeysToTarget()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        validateHostAddress "${remote_host}" "${target_port}";
+        returnedHostInfo="$(validateHostAddress "${remote_host}" "${target_port}")";
         ret_code="${?}";
 
         cname="sshutils.sh";
         function_name="${cname}#${FUNCNAME[0]}";
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
+            writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+        fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            continue_exec="${_FALSE}";
-
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting continue_exec to ${_FALSE}";
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${remote_host}. Please review logs.";
         fi
     fi
 
-    if [[ -n "${continue_exec}" ]] && [[ "${continue_exec}" == "${_TRUE}" ]]; then
+    if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]] || [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
         if [[ -n "${SSH_KEY_LIST[*]}" ]] && (( ${#SSH_KEY_LIST[*]} != 0 )); then
             for keyfile in "${SSH_KEY_LIST[@]}"; do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "keyfile -> ${keyfile}"; fi
@@ -339,7 +339,7 @@ function copyKeysToTarget()
                         writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-copy-id -i ${keyfile} -oPort=${SSH_PORT_NUMBER} ${remote_host} > /dev/null 2>&1";
                     fi
 
-                    ssh-copy-id -i "${keyfile}" -oPort="${target_port}" "${remote_host}" > /dev/null 2>&1;
+                    ssh-copy-id -i "${keyfile}" -oPort="${returnedHostInfo[1]}" "${returnedHostInfo[0]}" > /dev/null 2>&1;
                     ret_code="${?}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
