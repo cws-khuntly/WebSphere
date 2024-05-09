@@ -18,12 +18,12 @@
 
 trap 'set +v; set +x' INT TERM EXIT;
 
-declare PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## Application constants
 ARG_COUNTER=0;
-CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
-SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")"; declare SCRIPT_ROOT;
+CNAME="$(basename "${BASH_SOURCE[0]}")";
+SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
 LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
 FUNCTION_NAME="${CNAME}#startup";
 CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
@@ -31,13 +31,13 @@ CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 ## load the logger
 if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
-if [[ -z "$(command -v "writeLogEntryToFile" 2>/dev/null)" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
+if [[ -z "$(command -v "writeLogEntryToFile" 2>/dev/null)" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; LOGGING_LOADED="${_FALSE}"; fi;
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
 if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
-    declare WORKING_CONFIG_FILE="${CONFIG_FILE_LOCATION}";
+    WORKING_CONFIG_FILE="${CONFIG_FILE_LOCATION}";
     source "${WORKING_CONFIG_FILE}";
 else
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntryToFile "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
@@ -662,7 +662,7 @@ while (( ${#} > 0 )); do
         config|c)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "ARGUMENT_VALUE -> ${ARGUMENT_VALUE}"; fi
 
-            declare PROVIDED_CONFIG_FILE="${ARGUMENT_VALUE}";
+            PROVIDED_CONFIG_FILE="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "PROVIDED_CONFIG_FILE -> ${PROVIDED_CONFIG_FILE}"; fi
 
@@ -670,7 +670,7 @@ while (( ${#} > 0 )); do
             if [[ -n "${PROVIDED_CONFIG_FILE}" ]] && [[ "${PROVIDED_CONFIG_FILE}" != "${CONFIG_FILE_LOCATION}" ]] && [[ -r "${PROVIDED_CONFIG_FILE}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting WORKING_CONFIG_FILE..."; fi
 
-                declare WORKING_CONFIG_FILE="${PROVIDED_CONFIG_FILE}";
+                WORKING_CONFIG_FILE="${PROVIDED_CONFIG_FILE}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}"; fi
 
@@ -688,35 +688,35 @@ while (( ${#} > 0 )); do
         servername|s)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting TARGET_HOST..."; fi
 
-            declare TARGET_HOST="${ARGUMENT_VALUE}";
+            TARGET_HOST="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}"; fi
             ;;
         port|p)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting SSH_PORT_NUMBER..."; fi
 
-            declare SSH_PORT_NUMBER="${ARGUMENT_VALUE}";
+            SSH_PORT_NUMBER="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SSH_PORT_NUMBER -> ${SSH_PORT_NUMBER}"; fi
             ;;
         username|u)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting TARGET_USER..."; fi
 
-            declare TARGET_USER="${ARGUMENT_VALUE}";
+            TARGET_USER="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_USER -> ${TARGET_USER}"; fi
             ;;
         action|a)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting TARGET_ACTION..."; fi
 
-            declare TARGET_ACTION="${ARGUMENT_VALUE}";
+            TARGET_ACTION="${ARGUMENT_VALUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ACTION -> ${TARGET_ACTION}"; fi
             ;;
         force|f)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting FORCE_EXEC..."; fi
 
-            declare FORCE_EXEC="${_TRUE}";
+            FORCE_EXEC="${_TRUE}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "FORCE_EXEC -> ${FORCE_EXEC}"; fi
             ;;
@@ -732,7 +732,7 @@ while (( ${#} > 0 )); do
                     writeLogEntryToStdWriter "STDERR" "${SSH_KEYGEN_PROGRAM} was not found as an available utility. Unable to generate SSH keys.";
                 fi
 
-                declare IS_SSH_AVAILABLE="${_FALSE}";
+                IS_SSH_AVAILABLE="${_FALSE}";
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "IS_SSH_AVAILABLE -> ${IS_SSH_AVAILABLE}"; fi
             fi
@@ -748,7 +748,7 @@ while (( ${#} > 0 )); do
                     writeLogEntryToStdWriter "STDERR" "${GPG_APPLICATION_PROGRAM} was not found as an available utility. Unable to generate GnuPG keys.";
                 fi
 
-                declare IS_GPG_AVAILABLE="${_FALSE}";
+                IS_GPG_AVAILABLE="${_FALSE}";
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "IS_GPG_AVAILABLE -> ${IS_GPG_AVAILABLE}"; fi
             fi
@@ -757,14 +757,14 @@ while (( ${#} > 0 )); do
                 [Ss][Ss][Hh])
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting GENERATE_SSH_KEYS..."; fi
 
-                    if [[ -z "${IS_SSH_AVAILABLE}" ]] || [[ "${IS_SSH_AVAILABLE}" != "${_FALSE}" ]]; then declare GENERATE_SSH_KEYS="${_TRUE}"; fi
+                    if [[ -z "${IS_SSH_AVAILABLE}" ]] || [[ "${IS_SSH_AVAILABLE}" != "${_FALSE}" ]]; then GENERATE_SSH_KEYS="${_TRUE}"; fi
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}"; fi
                     ;;
                 [Gg][Pp][Gg]|[Pp][Gg][Pp])
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting GENERATE_GPG_KEYS..."; fi
 
-                    if [[ -z "${IS_GPG_AVAILABLE}" ]] || [[ "${IS_GPG_AVAILABLE}" != "${_FALSE}" ]]; then declare GENERATE_GPG_KEYS="${_TRUE}"; fi
+                    if [[ -z "${IS_GPG_AVAILABLE}" ]] || [[ "${IS_GPG_AVAILABLE}" != "${_FALSE}" ]]; then GENERATE_GPG_KEYS="${_TRUE}"; fi
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "GENERATE_GPG_KEYS -> ${GENERATE_GPG_KEYS}"; fi
                     ;;
@@ -774,8 +774,8 @@ while (( ${#} > 0 )); do
                         writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting GENERATE_GPG_KEYS...";
                     fi
 
-                    if [[ -z "${IS_SSH_AVAILABLE}" ]] || [[ "${IS_SSH_AVAILABLE}" != "${_FALSE}" ]]; then declare GENERATE_SSH_KEYS="${_TRUE}"; fi
-                    if [[ -z "${IS_GPG_AVAILABLE}" ]] || [[ "${IS_GPG_AVAILABLE}" != "${_FALSE}" ]]; then declare GENERATE_GPG_KEYS="${_TRUE}"; fi
+                    if [[ -z "${IS_SSH_AVAILABLE}" ]] || [[ "${IS_SSH_AVAILABLE}" != "${_FALSE}" ]]; then GENERATE_SSH_KEYS="${_TRUE}"; fi
+                    if [[ -z "${IS_GPG_AVAILABLE}" ]] || [[ "${IS_GPG_AVAILABLE}" != "${_FALSE}" ]]; then GENERATE_GPG_KEYS="${_TRUE}"; fi
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "GENERATE_SSH_KEYS -> ${GENERATE_SSH_KEYS}";
@@ -873,7 +873,7 @@ else
             ret_code="${?}";
 
             set +o noclobber;
-            CNAME="$(basename "${BASH_SOURCE[0]}")"; declare CNAME;
+            CNAME="$(basename "${BASH_SOURCE[0]}")"; CNAME;
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "ret_code -> ${ret_code}"; fi
