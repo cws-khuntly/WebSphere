@@ -23,9 +23,9 @@ PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 ## Application constants
 ARG_COUNTER=0;
 CNAME="$(basename "${BASH_SOURCE[0]}")";
+FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
 LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
-FUNCTION_NAME="${CNAME}#startup";
 CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 ## load the logger

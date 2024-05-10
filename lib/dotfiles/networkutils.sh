@@ -286,30 +286,32 @@ function checkForValidHost()
                 [[ -z "${resolver_entry}" ]] && continue;
                 [[ "${resolver_entry}" =~ ^\# ]] && continue;
 
-                search_domain="$(awk '{print $NF}' <<< "${resolver_entry}")";
+                if [[ "${resolver_entry}" =~ ^search ]]; then
+                    search_domain="$(awk '{print $NF}' <<< "${resolver_entry}")";
 
-                ## check if in DNS...
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "search_domain -> ${search_domain}";
-                    writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: host -N 0 ${checkForHostname}.${search_domain} > /dev/null 2>&1";
-                fi
+                    ## check if in DNS...
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "search_domain -> ${search_domain}";
+                        writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: host -N 0 ${checkForHostname}.${search_domain} > /dev/null 2>&1";
+                    fi
 
-                host -N 0 "${checkForHostname}.${search_domain}" > /dev/null 2>&1;
-                ret_code="${?}";
+                    host -N 0 "${checkForHostname}.${search_domain}" > /dev/null 2>&1;
+                    ret_code="${?}";
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
 
-                if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting returnedHostname to ${checkForHostname}.${search_domain}"; fi
+                    if [[ -n "${ret_code}" ]] && (( ret_code == 0 )); then
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting returnedHostname to ${checkForHostname}.${search_domain}"; fi
 
-                    returnedHostname="${checkForHostname}.${search_domain}";
+                        returnedHostname="${checkForHostname}.${search_domain}";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostname -> ${returnedHostname}"; fi
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntryToFile "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostname -> ${returnedHostname}"; fi
 
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-                    [[ -n "${resolver_entry}" ]] && unset -v resolver_entry;
+                        [[ -n "${ret_code}" ]] && unset -v ret_code;
+                        [[ -n "${resolver_entry}" ]] && unset -v resolver_entry;
 
-                    break;
+                        break;
+                    fi
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
