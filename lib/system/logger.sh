@@ -59,13 +59,49 @@ function usage()
     return ${return_code};
 )
 
+#======  FUNCTION  ============================================================
+#          NAME:  main
+#   DESCRIPTION:  Rotates log files in logs directory
+#    PARAMETERS:  None
+#       RETURNS:  0 regardless of result.
+#==============================================================================
+function writeLogEntry()
+(
+    set +o noclobber;
+    function_name="${CNAME}#${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    action="${1}";
+
+    case "${action}" in
+        [Ll][Oo][Gg][Tt][Oo][Ff][Ii][Ll][Ee])
+            writeLogEntry "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
+            ;;
+        [Ll][Oo][Gg][Tt][Oo][Cc][Oo][Nn][Ss][Oo][Ll][Ee])
+            writeLogEntryToConsole "${2}" "${3}";
+            ;;
+        *)
+            (( error_count += 1 ));
+            ;;
+    esac
+
+    [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    return ${return_code};
+)
+
 #=====  FUNCTION  =============================================================
 #          NAME:  writeLogEntry
 #   DESCRIPTION:  Cleans up the archived log directory
 #    PARAMETERS:  Archive Directory, Logfile Name, Retention Time
 #       RETURNS:  0 regardless of result.
 #==============================================================================
-function writeLogEntryToStdWriter()
+function writeLogEntryToConsole()
 (
     set +o noclobber;
     log_level="${1}";
@@ -82,12 +118,12 @@ function writeLogEntryToStdWriter()
 )
 
 #=====  FUNCTION  =============================================================
-#          NAME:  writeLogEntryToFile
+#          NAME:  writeLogEntry
 #   DESCRIPTION:  Cleans up the archived log directory
 #    PARAMETERS:  Archive Directory, Logfile Name, Retention Time
 #       RETURNS:  0 regardless of result.
 #==============================================================================
-function writeLogEntryToFile()
+function writeLogEntry()
 (
     set +o noclobber;
     log_level="${1}";
@@ -96,7 +132,7 @@ function writeLogEntryToFile()
     log_line="${4}";
     log_method="${5}";
     log_message="${6}";
-    log_date="$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
+    log_date="${7}";
 
     case "${log_level}" in
         [Pp][Ee][Rr][Ff][Oo][Rr][Mm][Aa][Nn][Cc][Ee]) log_file="${PERF_LOG_FILE}"; ;;
