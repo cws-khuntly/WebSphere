@@ -75,10 +75,10 @@ function writeLogEntry()
     action="${1}";
 
     case "${action}" in
-        [Ll][Oo][Gg][Tt][Oo][Ff][Ii][Ll][Ee])
-            writeLogEntry "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
+        [Ff][Ii][Ll][Ee])
+            writeLogEntryToFile "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
             ;;
-        [Ll][Oo][Gg][Tt][Oo][Cc][Oo][Nn][Ss][Oo][Ll][Ee])
+        [Cc][Oo][Nn][Ss][Oo][Ll][Ee])
             writeLogEntryToConsole "${2}" "${3}";
             ;;
         *)
@@ -96,7 +96,7 @@ function writeLogEntry()
 )
 
 #=====  FUNCTION  =============================================================
-#          NAME:  writeLogEntry
+#          NAME:  writeLogEntryToConsole
 #   DESCRIPTION:  Cleans up the archived log directory
 #    PARAMETERS:  Archive Directory, Logfile Name, Retention Time
 #       RETURNS:  0 regardless of result.
@@ -118,12 +118,12 @@ function writeLogEntryToConsole()
 )
 
 #=====  FUNCTION  =============================================================
-#          NAME:  writeLogEntry
+#          NAME:  writeLogEntryToFile
 #   DESCRIPTION:  Cleans up the archived log directory
 #    PARAMETERS:  Archive Directory, Logfile Name, Retention Time
 #       RETURNS:  0 regardless of result.
 #==============================================================================
-function writeLogEntry()
+function writeLogEntryToFile()
 (
     set +o noclobber;
     log_level="${1}";
