@@ -41,7 +41,7 @@ if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
     source "${WORKING_CONFIG_FILE}";
 else
     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
-    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
+    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "CONSOLE" "STDERR" "Unable to read base configuration file ${CONFIG_FILE_LOCATION}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
 fi
 
 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -504,12 +504,12 @@ function main()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
-                            writeLogEntry "STDERR" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
+                            writeLogEntry "CONSOLE" "STDERR" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "INFO" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-                            writeLogEntry "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntry "CONSOLE" "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
                 else
@@ -532,12 +532,12 @@ function main()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-                            writeLogEntry "STDERR" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
+                            writeLogEntry "CONSOLE" "STDERR" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "INFO" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-                            writeLogEntry "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntry "CONSOLE" "STDOUT" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
                         fi
                     fi
                 fi
@@ -551,12 +551,12 @@ function main()
 
     if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
-        writeLogEntry "STDOUT" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
+        writeLogEntry "CONSOLE" "STDOUT" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
     else
         return_code="${error_count}"
 
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-        writeLogEntry "STDERR" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
+        writeLogEntry "CONSOLE" "STDERR" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
     fi
 
     [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
@@ -729,7 +729,7 @@ while (( ${#} > 0 )); do
             if [[ -z "$(command -v "${SSH_KEYGEN_PROGRAM}")" ]]; then
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${SSH_KEYGEN_PROGRAM} was not found as an available utility. Unable to generate SSH keys.";
-                    writeLogEntry "STDERR" "${SSH_KEYGEN_PROGRAM} was not found as an available utility. Unable to generate SSH keys.";
+                    writeLogEntry "CONSOLE" "STDERR" "${SSH_KEYGEN_PROGRAM} was not found as an available utility. Unable to generate SSH keys.";
                 fi
 
                 IS_SSH_AVAILABLE="${_FALSE}";
@@ -745,7 +745,7 @@ while (( ${#} > 0 )); do
             if [[ -z "$(command -v "${GPG_APPLICATION_PROGRAM}")" ]]; then
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${GPG_APPLICATION_PROGRAM} was not found as an available utility. Unable to generate GnuPG keys.";
-                    writeLogEntry "STDERR" "${GPG_APPLICATION_PROGRAM} was not found as an available utility. Unable to generate GnuPG keys.";
+                    writeLogEntry "CONSOLE" "STDERR" "${GPG_APPLICATION_PROGRAM} was not found as an available utility. Unable to generate GnuPG keys.";
                 fi
 
                 IS_GPG_AVAILABLE="${_FALSE}";
@@ -831,14 +831,14 @@ if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then
     if (( RETURN_CODE != 3 )); then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found a non-zero return code prior to execution. Please review logs and parameters.";
-            writeLogEntry "STDERR" "Found a non-zero return code prior to execution. Please review logs and parameters.";
+            writeLogEntry "CONSOLE" "STDERR" "Found a non-zero return code prior to execution. Please review logs and parameters.";
         fi
     fi
 else
     if [[ -z "${WORKING_CONFIG_FILE}" ]] || [[ ! -r "${WORKING_CONFIG_FILE}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to find and/or read the configuration file supplied. Please ensure the file exists and can be read by the executing user.";
-            writeLogEntry "STDERR" "Unable to find and/or read the configuration file supplied. Please ensure the file exists and can be read by the executing user.";
+            writeLogEntry "CONSOLE" "STDERR" "Unable to find and/or read the configuration file supplied. Please ensure the file exists and can be read by the executing user.";
         fi
 
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
@@ -880,10 +880,10 @@ else
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "An error occurred while generating the GPG option file. Please review logs.";
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "An error occurred while generating the GPG option file. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "CONSOLE" "STDERR" "An error occurred while generating the GPG option file. Please review logs.";
             elif [[ ! -s "${GPG_OPTION_TEMPLATE}" ]]; then
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "An error occurred while generating the GPG option file. Please review logs.";
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "An error occurred while generating the GPG option file. Please review logs.";
+                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "CONSOLE" "STDERR" "An error occurred while generating the GPG option file. Please review logs.";
             fi
         fi
 
