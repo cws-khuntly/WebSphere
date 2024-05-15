@@ -247,7 +247,6 @@ function uninstallLocalFiles()
                 (( error_count += 1 ));
 
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "STDERR" "Failed to remove dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
             else
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Removed dotfiles installation directory ${DOTFILES_INSTALL_PATH}.";
             fi
