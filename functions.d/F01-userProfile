@@ -16,17 +16,6 @@ function showHostInfo()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch="$(date +"%s")";
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
-    fi
-
     ## system information
     host_system_name="$(hostname -f | tr '[:upper:]' '[:lower:]')";
     host_ip_address=( "$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "inet6|127.0.0.1" | awk '{print $2}' | tr '\n' ' ')" );
@@ -35,25 +24,10 @@ function showHostInfo()
     host_cpu_info="$(grep -E "model name" < /proc/cpuinfo | uniq | cut -d ":" -f 2 | sed -e 's/^ *//g;s/ *$//g' | tr -s " ")";
     host_memory_size="$(( $(grep -E MemTotal /proc/meminfo | awk '{print $2}') / 1024 ^ 2 ))";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_system_name -> ${host_system_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_ip_address -> ${host_ip_address[*]}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_kernel_version -> ${host_kernel_version}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_cpu_count -> ${host_cpu_count}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_cpu_info -> ${host_cpu_info}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "host_memory_size -> ${host_memory_size}";
-    fi
-
     ## user information
     user_disk_usage=$(du -ms "${HOME}"/ 2> /dev/null | awk '{print $1}');
     system_process_count=$(ps -ef | tail -n +1 | wc -l | awk '{print $1}');
     user_process_count=$(ps -ef | tail -n +1 | grep -v grep | grep -c "${LOGNAME}");
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "user_disk_usage -> ${user_disk_usage}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "system_process_count -> ${system_process_count}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "user_process_count -> ${user_process_count}";
-    fi
 
     clear;
 
@@ -89,22 +63,6 @@ function showHostInfo()
     [[ -n "${host_cpu_count}" ]] && unset -v host_cpu_count;
     [[ -n "${host_cpu_info}" ]] && unset -v host_cpu_info;
     [[ -n "${host_memory_size}" ]] && unset -v host_memory_size;
-
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch="$(date +"%s")"
-        runtime=$(( end_epoch - start_epoch ));
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-    fi
-
     [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
@@ -112,92 +70,6 @@ function showHostInfo()
 
     return "${return_code}";
 )
-
-#=====  FUNCTION  =============================================================
-#          NAME:  setPromptCommand
-#   DESCRIPTION:  Sets the PROMPT_COMMAND variable for bash shells
-#    PARAMETERS:  None
-#       RETURNS:  0 regardless of result
-#==============================================================================
-function setPromptCommand()
-{
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    cname="F01-userProfile";
-    function_name="${cname}#${FUNCNAME[0]}";
-    return_code=0;
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch="$(date +"%s")";
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
-    fi
-
-    color_off='\033[0m';
-    color_black='\033[0;30m';
-    color_red='\033[0;31m';
-    color_green='\033[0;32m';
-    color_yellow='\033[0;33m';
-    color_blue='\033[0;34m';
-    real_user="$(who am i | awk '{print $1}')";
-    PS2="continue -> ";
-    PS3="Enter selection: ";
-    PS4='[Time: \D{%F %T} ][Thread: ${0}][Log: -][Level: TRACE] - [File: ${FUNCNAME[0]:-${SHELL}}] [Method: -] - ';
-    git_status="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)";
-
-    [[ -n "${PS1}" ]] && unset -v PS1;
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "git_status -> ${git_status}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting PS1...";
-    fi
-
-    case "${real_user}" in
-        "${LOGNAME}")
-            echo -ne "\033]0; $(printf "[%s:%s] : <%s>" "${LOGNAME}" "${HOSTNAME}" "$(basename "${PWD}")")\007";
-
-            case "${git_status}" in
-                "") PS1='$(printf "${color_green}[\u:\H] ${color_black}: ${color_green}<${color_yellow}\w${color_green}>\n\n$ ${color_off}")'; ;;
-                *) PS1='$(printf "${color_green}[\u:\H] ${color_black}: ${color_green}<${color_yellow}\w ${color_blue}($(printf "%s" "${git_status}"))${color_green}>\n\n$ ${color_off}")'; ;;
-            esac
-            ;;
-        *)
-            echo -ne "\033]0; $(printf "[%s:%s as %s] : <%s>" "${LOGNAME}" "${HOSTNAME}" "${real_user}" "$(basename "${PWD}")")\007";
-
-            case "${git_status}" in
-                "") PS1='$(printf "${color_red}NOTE: YOU ARE ${real_user}\n${color_green}[\u:\h as ${color_red}%s ${color_black}: ${color_green}<${color_yellow}\w${color_green}>\n\n$ ${color_off}")'; ;;
-                *) PS1='$(printf "${color_red}NOTE: YOU ARE ${real_user}\n${color_green}[\u:\h as ${color_red}%s ${color_black}: ${color_green}<${color_yellow}\w ${color_blue}($(printf "%s" "${git_status}")${color_green})\n\n$ ${color_off}")'; ;;
-            esac
-            ;;
-    esac
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "PS1 -> ${PS1}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch="$(date +"%s")"
-        runtime=$(( end_epoch - start_epoch ));
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-    fi
-
-    [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    return ${return_code};
-}
 
 #=====  FUNCTION  =============================================================
 #          NAME:  logoutUser
@@ -216,36 +88,12 @@ function logoutUser()
     return_code=0;
     error_count=0;
 
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]]; then
-        start_epoch="$(date +"%s")";
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
-    fi
-
     ## turn off ssh-agent and keychain
     [[ -n "$(pidof ssh-agent)" ]] && pkill ssh-agent;
     [[ -f "${HOME}/.ssh/ssh-agent.env" ]] && rm -f "${HOME}/.ssh/ssh-agent.env";
 
     ## clear terminal scrollback
     printf "\033c";
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch="$(date +"%s")"
-        runtime=$(( end_epoch - start_epoch ));
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-    fi
 
     [[ -n "${error_count}" ]] && unset -v error_count;
     [[ -n "${function_name}" ]] && unset -v function_name;
