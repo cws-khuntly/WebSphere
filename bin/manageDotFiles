@@ -29,7 +29,6 @@ LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
 CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 ## load the logger
-if [[ -r "/usr/local/lib/logger.sh" ]] && [[ -s "/usr/local/lib/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "/usr/local/lib/logger.sh"; fi
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntry" 2>/dev/null)" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; LOGGING_LOADED="${_FALSE}"; fi;
 
