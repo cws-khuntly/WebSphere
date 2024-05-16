@@ -60,7 +60,7 @@ source "${HOME}"/.functions;
 showHostInfo;
 
 ## trap logout
-trap 'source ${HOME}/.dotfiles/functions.d/F01-userProfile; logoutUser; exit' 0;
+trap 'logoutUser; exit' 0;
 
 ## make the umask sane
 umask 022;
