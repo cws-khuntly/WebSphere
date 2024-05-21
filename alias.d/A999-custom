@@ -67,3 +67,4 @@ alias keychain.exp="${HOME}/lib/keychain.exp";
 alias telnet.exp="${HOME}/lib/telnet.exp";
 alias reload="source ${HOME}/.bashrc";
 alias listFunctions="compgen -A function";
+alias listAliases="compgen -A alias";
