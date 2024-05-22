@@ -93,7 +93,7 @@ function installFiles()
                 fi
             fi
 
-            if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ] && [ "${force_exec}" == "${_TRUE}" ]]; then
+            if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "install_host -> ${install_host}";
                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "install_user -> ${install_user}";
