@@ -193,10 +193,10 @@ function refreshLocalFiles()
         function_list=( $(compgen -A function) );
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[@]}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
         fi
 
-        for func_entry in ${function_list[@]}; do
+        for func_entry in "${function_list[@]}"; do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "func_entry -> ${func_entry}";
             fi
@@ -206,7 +206,7 @@ function refreshLocalFiles()
             unset -f "${func_entry}";
 
             [[ -n "${func_entry}" ]] && unset -v func_entry;
-        fi
+        done
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating alias listing...";
@@ -217,10 +217,10 @@ function refreshLocalFiles()
         alias_list=( $(compgen -A alias) );
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[@]}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
         fi
 
-        for alias_entry in ${function_list[@]}; do
+        for alias_entry in "${function_list[@]}"; do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "alias_entry -> ${alias_entry}";
             fi
@@ -230,7 +230,7 @@ function refreshLocalFiles()
             unset -f "${alias_entry}";
 
             [[ -n "${alias_entry}" ]] && unset -v alias_entry;
-        fi
+        done
 
         ## extract the archive to the appropriate place
         cd "${DOTFILES_INSTALL_PATH}" || (( error_count += 1 ));
