@@ -16,7 +16,6 @@ function validateHostAddress()
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
-    returned_data=();
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch="$(date +"%s")";
@@ -79,7 +78,7 @@ function validateHostAddress()
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Attempt to validate ${validatedHostName} with port ${validatedPortNumber} has failed.";
             fi
         else
-            returned_data=( "${validatedHostName}" "${validatedPortNumber}" );
+            returned_data="${validatedHostAddress}:${validatedPortNumber}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_data -> ${returned_data[*]}"; fi
         fi
@@ -104,7 +103,7 @@ function validateHostAddress()
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Attempt to validate ${validatedHostName} with port ${validatedPortNumber} has failed.";
             fi
         else
-            returned_data=( "${validatedHostAddress}" "${validatedPortNumber}" );
+            returned_data="${validatedHostAddress}:${validatedPortNumber}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_data -> ${returned_data[*]}"; fi
         fi
@@ -129,7 +128,7 @@ function validateHostAddress()
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Attempt to validate ${validatedHostName} has failed.";
             fi
         else
-            returned_data=( "${validatedHostName}" );
+            returned_data="${validatedHostName}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_data -> ${returned_data[*]}"; fi
         fi
@@ -154,7 +153,7 @@ function validateHostAddress()
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Attempt to validate ${validatedHostAddress} has failed.";
             fi
         else
-            returned_data=( "${validatedHostAddress}" );
+            returned_data="${validatedHostAddress}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_data -> ${returned_data[*]}"; fi
         fi
@@ -194,7 +193,7 @@ function validateHostAddress()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    printf "%s\n" "${returned_data[@]}";
+    printf "%s" "${returned_data}";
     return ${return_code};
 )
 
@@ -285,6 +284,7 @@ function checkForValidHost()
 
                 [[ -z "${resolver_entry}" ]] && continue;
                 [[ "${resolver_entry}" =~ ^\# ]] && continue;
+                [[ "${resolver_entry}" =~ ^nameserver ]] && continue;
 
                 if [[ "${resolver_entry}" =~ ^search ]]; then
                     search_domain="$(awk '{print $NF}' <<< "${resolver_entry}")";
