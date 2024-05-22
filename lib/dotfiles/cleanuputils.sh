@@ -30,17 +30,17 @@ function cleanupFiles()
 
     operating_mode="${1}";
     cleanup_file_list="${2}";
-    cleanup_host="${3}";
-    cleanup_port="${4}";
-    cleanup_user="${5}";
+    target_host="${3}";
+    target_port="${4}";
+    target_user="${5}";
     force_exec="${6}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "operating_mode -> ${operating_mode}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_file_list -> ${cleanup_file_list}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_host -> ${cleanup_host}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_port -> ${cleanup_port}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_user -> ${cleanup_user}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_user -> ${target_user}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "force_exec -> ${force_exec}";
     fi
 
@@ -65,7 +65,7 @@ function cleanupFiles()
                     (( error_count += 1 ))
 
                     [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the host availability check. Setting resume_cleanup to ${_FALSE}";
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
                 fi
                 ;;
             "${CLEANUP_LOCATION_REMOTE}")
@@ -92,7 +92,7 @@ function cleanupFiles()
                     fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
                     fi
                 fi
 
@@ -108,7 +108,7 @@ function cleanupFiles()
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    cleanupRemoteFiles "${cleanup_file_list}" "${cleanup_host}" "${cleanup_port}" "${cleanup_user}"
+                    cleanupRemoteFiles "${cleanup_file_list}" "${target_host}" "${target_port}" "${target_user}"
                     ret_code="${?}";
 
                     cname="cleanuputils.sh";
@@ -135,9 +135,9 @@ function cleanupFiles()
         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The list of files to operate against appears to be empty. Cannot continue.";
     fi
 
-    [[ -n "${cleanup_user}" ]] && unset -v cleanup_user;
-    [[ -n "${cleanup_host}" ]] && unset -v cleanup_host;
-    [[ -n "${cleanup_port}" ]] && unset -v cleanup_port;
+    [[ -n "${target_user}" ]] && unset -v target_user;
+    [[ -n "${target_host}" ]] && unset -v target_host;
+    [[ -n "${target_port}" ]] && unset -v target_port;
     [[ -n "${force_exec}" ]] && unset -v force_exec;
     [[ -n "${cleanup_file_list}" ]] && unset -v cleanup_file_list;
     [[ -n "${operating_mode}" ]] && unset -v operating_mode;
