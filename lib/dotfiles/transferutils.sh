@@ -87,7 +87,7 @@ function transferFiles()
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
+                    returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
                     ret_code="${?}";
 
                     cname="transferutils.sh";
