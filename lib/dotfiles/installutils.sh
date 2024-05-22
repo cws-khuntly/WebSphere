@@ -120,7 +120,6 @@ function installFiles()
                 fi
             fi
             ;;
-            ;;
         *)
             (( error_count += 1 ));
 
@@ -251,7 +250,7 @@ function installLocalFiles()
 
                         case "${entry_command}" in
                             "mkdir")
-                                if [[ -n "${ENABLE_DEBUG}" ]    force_exec="${4}";] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Creating directory ${entry_target}";
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${entry_target}";
                                 fi
@@ -549,7 +548,7 @@ function installRemoteFiles()
         } >| "${file_verification_script}";
 
         if [[ ! -s "${file_verification_script}" ]]; then
-            (( error_count     fi+= 1 ))
+            (( error_count += 1 ))
 
             [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
         else
@@ -688,10 +687,6 @@ function installRemoteFiles()
                 fi
             fi
         fi
-    else
-        (( error_count += 1 ));
-
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote host ${install_host} appears to be unavailable. Please review logs.";
     fi
 
     ## cleanup (remote)
