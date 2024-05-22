@@ -87,14 +87,14 @@ function transferFiles()
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
+                    returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
                     function_name="${cname}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo[*]}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
                         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                     fi
 
@@ -106,13 +106,20 @@ function transferFiles()
                 fi
 
                 if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: transferRemoteFiles ${returnedHostInfo[0]} ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}} ${target_user} "; fi
+                    returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
+                    returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_hostname -> ${returned_hostname}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_port -> ${returned_port}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: transferRemoteFiles ${files_to_process} ${returned_hostname} ${returned_port:-${SSH_PORT_NUMBER}} ${target_user}";
+                    fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    transferRemoteFiles "${files_to_process}" "${returnedHostInfo[0]}" "${returnedHostInfo[1]:-${SSH_PORT_NUMBER}}" "${target_user}";
+                    transferRemoteFiles "${files_to_process}" "${returned_hostname}" "${returned_port:-${SSH_PORT_NUMBER}}" "${target_user}";
                     ret_code="${?}";
 
                     cname="transferutils.sh";
