@@ -93,7 +93,7 @@ function cleanupFiles()
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${cleanup_host}. Please review logs.";
-                    else
+                    fi
                 fi
 
                 if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ] && [ "${force_exec}" == "${_TRUE}" ]]; then
