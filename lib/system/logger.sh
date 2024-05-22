@@ -25,6 +25,8 @@ if [[ -z "${LOGGING_PROPERTIES}" ]]; then
 fi
 
 if [[ -n "${LOGGING_PROPERTIES}" ]] && [[ -r "${LOGGING_PROPERTIES}" ]] && [[ -s "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
+
+if [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "${_FALSE}" ]]; then printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2; exit 1; fi
 if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
 
 #======  FUNCTION  ============================================================
@@ -38,8 +40,11 @@ function usage()
     function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=3;
 
-    printf "%s %s\n" "${function_name}" "Write a log message to stdout/err or to a logfile" >&2;
+    printf "%s %s\n" "${function_name}" "Write a log message to a provided target." >&2;
     printf "%s %s\n" "Usage: ${function_name}" "[ <options> ]" >&2;
+    printf "    %s: %s\n" "The type of log output." "Supported levels (not case-sensitive):" >&2; ## TODO: This should also be able to send email, write to a db, etc
+    printf "        %s: %s\n" "FILE" "Write the provided data to the console (writeable level provided as an argument)." >&2;
+    printf "        %s: %s\n" "CONSOLE" "Write the provided data to the console (either STDOUT or STDERR)." >&2;
     printf "    %s: %s\n" "The level to write for." "Supported levels (not case-sensitive):" >&2;
     printf "        %s: %s\n" "STDOUT" "Write the provided data to standard output - commonly a terminal screen." >&2;
     printf "        %s: %s\n" "STDERR" "Write the provided data to standard error - commonly a terminal screen." >&2;
@@ -48,7 +53,7 @@ function usage()
     printf "        %s: %s\n" "ERROR" "Errors that are handled within the application." >&2;
     printf "        %s: %s\n" "INFO" "Informational messages about runtime processing." >&2;
     printf "        %s: %s\n" "WARN" "Warning messages usually related to configuration." >&2;
-    printf "        %s: %s\n" "AUDIT" "Performs an audit log write." >&2; ## TODO: This should also be able to send email, write to a db, etc
+    printf "        %s: %s\n" "AUDIT" "Performs an audit log write." >&2;
     printf "        %s: %s\n" "DEBUG" "Messaging related to immediate runtime actions or configurations." >&2;
     printf "    %s: %s\n" "Process IDentifier (PID)" "The process ID of the running instance." >&2;
     printf "    %s: %s\n" "Calling script" "The script calling the method to write the log entry." >&2;
