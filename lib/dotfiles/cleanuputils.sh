@@ -413,10 +413,6 @@ function cleanupRemoteFiles()
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred during the file cleanup process on host ${target_host} as user ${target_user}. Please review logs.";
             fi
         fi
-    else
-        (( error_count += 1 ));
-
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote host ${cleanup_host} appears to be unavailable. Please review logs.";
     fi
 
     [[ -w "${file_cleanup_file}" ]] && rm -f "${file_cleanup_file}";
