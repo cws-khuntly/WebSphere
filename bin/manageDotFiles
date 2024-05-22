@@ -691,6 +691,13 @@ while (( ${#} > 0 )); do
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}"; fi
             ;;
+        serverlist|l)
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting SERVER_LIST"; fi
+
+            SERVER_LIST="${ARGUMENT_VALUE}";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_LIST -> ${SERVER_LIST}"; fi
+            ;;
         port|p)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting SSH_PORT_NUMBER..."; fi
 
@@ -828,7 +835,7 @@ if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     if (( RETURN_CODE != 3 )); then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] &                & [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found a non-zero return code prior to execution. Please review logs and parameters.";
             writeLogEntry "CONSOLE" "STDERR" "Found a non-zero return code prior to execution. Please review logs and parameters.";
         fi
@@ -886,9 +893,46 @@ else
             fi
         fi
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main"; fi
+        if [[ -n "${SERVER_LIST}" ]] && [[ -s "${SERVER_LIST}" ]]; then
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}"; fi
 
-        main;
+            for server_entry in $(< "${SERVER_LIST}"); do
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "server_entry -> ${server_entry}"; fi
+
+                [[ -z "${server_entry}" ]] && continue;
+                [[ "${server_entry}" =~ ^\# ]] && continue;
+
+                TARGET_HOST="$(cut -d ":" -f 1 <<< "${server_entry}")";
+                SSH_PORT_NUMBER="$(cut -d ":" -f 2 <<< "${server_entry}")";
+                TARGET_USER="$(cut -d ":" -f 3 <<< "${server_entry}")";
+                TARGET_ACTION="$(cut -d ":" -f 4 <<< "${server_entry}")";
+                FORCE_EXEC="$(cut -d ":" -f 5 <<< "${server_entry}")";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SSH_PORT_NUMBER -> ${SSH_PORT_NUMBER}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_USER -> ${TARGET_USER}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ACTION -> ${TARGET_ACTION}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "FORCE_EXEC -> ${FORCE_EXEC}";
+                fi
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main"; fi
+
+                main;
+
+                [[ -n "${server_entry}" ]] && unset -v server_entry;
+                [[ -n "${TARGET_HOST}" ]] && unset -v TARGET_HOST;
+                [[ -n "${SSH_PORT_NUMBER}" ]] && unset -v SSH_PORT_NUMBER;
+                [[ -n "${TARGET_USER}" ]] && unset -v TARGET_USER;
+                [[ -n "${TARGET_ACTION}" ]] && unset -v TARGET_ACTION;
+                [[ -n "${FORCE_EXEC}" ]] && unset -v FORCE_EXEC;
+            done
+        else
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main"; fi
+
+            main;
+        fi
+
         RETURN_CODE="${?}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETURN_CODE -> ${RETURN_CODE}"; fi
@@ -918,5 +962,6 @@ fi
 [[ -n "${GPG_OPTION_FILE}" ]] && unset -v GPG_OPTION_FILE;
 [[ -n "${IS_GPG_AVAILABLE}" ]] && unset -v IS_GPG_AVAILABLE;
 [[ -n "${ARG_COUNTER}" ]] && unset -v ARG_COUNTER;
+[[ -n "${SERVER_LIST}" ]] && unset -v SERVER_LIST;
 
 exit ${RETURN_CODE};
