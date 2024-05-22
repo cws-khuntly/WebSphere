@@ -31,6 +31,7 @@ alias gm="git commit -sm";
 alias gms="git commit -S -sm";
 alias gma="git commit -asm";
 alias rgc="git commit -sm \"\$(curl -s https://whatthecommit.com/index.txt)"\";
+alias rgsc="git commit -Ssm \"\$(curl -s https://whatthecommit.com/index.txt)"\";
 alias gb="git branch";
 alias gc="git checkout";
 alias gr="git rm";
