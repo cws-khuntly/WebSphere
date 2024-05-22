@@ -93,14 +93,21 @@ function refreshFiles()
                 fi
             fi
 
-            if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${returnedHostInfo[0]} ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}} ${target_user} "; fi
+            if [[ -n "${returnedHostInfo}" ]] && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
+                returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
+                returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_hostname -> ${returned_hostname}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_port -> ${returned_port}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${returned_hostname} ${returned_port:-${SSH_PORT_NUMBER}} ${target_user}";
+                fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                refreshRemoteFiles "${returnedHostInfo[0]}" "${returnedHostInfo[1]:-${SSH_PORT_NUMBER}}" "${target_user}";
+                refreshRemoteFiles "${returned_hostname}" "${returned_port:-${SSH_PORT_NUMBER}}" "${target_user}";
                 ret_code="${?}";
 
                 cname="transferutils.sh";
