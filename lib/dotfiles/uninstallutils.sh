@@ -68,15 +68,15 @@ function uninstallFiles()
             ## check if the host is alive
             if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${refresh_host}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${refresh_host} ${refresh_port}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${target_host}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
                 fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                returnedHostInfo="$(validateHostAddress "${refresh_host}" "${refresh_port}")";
+                returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
                 ret_code="${?}";
 
                 cname="uninstallutils.sh";
@@ -88,7 +88,7 @@ function uninstallFiles()
                 fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${refresh_host}. Please review logs.";
+                    [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
                 fi
             fi
 
@@ -470,7 +470,7 @@ function uninstallRemoteFiles()
 
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the file cleanup file ${file_removal_script}. Please ensure the file exists and can be written to.";
             else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh -ql "${target_user}" -p ${target_port} \"${target_host}\" \"cd ${DOTFILES_BASE_PATH}; for file in \$(find . -type f) printf \"%s %s %s\n\" \"-\" \"rm\" \"${file}\"; done; for file in \$(find . -type d) printf \"%s %s %s\n\" \"-\" \"rmdir\" \"${file}\"; done;\" >> \"${file_removal_script}\""; fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh -ql ${target_user} -p ${target_port} ${target_host} \"cd ${DOTFILES_BASE_PATH}; for file in \$(find . -type f) printf \"%s %s %s\n\" \"-\" \"rm\" \"${file}\"; done; for file in \$(find . -type d) printf \"%s %s %s\n\" \"-\" \"rmdir\" \"${file}\"; done;\" >> \"${file_removal_script}\""; fi
 
                 ## get the file listing from the remote host
                 ssh -ql "${target_user}" -p ${target_port} "${target_host}" "cd ${DOTFILES_BASE_PATH}; for file in \$(find . -type f) printf \"%s %s %s\n\" \"-\" \"rm\" \"${file}\"; done; for file in \$(find . -type d) printf \"%s %s %s\n\" \"-\" \"rmdir\" \"${file}\"; done;" >> "${file_removal_script}";
