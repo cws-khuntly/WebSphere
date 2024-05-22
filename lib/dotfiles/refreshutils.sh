@@ -93,7 +93,7 @@ function refreshFiles()
                 fi
             fi
 
-            if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ] && [ "${force_exec}" == "${_TRUE}" ]]; then
+            if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${returnedHostInfo[0]} ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}} ${target_user} "; fi
 
                 [[ -n "${cname}" ]] && unset -v cname;
@@ -492,7 +492,7 @@ function refreshRemoteFiles()
     if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
         (( error_count += 1 ))
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";lib/dotfiles/refreshutils.sh
     else
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating file verification script ${file_verification_script}...";
@@ -516,7 +516,7 @@ function refreshRemoteFiles()
             printf "%s\n\n" "if [[ ! -e \"${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\" ]] || [[ ! -r \"${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\" ]]; then (( error_count += 1 )); fi;";
             printf "%s\n\n" "printf \"%s\" \${error_count}";
         } >| "${file_verification_script}";
-
+lib/dotfiles/refreshutils.sh
         if [[ ! -s "${file_verification_script}" ]]; then
             (( error_count += 1 ))
 
@@ -584,7 +584,7 @@ function refreshRemoteFiles()
                                 printf \"%s\n\" umask 022;
                                 printf \"%s\n\" [[ -d ${DOTFILES_INSTALL_PATH} ]] && rm -rf ${DOTFILES_INSTALL_PATH}; mkdir ${DOTFILES_INSTALL_PATH} > /dev/null 2>&1;
                                 printf \"%s\n\" cd ${DOTFILES_INSTALL_PATH}; ${UNARCHIVE_PROGRAM} -c ${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION} | tar -xf -
-                                printf \"%s\n\n\" ${DOTFILES_INSTALL_PATH}/bin/installDotFiles --config=${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}") --action=installFiles --servername=${target_host}
+                                printf \"%s\n\n\" ${DOTFILES_INSTALL_PATH}/bin/installDotFiles --config=${DEPLOY_TO_DIR}/$(lib/dotfiles/refreshutils.shbasename "${WORKING_CONFIG_FILE}") --action=installFiles --servername=${target_host}
                                 printf \"%s\n\n\" printf \"%s\" \${?}";
                         fi
 
@@ -607,7 +607,7 @@ function refreshRemoteFiles()
                         else
                             [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
 
-                            transfer_file_list="${installation_script}|${DEPLOY_TO_DIR}/$(basename "${installation_script}"),";
+                            transfer_file_list="${installation_script}|${DEPLOY_TO_DIR}/$(basename "${installation_script}"lib/dotfiles/refreshutils.sh),";
 
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"
