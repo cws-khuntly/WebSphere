@@ -190,8 +190,8 @@ function refreshLocalFiles()
         fi
 
         ## unset the functions
-        fuckity
-        function_list=( $(compgen -A function) );
+        #mapfile -t function_list < <( compgen -A function);
+        function_list=( $(printf "%s" "$(compgen -A function)" | tr "," "\n") );
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
@@ -215,8 +215,8 @@ function refreshLocalFiles()
         fi
 
         ## unset the aliases
-        fuckity again
-        alias_list=( $(compgen -A alias) );
+        #mapfile -t alias_list < <( compgen -A alias);
+        alias_list=( $(printf "%s" "$(compgen -A alias)" | tr "," "\n") );
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
@@ -229,7 +229,7 @@ function refreshLocalFiles()
 
             [[ -z "${alias_entry}" ]] && continue;
 
-            unset -f "${alias_entry}";
+            unalias "${alias_entry}";
 
             [[ -n "${alias_entry}" ]] && unset -v alias_entry;
         done
@@ -494,7 +494,7 @@ function refreshRemoteFiles()
     if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
         (( error_count += 1 ))
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";lib/dotfiles/refreshutils.sh
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
     else
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating file verification script ${file_verification_script}...";
@@ -518,7 +518,7 @@ function refreshRemoteFiles()
             printf "%s\n\n" "if [[ ! -e \"${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\" ]] || [[ ! -r \"${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\" ]]; then (( error_count += 1 )); fi;";
             printf "%s\n\n" "printf \"%s\" \${error_count}";
         } >| "${file_verification_script}";
-lib/dotfiles/refreshutils.sh
+
         if [[ ! -s "${file_verification_script}" ]]; then
             (( error_count += 1 ))
 
