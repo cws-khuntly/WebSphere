@@ -125,30 +125,6 @@ function refreshFiles()
     [[ -n "${refresh_mode}" ]] && unset -v refresh_mode;
     [[ -n "${refresh_host}" ]] && unset -v refresh_host;
     [[ -n "${refresh_user}" ]] && unset -v refresh_user;
-            refreshRemoteFiles "${refresh_host}" "${refresh_port}" "${refresh_user}";
-            ret_code="${?}";
-
-            cname="refreshutils.sh";
-            function_name="${cname}#${FUNCNAME[0]}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}"; fi
-
-            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
-
-                [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote installation of package failed. Please review logs.";
-            fi
-            ;;
-        *)
-            (( error_count += 1 ));
-
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An invalid installation mode was specified. refresh_mode -> ${refresh_mode}. Cannot continue.";
-            ;;
-    esac
-
-    [[ -n "${refresh_mode}" ]] && unset -v refresh_mode;
-    [[ -n "${refresh_host}" ]] && unset -v refresh_host;
-    [[ -n "${refresh_user}" ]] && unset -v refresh_user;
     [[ -n "${continue_exec}" ]] && unset -v continue_exec;
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
