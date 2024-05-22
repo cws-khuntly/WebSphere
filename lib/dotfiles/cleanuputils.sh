@@ -72,15 +72,15 @@ function cleanupFiles()
                 ## check if the host is alive
                 if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${refresh_host}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${refresh_host} ${refresh_port}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${target_host}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
                     fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
+                    returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
                     ret_code="${?}";
 
                     cname="cleanuputils.sh";
@@ -96,19 +96,21 @@ function cleanupFiles()
                     fi
                 fi
 
-                if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
+                if [[ -n "${returnedHostInfo}" ]] && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
+                    returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
+                    returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
+
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "install_host -> ${install_host}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "install_user -> ${install_user}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "force_exec -> ${force_exec}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: installRemoteFiles ${install_host} ${install_port} ${install_user} ${force_exec}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_hostname -> ${returned_hostname}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_port -> ${returned_port}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cleanupRemoteFiles ${returned_hostname} ${returned_port:-SSH_PORT_NUMBER} ${install_user} ${force_exec}";
                     fi
 
                     [[ -n "${cname}" ]] && unset -v cname;
                     [[ -n "${function_name}" ]] && unset -v function_name;
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                    cleanupRemoteFiles "${cleanup_file_list}" "${target_host}" "${target_port}" "${target_user}"
+                    cleanupRemoteFiles "${cleanup_file_list}" "${returned_hostname}" "${returned_port:-SSH_PORT_NUMBER}" "${target_user}"
                     ret_code="${?}";
 
                     cname="cleanuputils.sh";
@@ -322,9 +324,7 @@ function cleanupRemoteFiles()
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-    ${TMPDIR:-${USABLE_TMP_DIR}}
-
-    getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}};
+    getHostKeys "$(cut -d ":" -f 1 <<< ${returnedHostInfo})" "$(cut -d ":" -f 2 <<< ${returnedHostInfo})";
     ret_code=${?};
 
     cname="cleanuputils.sh";
