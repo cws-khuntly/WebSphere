@@ -28,32 +28,32 @@ function getHostKeys()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    remote_host="${1}";
-    remote_port="${2}";
+    target_host="${1}";
+    target_port="${2}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "remote_host -> ${remote_host}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "remote_port -> ${remote_port}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
     fi
 
     for keytype in ${SSH_HOST_KEYS[*]}; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "keytype -> ${keytype}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-keygen -F ${remote_host} 2>/dev/null | grep ${keytype}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-keygen -F ${target_host} 2>/dev/null | grep ${keytype}";
          fi
 
-        does_key_exist="$(ssh-keygen -F "${remote_host}" 2>/dev/null | grep "${keytype}")";
+        does_key_exist="$(ssh-keygen -F "${target_host}" 2>/dev/null | grep "${keytype}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "does_key_exist -> ${does_key_exist}"; fi
 
         if [[ -z "${does_key_exist}" ]]; then
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s\n\" \"~\" | nc \"${remote_host}\" ${remote_port}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-keyscan -t \"${keytype}\" -p ${remote_port} -H \"${remote_host}\"";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s\n\" \"~\" | nc \"${target_host}\" ${target_port}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-keyscan -t \"${keytype}\" -p ${target_port} -H \"${target_host}\"";
             fi
 
-            remote_ssh_version="$(printf "%s" "~" | nc "${remote_host}" ${remote_port} 2>/dev/null | head -1)";
-            remote_ssh_key="$(ssh-keyscan -t "${keytype}" -p ${remote_port} -H "${remote_host}")";
+            remote_ssh_version="$(printf "%s" "~" | nc "${target_host}" ${target_port} 2>/dev/null | head -1)";
+            remote_ssh_key="$(ssh-keyscan -t "${keytype}" -p ${target_port} -H "${target_host}")";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "remote_ssh_version -> ${remote_ssh_version}";
@@ -63,11 +63,11 @@ function getHostKeys()
             if [[ -n "${remote_ssh_key}" ]] && [[ -n "${remote_ssh_version}" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Found key ${remote_ssh_key} of type ${keytype}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"# %s:%d %s\n\" \"${remote_host}\" \"${remote_port}\" \"${remote_ssh_version}\" >> \"${SSH_KNOWN_HOSTS}\"";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"# %s:%d %s\n\" \"${target_host}\" \"${target_port}\" \"${remote_ssh_version}\" >> \"${SSH_KNOWN_HOSTS}\"";
                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s\n\" \"${remote_ssh_key}\" >> \"${SSH_KNOWN_HOSTS}\"";
                 fi
 
-                printf "# %s:%d %s %s\n" "${remote_host}" "${remote_port}" "${keytype}" "${remote_ssh_version}" >> "${SSH_KNOWN_HOSTS}";
+                printf "# %s:%d %s %s\n" "${target_host}" "${target_port}" "${keytype}" "${remote_ssh_version}" >> "${SSH_KNOWN_HOSTS}";
                 printf "%s\n" "${remote_ssh_key}" >> "${SSH_KNOWN_HOSTS}";
             fi
         fi
@@ -82,8 +82,8 @@ function getHostKeys()
     [[ -n "${remote_ssh_version}" ]] && unset -v remote_ssh_version;
     [[ -n "${remote_ssh_key}" ]] && unset -v remote_ssh_key;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
-    [[ -n "${remote_port}" ]] && unset -v remote_port;
-    [[ -n "${remote_host}" ]] && unset -v remote_host;
+    [[ -n "${target_port}" ]] && unset -v target_port;
+    [[ -n "${target_host}" ]] && unset -v target_host;
     [[ -n "${hosts_to_process[*]}" ]] && unset -v hosts_to_process;
     [[ -n "${hostlist}" ]] && unset -v hostlist;
 
@@ -274,13 +274,13 @@ function copyKeysToTarget()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    remote_host="${1}";
+    target_host="${1}";
     target_port="${2}";
     target_user="${3}";
     force_exec="${4}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "remote_host -> ${remote_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_user -> ${target_user}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "force_exec -> ${force_exec}";
@@ -288,15 +288,15 @@ function copyKeysToTarget()
 
     if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${remote_host}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${remote_host} ${target_port}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${target_host}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
         fi
 
         [[ -n "${cname}" ]] && unset -v functioncname_name;
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        returnedHostInfo="$(validateHostAddress "${remote_host}" "${target_port}")";
+        returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
         ret_code="${?}";
 
         cname="sshutils.sh";
@@ -308,7 +308,7 @@ function copyKeysToTarget()
         fi
 
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${remote_host}. Please review logs.";
+            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
         fi
     fi
 
@@ -334,9 +334,9 @@ function copyKeysToTarget()
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
                         (( error_count += 1 ));
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to copy SSH identity ${keyfile} to host ${remote_host}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to copy SSH identity ${keyfile} to host ${target_host}";
                     else
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "SSH keyfile ${keyfile} applied to host ${remote_host} as user ${target_user}";
+                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "SSH keyfile ${keyfile} applied to host ${target_host} as user ${target_user}";
                     fi
                 else
                     ## NOT incrementing an error counter here because im not sure we actually need it
@@ -350,13 +350,13 @@ function copyKeysToTarget()
     else
         (( error_count += 1 ));
 
-        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Host ${remote_host} does not appear to be available. Unable to continue processing.";
+        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Host ${target_host} does not appear to be available. Unable to continue processing.";
     fi
 
     [[ -n "${force_exec}" ]] && unset -v force_exec;
     [[ -n "${keyfile}" ]] && unset -v keyfile;
     [[ -n "${target_user}" ]] && unset -v target_user;
-    [[ -n "${remote_host}" ]] && unset -v remote_host;
+    [[ -n "${target_host}" ]] && unset -v target_host;
     [[ -n "${target_port}" ]] && unset -v target_port;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${continue_exec}" ]] && unset -v continue_exec;
