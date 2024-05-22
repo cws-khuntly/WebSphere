@@ -503,7 +503,7 @@ function installRemoteFiles()
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-    getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]};
+    getHostKeys "${returnedHostInfo[0]}" ${returnedHostInfo[1]:-${SSH_PORT_NUMBER}};
     ret_code=${?};
 
     cname="installutils.sh";
