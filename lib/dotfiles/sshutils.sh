@@ -296,7 +296,7 @@ function copyKeysToTarget()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
+        returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
         ret_code="${?}";
 
         cname="sshutils.sh";
@@ -323,7 +323,7 @@ function copyKeysToTarget()
                 if [[ -f "${keyfile}" ]] && [[ -r "${keyfile}" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Copying public key ${keyfile}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-copy-id -i ${keyfile} -oPort=${returnedHostInfo[1]} ${returnedHostInfo[0]} > /dev/null 2>&1";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ssh-copy-id -i ${keyfile} -oPort=${returnedHostInfo[1]:-${SSH_PORT_NUMBER}} ${returnedHostInfo[0]} > /dev/null 2>&1";
                     fi
 
                     ssh-copy-id -i "${keyfile}" -oPort="${returnedHostInfo[1]:-${SSH_PORT_NUMBER}}" "${returnedHostInfo[0]}" > /dev/null 2>&1;
