@@ -77,7 +77,7 @@ function refreshFiles()
                 [[ -n "${function_name}" ]] && unset -v function_name;
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
+                returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
                 ret_code="${?}";
 
                 cname="installutils.sh";
@@ -593,7 +593,7 @@ function refreshRemoteFiles()
                                 printf \"%s\n\" umask 022;
                                 printf \"%s\n\" [[ -d ${DOTFILES_INSTALL_PATH} ]] && rm -rf ${DOTFILES_INSTALL_PATH}; mkdir ${DOTFILES_INSTALL_PATH} > /dev/null 2>&1;
                                 printf \"%s\n\" cd ${DOTFILES_INSTALL_PATH}; ${UNARCHIVE_PROGRAM} -c ${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION} | tar -xf -
-                                printf \"%s\n\n\" ${DOTFILES_INSTALL_PATH}/bin/installDotFiles --config=${DEPLOY_TO_DIR}/$(lib/dotfiles/refreshutils.shbasename "${WORKING_CONFIG_FILE}") --action=installFiles --servername=${target_host}
+                                printf \"%s\n\n\" ${DOTFILES_INSTALL_PATH}/bin/manageDotFiles --config=${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}") --action=refreshFiles --servername=${target_host}
                                 printf \"%s\n\n\" printf \"%s\" \${?}";
                         fi
 
@@ -605,7 +605,7 @@ function refreshRemoteFiles()
                             printf "%s\n" "umask 022";
                             printf "%s\n" "[[ -d ${DOTFILES_INSTALL_PATH} ]] && rm -rf ${DOTFILES_INSTALL_PATH}; mkdir ${DOTFILES_INSTALL_PATH} > /dev/null 2>&1;";
                             printf "%s\n" "cd ${DOTFILES_INSTALL_PATH}; ${UNARCHIVE_PROGRAM} -c ${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION} | tar -xf -;";
-                            printf "%s\n\n" "${DOTFILES_INSTALL_PATH}/bin/installDotFiles --config=${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}") --action=installFiles --servername=${target_host}";
+                            printf "%s\n\n" "${DOTFILES_INSTALL_PATH}/bin/manageDotFiles --config=${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}") --action=refreshFiles --servername=${target_host}";
                             printf "%s\n\n" "printf \"%s\" \${?}";
                         } >| "${installation_script}";
 
