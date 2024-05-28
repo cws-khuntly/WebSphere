@@ -64,7 +64,7 @@ function showHostInfo()
     [[ -n "${host_cpu_count}" ]] && unset -v host_cpu_count;
     [[ -n "${host_cpu_info}" ]] && unset -v host_cpu_info;
     [[ -n "${host_memory_size}" ]] && unset -v host_memory_size;
-    [[ -n "$swap_memory_size}" ]] && unset -v swap_memory_size;
+    [[ -n "${swap_memory_size}" ]] && unset -v swap_memory_size;
     [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
