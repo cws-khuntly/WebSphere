@@ -296,7 +296,7 @@ function copyKeysToTarget()
         [[ -n "${function_name}" ]] && unset -v function_name;
         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-        returnedHostInfo=( "$(validateHostAddress "${target_host}" "${target_port}")" );
+        returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
         ret_code="${?}";
 
         cname="sshutils.sh";
@@ -313,6 +313,15 @@ function copyKeysToTarget()
     fi
 
     if [[ -n "${returnedHostInfo}" ]] && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
+        returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
+        returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_hostname -> ${returned_hostname}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_port -> ${returned_port}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: transferRemoteFiles ${files_to_process} ${returned_hostname} ${returned_port:-${SSH_PORT_NUMBER}} ${target_user}";
+        fi
+
         returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
         returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
 
