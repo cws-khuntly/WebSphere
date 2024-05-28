@@ -105,7 +105,7 @@ function transferFiles()
                     fi
                 fi
 
-                if (( ${#returnedHostInfo[*]} != 0 )) && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
+                if [[ -n "${returnedHostInfo}" ]] && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
                     returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
                     returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
 
