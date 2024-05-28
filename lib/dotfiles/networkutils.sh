@@ -78,7 +78,7 @@ function validateHostAddress()
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Attempt to validate ${validatedHostName} with port ${validatedPortNumber} has failed.";
             fi
         else
-            returned_data="${validatedHostAddress}:${validatedPortNumber}";
+            returned_data="${validatedHostName}:${validatedPortNumber}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_data -> ${returned_data[*]}"; fi
         fi
