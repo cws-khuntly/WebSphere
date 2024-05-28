@@ -406,7 +406,7 @@ function main()
                         [[ -n "${function_name}" ]] && unset -v function_name;
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                        installFiles "${INSTALL_LOCATION_LOCAL}";
+                        refreshFiles "${INSTALL_LOCATION_LOCAL}";
                         ret_code="${?}";
 
                         CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -456,7 +456,7 @@ function main()
                         [[ -n "${function_name}" ]] && unset -v function_name;
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                        installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                        reloadFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
                         ret_code="${?}";
 
                         CNAME="$(basename "${BASH_SOURCE[0]}")";
