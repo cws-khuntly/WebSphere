@@ -12,7 +12,7 @@ function isNaN
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="sshutils.sh";
+    cname="systemutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
