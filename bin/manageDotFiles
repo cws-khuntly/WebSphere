@@ -150,9 +150,9 @@ function main()
 
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
             else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
+                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
+                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
+                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
@@ -242,9 +242,9 @@ function main()
 
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
             else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
+                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
+                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
+                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
@@ -374,9 +374,9 @@ function main()
 
                 [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
             else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR},";
-                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}"),";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}"),";
+                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
+                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
+                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}"; fi
 
