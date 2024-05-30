@@ -199,8 +199,7 @@ function cleanupLocalFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \",\" -t files_to_process < <(printf \"%s\" \"${requested_files}\")";
     fi
 
-    #mapfile -d "," -t files_to_process < <(printf "%s" "${requested_files}");
-    files_to_process=( $(printf "%s" "${requested_files}" | tr "," "\n") );
+    mapfile -t files_to_process < <(printf "%s" "${requested_files}");
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 
