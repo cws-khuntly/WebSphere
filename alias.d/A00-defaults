@@ -2,8 +2,8 @@
 
 #==============================================================================
 #
-#          FILE:  defaults
-#         USAGE:  . functions
+#          FILE:  A00-defaults
+#         USAGE:  . A00-defaults
 #   DESCRIPTION:  Sets application-wide functions
 #
 #       OPTIONS:  ---

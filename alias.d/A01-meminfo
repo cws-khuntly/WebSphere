@@ -2,8 +2,8 @@
 
 #==============================================================================
 #
-#          FILE:  meminfo
-#         USAGE:  . meminfo
+#          FILE:  A01-meminfo
+#         USAGE:  . A01-meminfo
 #   DESCRIPTION:  Useful system information gathering aliases
 #
 #       OPTIONS:  ---

@@ -2,9 +2,9 @@
 
 #==============================================================================
 #
-#          FILE:  A05-openssl
-#         USAGE:  . A05-openssl
-#   DESCRIPTION:  Useful git aliases
+#          FILE:  A08-iim
+#         USAGE:  . A08-iim
+#   DESCRIPTION:  Customizations
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,5 +18,5 @@
 #
 #==============================================================================
 
-alias sha512sum="openssl sha512";
-alias checkCSR="openssl req -text -noout -verify -in";
+[[ -d /usr1/IBM/IIM ]] || return;
+alias imcl='/usr1/IBM/IIM/eclipse/tools/imcl';

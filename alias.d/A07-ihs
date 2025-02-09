@@ -2,9 +2,9 @@
 
 #==============================================================================
 #
-#          FILE:  A05-openssl
-#         USAGE:  . A05-openssl
-#   DESCRIPTION:  Useful git aliases
+#          FILE:  A07-ihs
+#         USAGE:  . A07-ihs
+#   DESCRIPTION:  Customizations
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,5 +18,7 @@
 #
 #==============================================================================
 
-alias sha512sum="openssl sha512";
-alias checkCSR="openssl req -text -noout -verify -in";
+[[ -d /usr1/IBM/HTTPServer ]] || return;
+
+alias startApache='/usr1/IBM/HTTPServer/bin/apachectl -k start';
+alias stopApache='/usr1/IBM/HTTPServer/bin/apachectl -k stop';

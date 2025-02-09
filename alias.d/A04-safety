@@ -2,8 +2,8 @@
 
 #==============================================================================
 #
-#          FILE:  safety
-#         USAGE:  . safety
+#          FILE:  A04-safety
+#         USAGE:  . A04-safety
 #   DESCRIPTION:  Add safety measures to destructive commands
 #
 #       OPTIONS:  ---

@@ -2,9 +2,9 @@
 
 #==============================================================================
 #
-#          FILE:  A05-openssl
-#         USAGE:  . A05-openssl
-#   DESCRIPTION:  Useful git aliases
+#          FILE:  ansible
+#         USAGE:  . ansible
+#   DESCRIPTION:  Loads keychain and adds available keys to it
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,5 +18,4 @@
 #
 #==============================================================================
 
-alias sha512sum="openssl sha512";
-alias checkCSR="openssl req -text -noout -verify -in";
+declare -x OTEL_JAVAAGENT_ENABLED=false;
