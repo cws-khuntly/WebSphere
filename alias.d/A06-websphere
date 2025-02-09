@@ -18,7 +18,7 @@
 #
 #==============================================================================
 
-[[ -d /usr1/IBM/WebSphere ]] || return;
+[[ ! -d /usr1/IBM/WebSphere ]] || return;
 
 if [[ -d /usr1/IBM/WebSphere/profiles/wp_profile ]]; then
     alias startServer='/usr1/IBM/WebSphere/profiles/wp_profile/bin/startServer.sh';
