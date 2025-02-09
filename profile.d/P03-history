@@ -21,7 +21,7 @@
 history -a;
 history -n;
 
-declare -x HISTFILE="${HOME}/.bash_history";
+declare -x HISTFILE="${HOME}/.bash_history.${HOSTNAME}";
 declare -ix HISTSIZE=10000;
 declare -ix HISTFILESIZE=10000;
 declare -x HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S ";

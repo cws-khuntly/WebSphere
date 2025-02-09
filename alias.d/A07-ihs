@@ -18,7 +18,7 @@
 #
 #==============================================================================
 
-[[ ! -d /usr1/IBM/HTTPServer ]] || return;
+[[ -d /usr1/IBM/HTTPServer ]] || return;
 
 alias startApache='/usr1/IBM/HTTPServer/bin/apachectl -k start';
 alias stopApache='/usr1/IBM/HTTPServer/bin/apachectl -k stop';

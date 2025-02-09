@@ -18,5 +18,6 @@
 #
 #==============================================================================
 
-[[ ! -d /usr1/IBM/IIM ]] || return;
+[[  /usr1/IBM/IIM ]] || return;
+
 alias imcl='/usr1/IBM/IIM/eclipse/tools/imcl';
