@@ -24,8 +24,19 @@ appList = AdminApp.list().split(lineSplit)
 def listApps():
     for app in appList:
         print(app)
+ 
+        continue
+
+def remapApplication():
+    for app in appList:
+        moduleName = AdminApp.listModules("" + app + "", '-server').split("#")[1].split("+")[0]
+
+        AdminApp.edit('' + app + '', '[ -MapModulesToServers [[ \"' + app + '\" ' + moduleName + ',WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster=TestCluster ]]]')
 
         continue
+
+    AdminConfig.save()
+    AdminNodeManagement.syncActiveNodes()
 
 def exportApp(appName):
     AdminApp.export(appName, '/var/tmp/' + appName + '.ear')
@@ -34,9 +45,6 @@ def printHelp():
     print("This script configures default values for the Deployment Manager.")
     print("Format is configureDMGR wasVersion")
 
-##################################
-# main
-#################################
 ##################################
 # main
 #################################

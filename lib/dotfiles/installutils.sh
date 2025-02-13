@@ -129,6 +129,8 @@ function installFiles()
             ;;
     esac
 
+    [[ -f "${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" ]] && rm -f "${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}";
+
     [[ -n "${install_mode}" ]] && unset -v install_mode;
     [[ -n "${target_host}" ]] && unset -v target_host;
     [[ -n "${target_user}" ]] && unset -v target_user;

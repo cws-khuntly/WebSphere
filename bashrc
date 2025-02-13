@@ -32,7 +32,7 @@ do
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in "${HOME}"/.profile.d/"${file_entry}"/*
+        for dir_entry in "${file_entry}"/*
         do
             [[ -z "${dir_entry}" ]] && continue;
 
