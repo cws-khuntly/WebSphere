@@ -17,10 +17,15 @@
 #==============================================================================
 
 import sys
+import platform
+import time
+import logging
 
-serverName = "nodeagent"
-lineSplit = java.lang.System.getProperty("line.separator")
-targetCell = AdminControl.getCell()
+global logger = logging.getlog(__name__)
+global lineSplit = java.lang.System.getProperty("line.separator")
+
+global serverName = "nodeagent"
+global  targetCell = AdminControl.getCell()
 
 def configureNodeAgent():
     nodeList = AdminTask.listManagedNodes().split(lineSplit)

@@ -20,6 +20,14 @@
 
 [[ -d /usr1/IBM/WebSphere ]] || return;
 
+if [[ -d /usr1/IBM/WebSphere/profiles/dmgr01 ]]; then
+    alias startManager='/usr1/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh';
+    alias stopManager='/usr1/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh';
+
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+fi
+
 if [[ -d /usr1/IBM/WebSphere/profiles/wp_profile ]] ; then
     alias startServer='/usr1/IBM/WebSphere/profiles/wp_profile/bin/startServer.sh';
     alias stopServer='/usr1/IBM/WebSphere/profiles/wp_profile/bin/stopServer.sh';
@@ -31,34 +39,37 @@ if [[ -d /usr1/IBM/WebSphere/profiles/wp_profile ]] ; then
     alias runCCT='/usr1/IBM/WebSphere/profiles/wp_profile/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
 fi
 
-if [[ -d /usr1/IBM/WebSphere/profiles/pp_profile01 ]]; then
-    alias startServer='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/startServer.sh';
-    alias stopServer='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/stopServer.sh';
+if [[ -d /usr1/IBM/WebSphere/profiles/PPApplications ]]; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/PPApplications/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/PPApplications/bin/stopServer.sh';
 
-    alias startNode='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/startNode.sh';
-    alias stopNode='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/stopNode.sh';
+    alias startNode='/usr1/IBM/WebSphere/profiles/PPApplications/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/PPApplications/bin/stopNode.sh';
 
-    alias wsadmin='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/wsadmin.sh -lang jython';
-    alias runCCT='/usr1/IBM/WebSphere/profiles/pp_profile01/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPApplications/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/PPApplications/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
 fi
 
-if [[ -d /usr1/IBM/WebSphere/profiles/dmgr01 ]]; then
-    alias startManager='/usr1/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh';
-    alias stopManager='/usr1/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh';
+if [[ -d /usr1/IBM/WebSphere/profiles/PPAuthoring ]]; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/stopServer.sh';
 
-    alias wsadmin='/usr1/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython';
-    alias runCCT='/usr1/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+    alias startNode='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/stopNode.sh';
+
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
 fi
 
-if [[ -d /usr1/IBM/WebSphere/profiles/PPSearch01 ]]; then
-    alias startServer='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/startServer.sh';
-    alias stopServer='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/stopServer.sh';
+if [[ -d /usr1/IBM/WebSphere/profiles/PPSearch ]]; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/PPSearch/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/PPSearch/bin/stopServer.sh';
 
-    alias startNode='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/startNode.sh';
-    alias stopNode='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/stopNode.sh';
+    alias startNode='/usr1/IBM/WebSphere/profiles/PPSearch/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/PPSearch/bin/stopNode.sh';
 
-    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/wsadmin.sh -lang jython';
-    alias runCCT='/usr1/IBM/WebSphere/profiles/PPSearch01/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPSearch/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/PPSearch/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
 fi
 
 if [[ -d /usr1/IBM/WebSphere/profiles/PPServices01 ]]; then

@@ -21,8 +21,9 @@ import time
 import logging
 
 global logger = logging.getlog(__name__)
-global targetCell = AdminControl.getCell()
 global lineSplit = java.lang.System.getProperty("line.separator")
+
+global targetCell = AdminControl.getCell()
 global clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
 
 def restartClusters():
@@ -43,10 +44,6 @@ def restartClusters():
             continue
 
 def restartCluster(clusterName):
-    targetCell = AdminControl.getCell()
-    lineSplit = java.lang.System.getProperty("line.separator")
-    clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
-
     for cluster in clusterList:
         if clusterName == cluster.split("(")[0]:
             break

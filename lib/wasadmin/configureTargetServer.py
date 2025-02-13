@@ -18,10 +18,15 @@
 
 import sys
 import platform
+import time
+import logging
 
-targetCell = AdminControl.getCell()
-lineSplit = java.lang.System.getProperty("line.separator")
-genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon -verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 "
+global logger = logging.getlog(__name__)
+global lineSplit = java.lang.System.getProperty("line.separator")
+
+global targetCell = AdminControl.getCell()
+global nodeList = AdminTask.listManagedNodes().split(lineSplit)
+global genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon -verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 "
                 "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xmn1536M -XX:MaxDirectMemorySize=256000000 -Xscmx150m -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
                 "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true "
                 "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Xlp "
@@ -35,8 +40,6 @@ def configureAllServers():
         configureTargetServer(server.split("(")[0])
 
 def configureTargetServer(serverName):
-    nodeList = AdminTask.listManagedNodes().split(lineSplit)
-
     for node in nodeList:
         targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
 
@@ -126,10 +129,6 @@ def configureTargetServer(serverName):
     print("Configuration complete.")
 
 def installSampleApp(wasVersion, targetServer, targetCluster, vHostName):
-    lineSplit = java.lang.System.getProperty("line.separator")
-    nodeList = AdminTask.listManagedNodes().split(lineSplit)
-    targetCell = AdminControl.getCell()
-
     targetServer = targetServer.upper()
     targetAppName = targetCluster.lower()
     cluster = AdminControl.completeObjectName('cell=' + AdminControl.getCell()  + ',type=Cluster,name=' + targetCluster + ',*')
