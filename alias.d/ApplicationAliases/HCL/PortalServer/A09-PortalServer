@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+#==============================================================================
+#
+#          FILE:  A06-websphere
+#         USAGE:  . A06-websphere
+#   DESCRIPTION:  Aliases for WebSphere Server Management
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#
+#==============================================================================
+
+[[ -d /usr1/IBM/WebSphere/PortalServer ]] || return;
+
+if [[ -d /usr1/IBM/WebSphere/profiles/wp_profile ]] ; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/wp_profile/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/wp_profile/bin/stopServer.sh';
+
+    alias startNode='/usr1/IBM/WebSphere/profiles/wp_profile/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/wp_profile/bin/stopNode.sh';
+
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/wp_profile/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/wp_profile/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+
+    alias ConfigEngine='/usr1/IBM/WebSphere/profiles/wp_profile/ConfigEngine/ConfigEngine.sh';
+    alias xmlaccess='/usr1/IBM/WebSphere/profiles/wp_profile/PortalServer/bin/xmlaccess.sh -url http://localhost:10039/ProviderHome/config -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties';
+fi
+
+if [[ -d /usr1/IBM/WebSphere/profiles/PPApplications ]]; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/PPApplications/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/PPApplications/bin/stopServer.sh';
+
+    alias startNode='/usr1/IBM/WebSphere/profiles/PPApplications/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/PPApplications/bin/stopNode.sh';
+
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPApplications/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/PPApplications/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+
+    alias ConfigEngine='/usr1/IBM/WebSphere/profiles/PPApplications/ConfigEngine/ConfigEngine.sh';
+    alias xmlaccess='/usr1/IBM/WebSphere/profiles/PPApplications/PortalServer/bin/xmlaccess.sh -url http://localhost:10039/ProviderHome/config -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties';
+fi
+
+if [[ -d /usr1/IBM/WebSphere/profiles/PPAuthoring ]]; then
+    alias startServer='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/startServer.sh';
+    alias stopServer='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/stopServer.sh';
+
+    alias startNode='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/startNode.sh';
+    alias stopNode='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/stopNode.sh';
+
+    alias wsadmin='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/wsadmin.sh -lang jython';
+    alias runCCT='/usr1/IBM/WebSphere/profiles/PPAuthoring/bin/wsadmin.sh -conntype NONE -f ~/lib/wasadmin/cct/ConfigDump.py';
+
+    alias ConfigEngine='/usr1/IBM/WebSphere/profiles/PPAuthoring/ConfigEngine/ConfigEngine.sh';
+    alias xmlaccess='/usr1/IBM/WebSphere/profiles/PPAuthoring/PortalServer/bin/xmlaccess.sh -url http://localhost:10039/ProviderHome/config -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties';
+fi

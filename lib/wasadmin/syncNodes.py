@@ -18,15 +18,13 @@
 
 import sys
 import time
-import logging
 
-global logger = logging.getlog(__name__)
-global lineSplit = java.lang.System.getProperty("line.separator")
+lineSplit = java.lang.System.getProperty("line.separator")
 
-global targetCell = AdminControl.getCell()
-global nodeList = AdminTask.listManagedNodes().split(lineSplit)
+targetCell = AdminControl.getCell()
+nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
-def performNodeSync:
+def performNodeSync():
     print("Synchronizing all nodes...")
 
     for node in nodeList:

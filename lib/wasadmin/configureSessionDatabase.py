@@ -22,10 +22,8 @@
 import sys
 import platform
 import time
-import logging
 
-global logger = logging.getlog(__name__)
-global lineSplit = java.lang.System.getProperty("line.separator")
+lineSplit = java.lang.System.getProperty("line.separator")
 
 def addOracleSessionDatabase(driverPath, oracleURL, entryName):
     ## add oracle jdbc driver

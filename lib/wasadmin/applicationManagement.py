@@ -18,14 +18,12 @@
 
 import sys
 import time
-import logging
 
 from pathlib import Path
 
-global logger = logging.getlog(__name__)
-global lineSplit = java.lang.System.getProperty("line.separator")
+lineSplit = java.lang.System.getProperty("line.separator")
 
-global appList = AdminApp.list().split(lineSplit)
+appList = AdminApp.list().split(lineSplit)
 
 def listApps():
     for app in appList:

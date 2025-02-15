@@ -18,13 +18,11 @@
 
 import sys
 import time
-import logging
 
-global logger = logging.getlog(__name__)
-global lineSplit = java.lang.System.getProperty("line.separator")
+lineSplit = java.lang.System.getProperty("line.separator")
 
-global targetCell = AdminControl.getCell()
-global clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
+targetCell = AdminControl.getCell()
+clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
 
 def restartClusters():
     logger.debug("In restart clusters")

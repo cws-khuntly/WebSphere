@@ -19,13 +19,11 @@
 import sys
 import platform
 import time
-import logging
 
-global logger = logging.getlog(__name__)
-global lineSplit = java.lang.System.getProperty("line.separator")
+lineSplit = java.lang.System.getProperty("line.separator")
 
-global serverName = "dmgr"
-global targetCell = AdminControl.getCell()
+serverName = "dmgr"
+targetCell = AdminControl.getCell()
 
 def configureDMGR():
     nodeList = AdminTask.listManagedNodes().split(lineSplit)
