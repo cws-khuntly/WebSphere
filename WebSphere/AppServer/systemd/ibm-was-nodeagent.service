@@ -3,10 +3,10 @@ Description=IBM WebSphere Application Server - nodeagent
 
 [Service]
 Type=forking
-ExecStart=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startNode.sh
-ExecStop=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/bin/stopNode.sh
-User=<SERVICE ACCOUNT>
-PIDFile=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/logs/nodeagent/nodeagent.pid
+ExecStart=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startNode.sh
+ExecStop=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/stopNode.sh
+User=wasadm
+PIDFile=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/logs/nodeagent/nodeagent.pid
 SuccessExitStatus=143 0
 
 [Install]

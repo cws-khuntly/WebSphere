@@ -4,10 +4,10 @@ After=ibm-was-nodeagent
 
 [Service]
 Type=forking
-ExecStart=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startServer.sh <SERVER NAME>
-ExecStop=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/bin/stopServer.sh <SERVER NAME>
-User=svc_wasadmd
-PIDFile=/usr1/IBM/WebSphere/profiles/<PROFILE NAME>/logs/<SERVER NAME>/<SERVER NAME>.pid
+ExecStart=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startServer.sh <SERVER NAME>
+ExecStop=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/stopServer.sh <SERVER NAME>
+User=wasadm
+PIDFile=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/logs/<SERVER NAME>/<SERVER NAME>.pid
 SuccessExitStatus=143 0
 TimeoutStartSec=10min
 TimeoutStopSec=10min
