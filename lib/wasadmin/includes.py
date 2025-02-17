@@ -25,10 +25,7 @@ def getAppNameFromArchive(earFile):
         end_string = "</display-name>"
 
         if (earFile.endswith(".war")) or (earFile.endswith(".ear")):
-            # read the zipfile
             zf = zipfile.ZipFile(filepath, "r")
-
-            #Get the list of files in the zipfile
             nl = zf.namelist()
 
             for name in nl:

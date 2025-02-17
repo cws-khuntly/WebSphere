@@ -40,11 +40,11 @@ for file_entry in "${HOME}"/.alias.d/*; do
                 [[ -n "${dir_entry}" ]] && unset -v dir_entry;
             elif [[ "${dir_entry}" == "ApplicationAliases" ]]; then
                 for alias_file in $(find "${dir_entry}" -type f -name "A*"); do
-                    [[ -r "${alias_file}" ]] && [[ -s "${alias_file}" ]]; then
+                    if [[ -r "${alias_file}" ]] && [[ -s "${alias_file}" ]]; then
+                        source "${alias_file}";
 
-                    source "${alias_file}";
-
-                    [[ -n "${alias_file}" ]] && unset -v alias_file;
+                        [[ -n "${alias_file}" ]] && unset -v alias_file;
+                    fi
                 done
 
                 [[ -n "${alias_file}" ]] && unset -v alias_file;
