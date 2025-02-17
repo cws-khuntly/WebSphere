@@ -27,13 +27,11 @@ if [[ -z "$(command -v "writeLogEntryToFile")" ]]; then printf "\e[00;31m%s\033[
 declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${HOME}/bin";
 
 ## load profile
-for file_entry in "${HOME}"/.profile.d/*
-do
+for file_entry in "${HOME}"/.profile.d/*; do
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in "${file_entry}"/*
-        do
+        for dir_entry in "${file_entry}"/*; do
             [[ -z "${dir_entry}" ]] && continue;
 
             if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then source "${dir_entry}"; fi

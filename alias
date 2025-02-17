@@ -19,13 +19,11 @@
 #==============================================================================
 
 ## load aliases
-for file_entry in "${HOME}"/.alias.d/*
-do
+for file_entry in "${HOME}"/.alias.d/*; do
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in "${file_entry}"/*
-        do
+        for dir_entry in "${file_entry}"/*; do
             [[ -n "${dir_entry}" ]] && continue;
 
             if [[ "${dir_entry}" == "OSAliases" ]]; then
@@ -38,6 +36,8 @@ do
 
                     [[ -n "${dir_entry}" ]] && unset -v dir_entry;
                 fi
+
+                [[ -n "${dir_entry}" ]] && unset -v dir_entry;
             elif [[ "${dir_entry}" == "ApplicationAliases" ]]; then
                 for alias_file in $(find "${dir_entry}" -type f -name "A*"); do
                     [[ -r "${alias_file}" ]] && [[ -s "${alias_file}" ]]; then

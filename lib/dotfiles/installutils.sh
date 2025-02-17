@@ -211,7 +211,7 @@ function installLocalFiles()
 
                 if [[ -s "${INSTALL_CONF}" ]]; then
                     ## change the IFS
-                    IFS="${MODIFIED_IFS}";    force_exec="${4}";
+                    IFS="${MODIFIED_IFS}";
 
                     ## clean up home directory first
                     for entry in $(< "${INSTALL_CONF}"); do
