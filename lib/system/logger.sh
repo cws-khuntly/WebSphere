@@ -20,13 +20,19 @@ PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## get the available log config and load it
 if [[ -z "${LOGGING_PROPERTIES}" ]]; then
-    if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; fi ## if its here, use it
-    if [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties"; fi ## if its here, override the above and use it
+    if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then
+        LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; ## if its here, use it
+    elif [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then
+        LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties"; ## if its here, override the above and use it
+    fi
 fi
 
 if [[ -n "${LOGGING_PROPERTIES}" ]] && [[ -r "${LOGGING_PROPERTIES}" ]] && [[ -s "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 
-if [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "${_FALSE}" ]]; then printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2; fi
+if [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "${_FALSE}" ]]; then
+    printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2;
+fi
+
 if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
 
 #======  FUNCTION  ============================================================
@@ -84,7 +90,7 @@ function writeLogEntry()
             writeLogEntryToFile "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
             ;;
         [Cc][Oo][Nn][Ss][Oo][Ll][Ee])
-            writeLogEntryToConsole "${2}" "${3}";
+            writeLogEntryToConsole "${2}" "${7}";
             ;;
         *)
             (( error_count += 1 ));
