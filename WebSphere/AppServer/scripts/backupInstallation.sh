@@ -28,18 +28,18 @@ else
 fi
 
 #=====  FUNCTION  =============================================================
-#          NAME:  buildDeploymentManager
-#   DESCRIPTION:  Creates a WebSphere Application Server deployment manager
+#          NAME:  executeBackup
+#   DESCRIPTION:  Backs up a WebSphere Application Server installation
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function buildDeploymentManager()   
+function executeBackup()   
 {
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="buildDeploymentManager";
+    cname="executeBackup";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -75,9 +75,9 @@ function buildDeploymentManager()
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
         fi
 
-        printf "%s %s\n" "${FUNCNAME[1]}" "Builds a deployment manager profile and optionally augments it for WebSphere Portal Server." >&2;
+        printf "%s %s\n" "${FUNCNAME[1]}" "Backs up a WebSphere Application Server installation." >&2;
         printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ property file ]" >&2;
-        printf "    %s: %s\n" "<property file>" "The property file holding the deployment manager configuration values." >&2;
+        printf "    %s: %s\n" "<property file>" "The property file holding the server configuration values." >&2;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
@@ -99,51 +99,94 @@ function buildDeploymentManager()
 
     if [[ -r "${property_file}" ]] && [[ -s "${property_file}" ]]; then
         readPropertyFile "${property_file}";
-
-        createDeploymentManager;
-        ret_code="${?}";
+        ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
         fi
-
+    
         if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
             (( error_count += 1 ));
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to load property file. Ensure the file exists and can be read.";
+                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to load property file. Ensure the file exists and can be read.";
             fi
         else
-            if [[ -n "${AUGMENT_DMGR_PROFILE}" ]] && [[ "${AUGMENT_DMGR_PROFILE}" == "${_TRUE}" ]]; then
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
+            case "${BACKUP_TYPE}" in
+                "[Pp][Rr][Oo][Ff][Ii][Ll][Ee]")
+                    backupServerProfile "${PROFILE_NAME}";
+                    ret_code=${?};
 
-                augmentDeploymentManager;
-                ret_code="${?}";
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                    fi
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                fi
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        (( error_count += 1 ));
 
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                        fi
+                    fi
+                "[Ff][Ii][Ll][Ee][Ss][Yy][Ss][Tt][Ee][Mm]")
+                    backupServerFilesystem "${WAS_INSTALL_ROOT}" "${BACKUP_DIRECTORY}";
+                    ret_code=${?};
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                    fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        (( error_count += 1 ));
+
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
+                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
+                        fi
+                    fi
+                "[Aa][Ll][Ll]|[Bb][Oo][Tt][Hh]")
+                    backupServerProfile "${PROFILE_NAME}";
+                    ret_code=${?};
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                    fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        (( error_count += 1 ));
+
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                        fi
+                    else
+                        backupServerFilesystem "${BACKUP_FILESYSTEM}" "${BACKUP_DIRECTORY}";
+                        ret_code=${?};
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                        fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            (( error_count += 1 ));
+
+                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
+                                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
+                            fi
+                        fi
+                    fi
+                *)
                     (( error_count += 1 ));
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "A valid backup type was not provided. Please review the configured property file.";
+                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "A valid backup type was not provided. Please review the configured property file.";
                     fi
-                fi
-            fi
+            esac
         fi
-
-        [[ -n "${AUGMENT_DMGR_PROFILE}" ]] && unset -v AUGMENT_DMGR_PROFILE;
-        [[ -n "${WAS_INSTALL_ROOT}" ]] && unset -v WAS_INSTALL_ROOT;
-        [[ -n "${DMGR_HOST_NAME}" ]] && unset -v DMGR_HOST_NAME;
-        [[ -n "${DMGR_ADMIN_USERNAME}" ]] && unset -v DMGR_ADMIN_USERNAME;
-        [[ -n "${DMGR_ADMIN_PASSWORD}" ]] && unset -v DMGR_ADMIN_PASSWORD;
-        [[ -n "${DMGR_PROFILE_PATH}" ]] && unset -v DMGR_PROFILE_PATH;
-        [[ -n "${DMGR_PROFILE_CELL}" ]] && unset -v DMGR_PROFILE_CELL;
-        [[ -n "${DMGR_PROFILE_NAME}" ]] && unset -v DMGR_PROFILE_NAME;
     else
         (( error_count += 1 ));
 
@@ -158,14 +201,142 @@ function buildDeploymentManager()
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
-    [[ -n "${AUGMENT_DMGR_PROFILE}" ]] && unset -v AUGMENT_DMGR_PROFILE;
+    [[ -n "${IBM_INSTALL_ROOT}" ]] && unset -v IBM_INSTALL_ROOT;
     [[ -n "${WAS_INSTALL_ROOT}" ]] && unset -v WAS_INSTALL_ROOT;
-    [[ -n "${DMGR_HOST_NAME}" ]] && unset -v DMGR_HOST_NAME;
-    [[ -n "${DMGR_ADMIN_USERNAME}" ]] && unset -v DMGR_ADMIN_USERNAME;
-    [[ -n "${DMGR_ADMIN_PASSWORD}" ]] && unset -v DMGR_ADMIN_PASSWORD;
-    [[ -n "${DMGR_PROFILE_PATH}" ]] && unset -v DMGR_PROFILE_PATH;
-    [[ -n "${DMGR_PROFILE_CELL}" ]] && unset -v DMGR_PROFILE_CELL;
-    [[ -n "${DMGR_PROFILE_NAME}" ]] && unset -v DMGR_PROFILE_NAME;
+    [[ -n "${WAS_PROFILE_NAME}" ]] && unset -v WAS_PROFILE_NAME;
+    [[ -n "${FILESYSTEM_BACKUP_WAS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WAS_ONLY;
+    [[ -n "${FILESYSTEM_BACKUP_IHS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_IHS_ONLY;
+    [[ -n "${FILESYSTEM_BACKUP_WCT_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WCT_ONLY;
+    [[ -n "${FILESYSTEM_BACKUP_WPS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WPS_ONLY;
+    [[ -n "${BACKUP_DIRECTORY}" ]] && unset -v BACKUP_DIRECTORY;
+    [[ -n "${BACKUP_TYPE_PROFILE}" ]] && unset -v BACKUP_TYPE_PROFILE;
+    [[ -n "${BACKUP_TYPE_FILESYSTEM}" ]] && unset -v BACKUP_TYPE_FILESYSTEM;
+    [[ -n "${BACKUP_TYPE_ALL}" ]] && unset -v BACKUP_TYPE_ALL;
+    [[ -n "${BACKUP_TYPE_DEFAULT}" ]] && unset -v BACKUP_TYPE_DEFAULT;
+    [[ -n "${BACKUP_TYPE}" ]] && unset -v BACKUP_TYPE;
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
+    fi
+
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
+    [[ -n "${property_file}" ]] && unset -v property_file;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        end_epoch="$(date +"%s")"
+        runtime=$(( end_epoch - start_epoch ));
+
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${cname}" ]] && unset -v cname;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+}
+
+#=====  FUNCTION  =============================================================
+#          NAME:  backupServerProfile
+#   DESCRIPTION:  Creates a WebSphere Application Server deployment manager
+#    PARAMETERS:  Directory to create
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function backupServerProfile()
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="backupProfile";
+    function_name="${cname}#${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        start_epoch="$(date +"%s")";
+
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
+    fi
+
+    #======  FUNCTION  ============================================================
+    #          NAME:  usage
+    #   DESCRIPTION:  
+    #    PARAMETERS:  None
+    #       RETURNS:  0 regardless of result.
+    #==============================================================================
+    function usage()
+    (
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+        set +o noclobber;
+        cname="backupServerProfile";
+        function_name="${cname}#${FUNCNAME[1]}";
+        return_code=3;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        fi
+
+        printf "%s %s\n" "${FUNCNAME[1]}" "Creates a filesystem backup of a provided WebSphere profile." >&2;
+        printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ profile ]" >&2;
+        printf "    %s: %s\n" "<profile name>" "The name of the WebSphere profile to back up." >&2;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
+        fi
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    )
+
+    if (( ${#} == 0 )); then usage; return "${?}"; fi
+
+    profile_name="${1}";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
+    fi
+
+    if [[ -n "${profile_name}" ]]; then
+        ## get a list of all the servers in this profile so we can turn them down
+        
+        /usr1/IBM/WebSphere/profiles/dmgr01/bin/serverStatus.sh -all 
+        server_list="$(echo -e "$(/usr1/IBM/WebSphere/profiles/dmgr01/bin/serverStatus.sh -all | grep "Server name" | cut -d ":" -f 3)" | xargs)"
+        ${WAS_INSTALL_ROOT}/${profile_name}/bin/stopManager.sh
+
+        rm -rf /usr1/IBM/WebSphere/profiles/dmgr01/temp/*
+        rm -rf /usr1/IBM/WebSphere/profiles/dmgr01/wstemp/*
+
+        /usr1/IBM/WebSphere/profiles/dmgr01/bin/clearClassCache.sh
+        /usr1/IBM/WebSphere/profiles/dmgr01/bin/osgiCfgInit.sh
+
+        /usr1/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /usr1/IBM/backups/dmgr01-PostPortalInstall-backup.$(date +"%d-%m-%Y_%H:%M:%S");
+    else
+        (( error_count += 1 ));
+
+        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "No profile name was provided to back up. Cannot continue.";
+        fi
+
+        [[ -n "${ret_code}" ]] && unset -v ret_code;
+        [[ -n "${property_file}" ]] && unset -v property_file;
+    fi
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
