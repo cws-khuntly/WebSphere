@@ -365,18 +365,18 @@ function backupServerProfile()
 }
 
 #=====  FUNCTION  =============================================================
-#          NAME:  createDeploymentManager
+#          NAME:  backupServerFilesystem
 #   DESCRIPTION:  Creates a directory and then changes into it
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function createDeploymentManager()
+function backupServerFilesystem()
 (
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="createDeploymentManager";
+    cname="backupServerFilesystem";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -461,13 +461,11 @@ function createDeploymentManager()
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
         fi
 
         [[ -n "${ret_code}" ]] && unset -v ret_code;
     else
         writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully created.";
-        writeLogEntry "STDOUT" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully created.";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
@@ -588,7 +586,6 @@ function augmentDeploymentManager()
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred unzipping the Portal deployment manager files. Please review logs.";
-                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred unzipping the Portal deployment manager files. Please review logs.";
             fi
 
             [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -607,7 +604,6 @@ function augmentDeploymentManager()
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
-                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
                     fi
 
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -625,7 +621,6 @@ function augmentDeploymentManager()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
                         fi
 
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -646,7 +641,6 @@ function augmentDeploymentManager()
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred stopping the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
-                    writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred stopping the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -665,7 +659,6 @@ function augmentDeploymentManager()
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
                     fi
 
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -683,14 +676,12 @@ function augmentDeploymentManager()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred starting the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
-                            writeLogEntry "STDERR" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred starting the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
                         fi
 
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully augmented.";
-                            writeLogEntry "CONSOLE" "STDOUT" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully augmented.";
                         fi
                     fi
 
@@ -705,7 +696,6 @@ function augmentDeploymentManager()
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The location of the Portal deployment manager files was not found or could not be read. Please confirm the location of these files.";
-            writeLogEntry "STDERR" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The location of the Portal deployment manager files was not found or could not be read. Please confirm the location of these files.";
         fi
 
         [[ -n "${ret_code}" ]] && unset -v ret_code;
