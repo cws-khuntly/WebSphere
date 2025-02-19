@@ -1,11 +1,12 @@
 #==============================================================================
 #
-#          FILE:  ibm-wps-server@.service
+#          FILE:  ibm-was-server@.service
 #         USAGE:  Install unit file using appropriate systemctl syntax. Example:
 #
-#                 systemctl enable ibm-wps-server@<INSTANCE>
+#                 systemctl enable ibm-was-server@<INSTANCE>
+#
 #     ARGUMENTS:  None
-#   DESCRIPTION:  systemd unit file for HCL Digital Experience Server
+#   DESCRIPTION:  systemd unit file for IBM WebSphere Application Server
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,15 +19,15 @@
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=IBM WebSphere Application Server - WebSphere Portal
-After=ibm-was-nodeagent
+Description=IBM WebSphere Application Server - Application Server
+After=ibm-was-nodeagent@%i
+Requires=ibm-was-nodeagent@%i
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/WebSphere/profiles/wp_profile/bin/startServer.sh %i
-ExecStop=/opt/IBM/WebSphere/profiles/wp_profile/bin/stopServer.sh %i
-User=wasadm
-PIDFile=/opt/IBM/WebSphere/profiles/wp_profile/logs/%i/%i.pid
+ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
+ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
+PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/%i/${SERVER_NAME}.pid
 SuccessExitStatus=143 0
 TimeoutStartSec=10min
 TimeoutStopSec=10min

@@ -12,7 +12,7 @@
 #  REQUIREMENTS:  ---
 #          BUGS:  ---
 #         NOTES:  ---
-#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
 #       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---

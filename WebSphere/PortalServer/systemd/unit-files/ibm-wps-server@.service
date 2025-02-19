@@ -12,23 +12,26 @@
 #  REQUIREMENTS:  ---
 #          BUGS:  ---
 #         NOTES:  ---
-#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
 #       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=IBM WebSphere Application Server - Application Server
-After=ibm-was-nodeagent
+Description=IBM WebSphere Portal Server
+After=ibm-was-nodeagent@%i
+Requires=ibm-was-nodeagent@%i
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startServer.sh %i
-ExecStop=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/bin/startServer.sh %i
+ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
+ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
 User=wasadm
-PIDFile=/opt/IBM/WebSphere/profiles/<PROFILE NAME>/logs/%i/%i.pid
+PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/${SERVER_NAME}/${SERVER_NAME}.pid
 SuccessExitStatus=143 0
+TimeoutStartSec=10min
+TimeoutStopSec=10min
 
 [Install]
 WantedBy=default.target

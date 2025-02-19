@@ -9,7 +9,7 @@
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
 #         NOTES:
-#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
 #       CREATED:  ---
@@ -33,7 +33,7 @@ fi
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function buildDeploymentManager()   
+function buildDeploymentManager()
 {
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi

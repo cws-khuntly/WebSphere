@@ -9,7 +9,7 @@
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
 #         NOTES:
-#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
 #       CREATED:  ---
@@ -28,18 +28,18 @@ else
 fi
 
 #=====  FUNCTION  =============================================================
-#          NAME:  executeBackup
-#   DESCRIPTION:  Backs up a WebSphere Application Server installation
+#          NAME:  performAppServerBackup
+#   DESCRIPTION:  Backs up a WebSphere installation
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function executeBackup()   
+function performAppServerBackup()
 {
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="executeBackup";
+    cname="backupProfile";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -75,9 +75,9 @@ function executeBackup()
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
         fi
 
-        printf "%s %s\n" "${FUNCNAME[1]}" "Backs up a WebSphere Application Server installation." >&2;
-        printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ property file ]" >&2;
-        printf "    %s: %s\n" "<property file>" "The property file holding the server configuration values." >&2;
+        printf "%s %s\n" "${FUNCNAME[1]}" "Creates a filesystem backup of a provided WebSphere profile." >&2;
+        printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ profile ]" >&2;
+        printf "    %s: %s\n" "<profile name>" "The name of the WebSphere profile to back up." >&2;
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
@@ -91,129 +91,22 @@ function executeBackup()
 
     if (( ${#} == 0 )); then usage; return "${?}"; fi
 
-    property_file="${1}";
+    profile_name="${1}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "property_file -> ${property_file}";
-    fi
-
-    if [[ -r "${property_file}" ]] && [[ -s "${property_file}" ]]; then
-        readPropertyFile "${property_file}";
-        ret_code=${?};
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-        fi
-    
-        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-            (( error_count += 1 ));
-
-            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to load property file. Ensure the file exists and can be read.";
-                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to load property file. Ensure the file exists and can be read.";
-            fi
-        else
-            case "${BACKUP_TYPE}" in
-                "[Pp][Rr][Oo][Ff][Ii][Ll][Ee]")
-                    backupServerProfile "${PROFILE_NAME}";
-                    ret_code=${?};
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ));
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                        fi
-                    fi
-                "[Ff][Ii][Ll][Ee][Ss][Yy][Ss][Tt][Ee][Mm]")
-                    backupServerFilesystem "${WAS_INSTALL_ROOT}" "${BACKUP_DIRECTORY}";
-                    ret_code=${?};
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ));
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
-                        fi
-                    fi
-                "[Aa][Ll][Ll]|[Bb][Oo][Tt][Hh]")
-                    backupServerProfile "${PROFILE_NAME}";
-                    ret_code=${?};
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ));
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
-                        fi
-                    else
-                        backupServerFilesystem "${BACKUP_FILESYSTEM}" "${BACKUP_DIRECTORY}";
-                        ret_code=${?};
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ));
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
-                                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred backing up the server filesystem. Please review logs.";
-                            fi
-                        fi
-                    fi
-                *)
-                    (( error_count += 1 ));
-
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "A valid backup type was not provided. Please review the configured property file.";
-                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "A valid backup type was not provided. Please review the configured property file.";
-                    fi
-            esac
-        fi
-    else
-        (( error_count += 1 ));
-
-        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Unable to read provided property file ${property_file}. Please verify the file exists, is readable, and contains data.";
-            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Unable to read provided property file ${property_file}. Please verify the file exists, is readable, and contains data.";
-        fi
-
-        [[ -n "${ret_code}" ]] && unset -v ret_code;
-        [[ -n "${property_file}" ]] && unset -v property_file;
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
-    [[ -n "${IBM_INSTALL_ROOT}" ]] && unset -v IBM_INSTALL_ROOT;
+    [[ -n "${AUGMENT_DMGR_PROFILE}" ]] && unset -v AUGMENT_DMGR_PROFILE;
     [[ -n "${WAS_INSTALL_ROOT}" ]] && unset -v WAS_INSTALL_ROOT;
-    [[ -n "${WAS_PROFILE_NAME}" ]] && unset -v WAS_PROFILE_NAME;
-    [[ -n "${FILESYSTEM_BACKUP_WAS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WAS_ONLY;
-    [[ -n "${FILESYSTEM_BACKUP_IHS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_IHS_ONLY;
-    [[ -n "${FILESYSTEM_BACKUP_WCT_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WCT_ONLY;
-    [[ -n "${FILESYSTEM_BACKUP_WPS_ONLY}" ]] && unset -v FILESYSTEM_BACKUP_WPS_ONLY;
-    [[ -n "${BACKUP_DIRECTORY}" ]] && unset -v BACKUP_DIRECTORY;
-    [[ -n "${BACKUP_TYPE_PROFILE}" ]] && unset -v BACKUP_TYPE_PROFILE;
-    [[ -n "${BACKUP_TYPE_FILESYSTEM}" ]] && unset -v BACKUP_TYPE_FILESYSTEM;
-    [[ -n "${BACKUP_TYPE_ALL}" ]] && unset -v BACKUP_TYPE_ALL;
-    [[ -n "${BACKUP_TYPE_DEFAULT}" ]] && unset -v BACKUP_TYPE_DEFAULT;
-    [[ -n "${BACKUP_TYPE}" ]] && unset -v BACKUP_TYPE;
+    [[ -n "${DMGR_HOST_NAME}" ]] && unset -v DMGR_HOST_NAME;
+    [[ -n "${DMGR_ADMIN_USERNAME}" ]] && unset -v DMGR_ADMIN_USERNAME;
+    [[ -n "${DMGR_ADMIN_PASSWORD}" ]] && unset -v DMGR_ADMIN_PASSWORD;
+    [[ -n "${DMGR_PROFILE_PATH}" ]] && unset -v DMGR_PROFILE_PATH;
+    [[ -n "${DMGR_PROFILE_CELL}" ]] && unset -v DMGR_PROFILE_CELL;
+    [[ -n "${DMGR_PROFILE_NAME}" ]] && unset -v DMGR_PROFILE_NAME;
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -242,12 +135,12 @@ function executeBackup()
 }
 
 #=====  FUNCTION  =============================================================
-#          NAME:  backupServerProfile
+#          NAME:  backupProfile
 #   DESCRIPTION:  Creates a WebSphere Application Server deployment manager
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function backupServerProfile()
+function backupProfile()
 {
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
@@ -281,7 +174,7 @@ function backupServerProfile()
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
         set +o noclobber;
-        cname="backupServerProfile";
+        cname="buildDeploymentManager";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
 
@@ -312,19 +205,7 @@ function backupServerProfile()
     fi
 
     if [[ -n "${profile_name}" ]]; then
-        ## get a list of all the servers in this profile so we can turn them down
-        
-        /usr1/IBM/WebSphere/profiles/dmgr01/bin/serverStatus.sh -all 
-        server_list="$(echo -e "$(/usr1/IBM/WebSphere/profiles/dmgr01/bin/serverStatus.sh -all | grep "Server name" | cut -d ":" -f 3)" | xargs)"
-        ${WAS_INSTALL_ROOT}/${profile_name}/bin/stopManager.sh
-
-        rm -rf /usr1/IBM/WebSphere/profiles/dmgr01/temp/*
-        rm -rf /usr1/IBM/WebSphere/profiles/dmgr01/wstemp/*
-
-        /usr1/IBM/WebSphere/profiles/dmgr01/bin/clearClassCache.sh
-        /usr1/IBM/WebSphere/profiles/dmgr01/bin/osgiCfgInit.sh
-
-        /usr1/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /usr1/IBM/backups/dmgr01-PostPortalInstall-backup.$(date +"%d-%m-%Y_%H:%M:%S");
+        ## do work
     else
         (( error_count += 1 ));
 
@@ -365,18 +246,18 @@ function backupServerProfile()
 }
 
 #=====  FUNCTION  =============================================================
-#          NAME:  backupServerFilesystem
+#          NAME:  createDeploymentManager
 #   DESCRIPTION:  Creates a directory and then changes into it
 #    PARAMETERS:  Directory to create
 #       RETURNS:  0 if success, 1 otherwise
 #==============================================================================
-function backupServerFilesystem()
+function createDeploymentManager()
 (
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="backupServerFilesystem";
+    cname="createDeploymentManager";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -461,11 +342,13 @@ function backupServerFilesystem()
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred creating the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
         fi
 
         [[ -n "${ret_code}" ]] && unset -v ret_code;
     else
         writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully created.";
+        writeLogEntry "STDOUT" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully created.";
     fi
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
@@ -586,6 +469,7 @@ function augmentDeploymentManager()
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred unzipping the Portal deployment manager files. Please review logs.";
+                writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred unzipping the Portal deployment manager files. Please review logs.";
             fi
 
             [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -604,6 +488,7 @@ function augmentDeploymentManager()
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
+                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
                     fi
 
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -621,6 +506,7 @@ function augmentDeploymentManager()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
+                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred moving the Portal deployment manager wkplc file. Please review logs.";
                         fi
 
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -641,6 +527,7 @@ function augmentDeploymentManager()
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred stopping the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
+                    writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred stopping the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -659,6 +546,7 @@ function augmentDeploymentManager()
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
+                        writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred augmenting the deployment manager profile. Please review logs under ${WAS_INSTALL_ROOT}/logs/manageprofiles.";
                     fi
 
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
@@ -676,12 +564,14 @@ function augmentDeploymentManager()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred starting the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
+                            writeLogEntry "STDERR" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred starting the deployment manager. Please review logs under ${DMGR_PROFILE_PATH}/logs and ${DMGR_PROFILE_PATH}/logs/${DMGR_PROFILE_NAME}.";
                         fi
 
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully augmented.";
+                            writeLogEntry "CONSOLE" "STDOUT" "${$}" "${cname}" "${LINENO}" "${function_name}" "The deployment manager profile was successfully augmented.";
                         fi
                     fi
 
@@ -696,6 +586,7 @@ function augmentDeploymentManager()
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The location of the Portal deployment manager files was not found or could not be read. Please confirm the location of these files.";
+            writeLogEntry "STDERR" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "The location of the Portal deployment manager files was not found or could not be read. Please confirm the location of these files.";
         fi
 
         [[ -n "${ret_code}" ]] && unset -v ret_code;
