@@ -18,10 +18,8 @@
 
 import os
 import sys
-import platform
-import time
 
-sys.path.append(os.path.expanduser('~') + '/lib/wasadmin/')
+sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
 
 import includes
 
@@ -55,10 +53,11 @@ def configureDMGR():
 
             AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + nodeName + ' -verboseModeGarbageCollection true -initialHeapSize 512 -maximumHeapSize 512 -genericJvmArguments "-Xshareclasses:none"]')
 
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList)
         continue
     #endfor
+
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
 
     print("Configuration complete.")
 #enddef

@@ -16,8 +16,8 @@
 #      REVISION:  ---
 #==============================================================================
 
+import os
 import sys
-import time
 
 lineSplit = java.lang.System.getProperty("line.separator")
 
@@ -81,7 +81,7 @@ def printHelp():
 #################################
 if(len(sys.argv) == 1):
     # get node name and process name from the command line
-    configureNodeAgent(sys.argv[0])
+    restartCluster(sys.argv[0])
 else:
     restartClusters()
 #endif

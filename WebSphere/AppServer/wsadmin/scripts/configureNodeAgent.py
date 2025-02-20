@@ -18,10 +18,8 @@
 
 import os
 import sys
-import platform
-import time
 
-sys.path.append(os.path.expanduser('~') + '/lib/wasadmin/')
+sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
 
 import includes
 
@@ -57,8 +55,8 @@ def configureNodeAgent():
 
         AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection false -initialHeapSize 512 -maximumHeapSize 512 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
 
-    saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
 
     print("Configuration complete.")
 #enddef

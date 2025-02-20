@@ -19,11 +19,10 @@
 #      REVISION:  ---
 #==============================================================================
 
+import os
 import sys
-import platform
-import time
 
-sys.path.append(os.path.expanduser('~') + '/lib/wasadmin/')
+sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
 
 import includes
 
@@ -53,8 +52,8 @@ def addOracleSessionDatabase(driverPath, oracleURL, entryName):
     print("Modifying JDBC entry..")
     AdminConfig.modify(AdminConfig.list("ConnectionPool", "*cells/" + targetCell + "|*"), '[[connectionTimeout "60"] [maxConnections "10"] [unusedTimeout "300"] [minConnections "1"]' '[purgePolicy "FailingConnectionOnly"] [agedTimeout "1800"] [reapTime "180"]]')
 
-    saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
 #enddef
 
 def addDB2SessionDatabase(driverPath, databaseName, serverName, portNumber, entryName):
@@ -77,8 +76,8 @@ def addDB2SessionDatabase(driverPath, databaseName, serverName, portNumber, entr
     print("Modifying JDBC entry..")
     AdminConfig.modify(AdminConfig.list("ConnectionPool", "*cells/" + targetCell + "|*"), '[[connectionTimeout "60"] [maxConnections "10"] [unusedTimeout "300"] [minConnections "1"] [purgePolicy "FailingConnectionOnly"] [agedTimeout "1800"] [reapTime "180"]]')
 
-    saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
 #enddef
 
 def printHelp():

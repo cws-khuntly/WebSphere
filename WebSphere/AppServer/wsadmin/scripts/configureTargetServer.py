@@ -16,11 +16,10 @@
 #      REVISION:  ---
 #==============================================================================
 
+import os
 import sys
-import platform
-import time
 
-sys.path.append(os.path.expanduser('~') + '/lib/wasadmin/')
+sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
 
 import includes
 
@@ -125,8 +124,8 @@ def configureTargetServer(serverName):
         #endif
     #endfor
 
-    saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
 
     print("Configuration complete.")
 #enddef
