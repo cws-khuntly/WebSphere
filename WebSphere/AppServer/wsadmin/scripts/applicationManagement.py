@@ -59,17 +59,21 @@ def exportApp(appName):
     AdminApp.export(appName, exportPath + '/' + appName + '.ear')
 #enddef
 
-def performAppInstallation(appPath, clusterName, webserverNodeName, webserverName):
+def installSingleModule(appPath, clusterName, webserverNodeName, webserverName):
     appFileName = includes.getFileNameFromPath(appPath)
     appName = includes.getAppDisplayName(appPath)
     appModuleName = includes.removeExtraExtension(includes.getAppModuleName(appPath), 4)
     appWarName = includes.getAppWarName(appPath)
+    appMappingOptions = (
+        '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
+        'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
+    )
     appInstallOptions = (
         '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
         '-nouseMetaDataFromBinary -nodeployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
         '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
         '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]]'
+        str(appMappingOptions).strip("()") + ']'
     )
 
     print ("Installing application " + appName + " into cluster " + clusterName + " and webserver " + webserverName + "..")
@@ -80,20 +84,49 @@ def performAppInstallation(appPath, clusterName, webserverNodeName, webserverNam
     includes.syncAllNodes(nodeList)
 #enddef
 
-def performAppUpdate(appPath, clusterName, webserverNodeName, webserverName):
+def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName):
     appFileName = includes.getFileNameFromPath(appPath)
     appName = includes.getAppDisplayName(appPath)
     appModuleName = includes.getAppModuleName(appPath)
     appWarName = includes.getAppWarName(appPath)
-    appUpdateOptions = (
-        '[ -operation update -contents ' + appPath + ' -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp'
-        '-nouseMetaDataFromBinary -nodeployejb -createMBeansForResources -noreloadEnabled -nodeployws'
-        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude'
-        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema'
-        '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]]'
+    appMappingOptions = (
+        '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
+        'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
+    )
+    appInstallOptions = (
+        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
+        '-nouseMetaDataFromBinary -nodeployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
+        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
+        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
+        str(appMappingOptions).strip("()") + ']'
     )
 
     print ("Updating application " + appName + " in cluster " + clusterName + " + and webserver " + webserverName + "..")
+
+    AdminApp.update(appName, 'app', str(appUpdateOptions).strip("()"))
+
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
+#enddef
+
+def installEJBApplication(appPath, clusterName, webserverNodeName, webserverName):
+    appFileName = includes.getFileNameFromPath(appPath)
+    appName = includes.getAppDisplayName(appPath)
+    appModuleName = includes.getAppModuleName(appPath)
+    appWarName = includes.getAppWarName(appPath)
+    appMappingOptions = (
+        '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
+        'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
+    )
+    appInstallOptions = (
+        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
+        '-nouseMetaDataFromBinary -deployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
+        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
+        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
+        str(appMappingOptions).strip("()") + ']'
+    )
+
+    print ("Installing EJB application " + appName + " in cluster " + clusterName + " + and webserver " + webserverName + "..")
 
     AdminApp.update(appName, 'app', str(appUpdateOptions).strip("()"))
 
@@ -129,13 +162,13 @@ if ((len(sys.argv) == 1) and (sys.argv[0] == "list")):
 else:
     if (sys.argv[0] == "install"):
         if (len(sys.argv) == 5):
-            performAppInstallation(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+            installSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
         else:
             printHelp()
         #endif
     if (sys.argv[0] == "update"):
         if (len(sys.argv) == 5):
-            performAppInstallation(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+            updateSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
         else:
             printHelp()
         #endif
@@ -148,7 +181,7 @@ else:
     #endif
     if (sys.argv[0] == "export"):
         if (len(sys.argv) == 1):
-            performAppInstallation(sys.argv[1])
+            exportApp(sys.argv[1])
         else:
             printHelp()
         #endif
