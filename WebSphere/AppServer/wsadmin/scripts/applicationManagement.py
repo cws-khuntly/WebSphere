@@ -69,11 +69,11 @@ def installSingleModule(appPath, clusterName, webserverNodeName, webserverName):
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
     )
     appInstallOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
+        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/' + targetCell + '/' + appFileName + ' -distributeApp '
         '-nouseMetaDataFromBinary -nodeployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
         '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
         '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        str(appMappingOptions).strip("()") + ']'
+        '' + str(appMappingOptions).strip("()") + ']'
     )
 
     print ("Installing application " + appName + " into cluster " + clusterName + " and webserver " + webserverName + "..")
@@ -93,12 +93,12 @@ def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName):
         '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
     )
-    appInstallOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
+    appUpdateOptions = (
+        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/' + targetCell + '/' + appFileName + ' -distributeApp '
         '-nouseMetaDataFromBinary -nodeployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
         '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
         '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        str(appMappingOptions).strip("()") + ']'
+        '' + str(appMappingOptions).strip("()") + ']'
     )
 
     print ("Updating application " + appName + " in cluster " + clusterName + " + and webserver " + webserverName + "..")
@@ -119,16 +119,16 @@ def installEJBApplication(appPath, clusterName, webserverNodeName, webserverName
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
     )
     appInstallOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/PPcell01/' + appFileName + ' -distributeApp '
+        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/' + targetCell + '/' + appFileName + ' -distributeApp '
         '-nouseMetaDataFromBinary -deployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
         '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
         '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        str(appMappingOptions).strip("()") + ']'
+        '' + str(appMappingOptions).strip("()") + ']'
     )
 
     print ("Installing EJB application " + appName + " in cluster " + clusterName + " + and webserver " + webserverName + "..")
 
-    AdminApp.update(appName, 'app', str(appUpdateOptions).strip("()"))
+    AdminApp.update(appName, 'app', str(appInstallOptions).strip("()"))
 
     includes.saveWorkspaceChanges()
     includes.syncAllNodes(nodeList)
