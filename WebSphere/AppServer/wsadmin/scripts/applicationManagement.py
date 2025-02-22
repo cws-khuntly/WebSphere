@@ -84,7 +84,7 @@ def installSingleModule(appPath, clusterName, webserverNodeName, webserverName):
     includes.syncAllNodes(nodeList)
 #enddef
 
-def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName):
+def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName, vhostName):
     appFileName = includes.getFileNameFromPath(appPath)
     appName = includes.getAppDisplayName(appPath)
     appModuleName = includes.getAppModuleName(appPath)
@@ -92,7 +92,9 @@ def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName):
     appMappingOptions = (
         '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
+        '-MapWebModToVH [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml ' + vhostName + ' ]]'
     )
+
     appUpdateOptions = (
         '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/' + targetCell + '/' + appFileName + ' -distributeApp '
         '-nouseMetaDataFromBinary -nodeployejb -appname ' + appName + ' -createMBeansForResources -noreloadEnabled -nodeployws '
@@ -134,6 +136,33 @@ def installEJBApplication(appPath, clusterName, webserverNodeName, webserverName
     includes.syncAllNodes(nodeList)
 #enddef
 
+def modifyStartupWeightForApplication(appPath, startWeight):
+    appFileName = includes.getFileNameFromPath(appPath)
+    appName = includes.getAppDisplayName(appPath)
+
+    print ("Changing the startup weight for " + appName + " to " + startWeight + "..")
+
+    appDeployment = AdminConfig.getid("/Deployment:" + appName + "/")
+    appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
+
+    AdminConfig.modify(appDeploymentObject, [['startingWeight', '' + startWeight + '']])
+
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
+#enddef
+
+def disableApplicationStartup(appName):
+    print ("Disabling autostart for application " + appName + "..")
+
+    appDeployment = AdminConfig.getid("/Deployment:" + appName + "/")
+    appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
+
+    AdminConfig.modify(appDeploymentObject, [['startingWeight', '' + startWeight + '']])
+
+    includes.saveWorkspaceChanges()
+    includes.syncAllNodes(nodeList)
+#enddef
+
 def performAppUninstall(appName):
     print ("Removing application " + appName + "..")
 
@@ -146,12 +175,12 @@ def performAppUninstall(appName):
 def printHelp():
     print ("This script performs an application management.")
     print ("Execution: wsadmin.sh -lang jython -f /path/to/clusterInstallApp.py <option> <appname> <binary path> <cluster name>")
-    print ("<option> - One of list, install, update, uninstall, or export.")
-    print ("<app path> - The path to the application to install or update. Required if option is install or update.")
+    print ("<option> - One of list, install, update, uninstall, change-weight, export.")
+    print ("<app path> - The path to the application to install or modify.")
     print ("<cluster name> - The cluster to install or update the application into. Required if option is install or update.")
     print ("<webserver node name> - The webserver node name as defined in the deployment manager for mapping. Required if option is install or update.")
     print ("<webserver name> - The webserver name as defined in the deployment manager for mapping. Required if option is install or update.")
-    print ("<app name> - Only required if option is export.")
+    print ("<start weight> - Only required if option is change-weight.")
 #enddef
 
 ##################################
@@ -178,11 +207,17 @@ else:
         else:
             printHelp()
         #endif
-    #endif
-    if (sys.argv[0] == "export"):
+    elif (sys.argv[0] == "export"):
         if (len(sys.argv) == 1):
             exportApp(sys.argv[1])
         else:
             printHelp()
         #endif
+    elif (sys.argv[0] == "change-weight"):
+        if (len(sys.argv) == 2):
+            modifyStartupWeightForApplication(sys.argv[1], sys.argv[2])
+        else:
+            printHelp()
+        #endif
+    #endif
 #endif
