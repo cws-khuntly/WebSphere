@@ -37,7 +37,9 @@ for file_entry in ${HOME}/.profile.d/*; do
         profile_file="${file_entry}"
     fi
 
-    if [[ -r "${profile_file}" ]] && [[ -s "${profile_file}" ]]; then source "${profile_file}"; fi
+    if [[ -r "${profile_file}" ]] && [[ -s "${profile_file}" ]]; then
+        source "${profile_file}";
+    fi
 
     [[ -n "${profile_file}" ]] && unset -v profile_file;
     [[ -n "${dir_entry}" ]] && unset -v dir_entry;

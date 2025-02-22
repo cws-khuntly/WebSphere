@@ -31,5 +31,5 @@ if [[ ! -n "${USER_INSTALL_ROOT}" ]] && [[ -d "${USER_INSTALL_ROOT}" ]]; then
     alias PortalLogs='cd ${USER_INSTALL_ROOT}/logs/WebSphere_Portal';
 
     alias wsadmin='${USER_INSTALL_ROOT}/bin/wsadmin.sh -lang jython';
-    alias runCCT='${USER_INSTALL_ROOT}/bin/wsadmin.sh -conntype NONE -f /nas/pportal_software/IBM/WAS/CCT/ConfigDump.py';
+    alias runCCT='${USER_INSTALL_ROOT}/bin/wsadmin.sh -conntype NONE -f /nas/software/IBM/WAS/CCT/ConfigDump.py';
 fi

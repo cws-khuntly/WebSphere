@@ -9,7 +9,7 @@
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
 #         NOTES:
-#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
 #       CREATED:  ---
@@ -253,9 +253,9 @@ function installRequestedApplication()
 
     ## turn off history for now
     for app in $(</var/tmp/portal-apps.txt); do
-        /usr1/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
+        /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
             install \
-            /nas/pportal_software/workspace/WebSphere/AppServer/files/EarFiles/${app}  \
+            /nas/software/workspace/WebSphere/AppServer/files/EarFiles/${app}  \
             ApplicationsCluster \
             bwebd02vrNode \
             PPApplicationsIHS | tee -a ~/log/appinstall-${app}.log;

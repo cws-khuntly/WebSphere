@@ -46,6 +46,10 @@ for file_entry in ${HOME}/.alias.d/*; do
                 done
 
                 [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+            else
+                if [[ -f "${dir_entry}" ]]; then
+                    alias_file="${dir_entry}";
+                fi
             fi
 
             [[ -n "${dir_entry}" ]] && unset -v dir_entry;

@@ -9,7 +9,7 @@
 #  REQUIREMENTS:  bash 4+
 #          BUGS:  ---
 #         NOTES:
-#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  CaspersBox Web Services
 #       VERSION:  1.0
 #       CREATED:  ---

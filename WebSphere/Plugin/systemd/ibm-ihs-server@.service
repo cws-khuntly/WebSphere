@@ -1,0 +1,33 @@
+#==============================================================================
+#
+#          FILE:  ibm-ihs-server@.service
+#         USAGE:  Install unit file using appropriate systemctl syntax. Example:
+#
+#                 systemctl enable ibm-ihs-server@<INSTANCE>
+#     ARGUMENTS:  None
+#   DESCRIPTION:  systemd unit file for IBM HTTP Server
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
+[Unit]
+Description=IBM HTTP Server
+
+[Service]
+Type=forking
+ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k start
+ExecReload=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k reload
+ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k stop
+User=ihsadm
+PIDFile=/opt/IBM/HTTPServer/logs/%i/httpd.pid
+SuccessExitStatus=143 0
+
+[Install]
+WantedBy=default.target

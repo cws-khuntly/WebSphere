@@ -9,7 +9,7 @@
 #  REQUIREMENTS:  ---
 #          BUGS:  ---
 #         NOTES:  ---
-#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
@@ -32,7 +32,7 @@ genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpd
                 "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 -Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true "
                 "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 "
                 "-Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -Dcom.ibm.websphere.webservices.http.connectionTimeout=0 -Dlog4j2.formatMsgNoLookups=true -Dderby.system.home=${USER_INSTALL_ROOT}/PortalServer/derby "
-                "-Dephox.config.file=/usr1/ephox/application.conf -Xjit:iprofilerMemoryConsumptionLimit=67108864 -Xcodecache20m")
+                "-Dephox.config.file=/opt/ephox/application.conf -Xjit:iprofilerMemoryConsumptionLimit=67108864 -Xcodecache20m")
 
 def configureAllServers(runAsUser="", runAsGroup=""):
     serverList = AdminTask.listServers('[-serverType APPLICATION_SERVER ]').split(lineSplit)

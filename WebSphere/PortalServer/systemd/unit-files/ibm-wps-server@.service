@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  ibm-was-server@.service
+#          FILE:  ibm-wps-server@.service
 #         USAGE:  Install unit file using appropriate systemctl syntax. Example:
 #
-#                 systemctl enable ibm-was-server@<INSTANCE>
+#                 systemctl enable ibm-wps-server@<INSTANCE>
 #
 #     ARGUMENTS:  None
 #   DESCRIPTION:  systemd unit file for IBM WebSphere Application Server
@@ -12,7 +12,7 @@
 #  REQUIREMENTS:  ---
 #          BUGS:  ---
 #         NOTES:  ---
-#        AUTHOR:  Kevin Huntly <kevin.huntly@bcbsma.com>
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
 #       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
@@ -27,7 +27,6 @@ Requires=ibm-was-nodeagent@%i
 Type=forking
 ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
 ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
-User=wasadm
 PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/${SERVER_NAME}/${SERVER_NAME}.pid
 SuccessExitStatus=143 0
 TimeoutStartSec=10min

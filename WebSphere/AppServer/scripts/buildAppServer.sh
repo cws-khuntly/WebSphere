@@ -399,7 +399,7 @@ function federateServerProfile()
     fi
 
     ## maybe backup the initial build
-    /usr1/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /usr1/IBM/backups/dmgr01-PostPortalInstall-backup.$(date +"%d-%m-%Y_%H:%M:%S");
+    /opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostPortalInstall-backup.$(date +"%d-%m-%Y_%H:%M:%S");
 
     if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
@@ -437,7 +437,7 @@ function federateServerProfile()
 
 Cluster ->
 First Node:
-/usr1/IBM/WebSphere/profiles/PPServices/bin/wsadmin.sh -lang jython -conntype SOAP -host <DMGR FQDN> -port 8879
+/opt/IBM/WebSphere/profiles/PPServices/bin/wsadmin.sh -lang jython -conntype SOAP -host <DMGR FQDN> -port 8879
  - server = AdminConfig.getid('/Cell:dmgrCell01/Node:<Node name>/Server:<Server Name>/')
  - AdminConfig.convertToCluster(server, '<Cluster Name>')
  - AdminConfig.save()

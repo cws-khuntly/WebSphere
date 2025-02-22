@@ -22,7 +22,6 @@ Description=IBM WebSphere Application Server - nodeagent
 Type=forking
 ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startNode.sh
 ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/stopNode.sh
-User=${SERVICE_ACCOUNT}
 PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/nodeagent/nodeagent.pid
 SuccessExitStatus=143 0
 

@@ -1,0 +1,15 @@
+pp.ws.alerts.ear
+pp.ws.association.ear
+pp.ws.cache.ear
+pp.ws.claims.ear
+pp.ws.email.ear
+pp.ws.emdeon.registration.ear
+pp.ws.internalassociatesinfo.ear
+pp.ws.pharmacy.ear
+pp.ws.providerinfo.ear
+pp.ws.rbb.ear
+pp.ws.registration.ear
+pp.ws.reports.ear
+pp.ws.rest.saml.assertion.ear
+pp.ws.singlesignon.ear
+pp.ws.training.ear
