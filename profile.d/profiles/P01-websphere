@@ -21,7 +21,8 @@
 [[ -d /opt/IBM/WebSphere/AppServer ]] || return;
 
 declare -x OTEL_JAVAAGENT_ENABLED=false;
+declare WAS_PROFILE_PATH="/opt/IBM/WebSphere/profiles";
 
-for WAS_PROFILE in $(ls -ltr /opt/IBM/WebSphere/profiles | grep ^d | awk '{print $NF}' | cut -d "/" -f 1); do
-    source ${WAS_PROFILE}/bin/setupCmdLine.sh;
+for WAS_PROFILE in $(ls -ltr "${WAS_PROFILE_PATH}" | grep ^d | awk '{print $NF}' | cut -d "/" -f 1); do
+    source "${WAS_PROFILE_PATH}/${WAS_PROFILE}/bin/setupCmdLine.sh";
 done
