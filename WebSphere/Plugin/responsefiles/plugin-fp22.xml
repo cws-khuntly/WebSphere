@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<agent-input>
+  <variables>
+    <variable name='sharedLocation' value='/opt/IBM/IMShared'/>
+    <variable name='pluginInstallLocation' value='/opt/IBM/WebSphere/Plugins'/>
+  </variables>
+  <server>
+    <repository location='/nas/software/IBM/Plugin/FP/FP022'/>
+    <repository location='/nas/software/IBM/JDK/FP/FP035'/>
+  </server>
+  <profile id='Web Server Plug-ins for IBM WebSphere Application Server V9.0' installLocation='${pluginInstallLocation}'>
+    <data key='cic.selector.arch' value='x86_64'/>
+  </profile>
+  <install>
+    <!-- Web Server Plug-ins for IBM WebSphere Application Server 9.0.5.22 -->
+    <offering profile='Web Server Plug-ins for IBM WebSphere Application Server V9.0' id='com.ibm.websphere.PLG.v90' version='9.0.5022.20241118_0055' features='core.feature'/>
+    <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.35 -->
+    <offering profile='Web Server Plug-ins for IBM WebSphere Application Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8035.20241125_0150' features='com.ibm.sdk.8'/>
+  </install>
+  <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
+</agent-input>

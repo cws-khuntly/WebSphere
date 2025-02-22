@@ -18,6 +18,6 @@
 #
 #==============================================================================
 
-[[  /usr1/IBM/IIM ]] || return;
-
-alias imcl='/usr1/IBM/IIM/eclipse/tools/imcl';
+if [[ ! -n "${IIM_INSTALL_ROOT}" ]] && [[ -d "${IIM_INSTALL_ROOT}" ]]; then
+    alias imcl='${IIM_INSTALL_ROOT}/eclipse/tools/imcl';
+fi

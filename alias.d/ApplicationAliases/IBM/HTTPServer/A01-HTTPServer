@@ -18,7 +18,7 @@
 #
 #==============================================================================
 
-[[ -d /usr1/IBM/HTTPServer ]] || return;
-
-alias startApache='/usr1/IBM/HTTPServer/bin/apachectl -k start';
-alias stopApache='/usr1/IBM/HTTPServer/bin/apachectl -k stop';
+if [[ ! -n "${USER_INSTALL_ROOT}" ]] && [[ -d "${USER_INSTALL_ROOT}" ]]; then
+    alias startIHS='${USER_INSTALL_ROOT}/bin/apachectl -k start';
+    alias stopIHS='${USER_INSTALL_ROOT}/bin/apachectl -k stop';
+fi

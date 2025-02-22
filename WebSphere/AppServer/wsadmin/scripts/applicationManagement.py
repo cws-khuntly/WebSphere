@@ -33,7 +33,7 @@ def listApps():
 
     appList = AdminApp.list().split(lineSplit)
 
-    for app in appList:
+    for app in (appList):
         print ("Application: " + app)
  
         continue

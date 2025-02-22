@@ -25,12 +25,13 @@ targetCell = AdminControl.getCell()
 clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
 
 def restartClusters():
-    logger.debug("In restart clusters")
+    print ("Restarting all found clusters...")
 
-    for cluster in clusterList:
+    for cluster in (clusterList):
         clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
-        
-        print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
+
+        print ("Restarting cluster " + cluster + "...")
+        print ("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
         
         AdminControl.invoke(clusterName, "stop")
         
@@ -45,43 +46,78 @@ def restartClusters():
 #enddef
 
 def restartCluster(clusterName):
-    for cluster in clusterList:
+    for cluster in (clusterList):
         if (clusterName == cluster.split("(")[0]):
-            break
+            for cluster in (clusterList):
+                clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
+
+                print ("Restarting cluster " + clusterName + "...")
+                print ("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
+                
+                AdminControl.invoke(clusterName, "stop")
+                
+                time.sleep(900)
+                
+                if (AdminControl.getAttribute(clusterName, "state" ).split(".")[2] == "stopped"):
+                    AdminControl.invoke(clusterName, "rippleStart")
+
+                    continue
+                #endif
+            #endfor
         else:
             print("The provided cluster is not available on this system.")
 
             sys.exit(1)
         #endif
-
-    for cluster in clusterList:
-        clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
-        
-        print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
-        
-        AdminControl.invoke(clusterName, "stop")
-        
-        time.sleep(900)
-        
-        if (AdminControl.getAttribute(clusterName, "state" ).split(".")[2] == "stopped"):
-            AdminControl.invoke(clusterName, "rippleStart")
-
-            continue
-        #endif
     #endfor
 #enddef    
 
 def printHelp():
-    print("This script configures default values for the Deployment Manager.")
-    print("Format is configureDMGR wasVersion")
+    print ("This script performs an application management.")
+    print ("Execution: wsadmin.sh -lang jython -f /path/to/clusterInstallApp.py <option> <appname> <binary path> <cluster name>")
+    print ("<option> - One of list, install, update, uninstall, change-weight, export.")
+    print ("<app path> - The path to the application to install or modify.")
+    print ("<cluster name> - The cluster to install or update the application into. Required if option is install or update.")
+    print ("<webserver node name> - The webserver node name as defined in the deployment manager for mapping. Required if option is install or update.")
+    print ("<webserver name> - The webserver name as defined in the deployment manager for mapping. Required if option is install or update.")
+    print ("<start weight> - Only required if option is change-weight.")
 #enddef
 
 ##################################
 # main
 #################################
-if(len(sys.argv) == 1):
-    # get node name and process name from the command line
-    restartCluster(sys.argv[0])
+if ((len(sys.argv) == 1) and (sys.argv[0] == "list")):
+    listApps()
 else:
-    restartClusters()
+    if (sys.argv[0] == "install"):
+        if (len(sys.argv) == 5):
+            installSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        else:
+            printHelp()
+        #endif
+    if (sys.argv[0] == "update"):
+        if (len(sys.argv) == 5):
+            updateSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        else:
+            printHelp()
+        #endif
+    elif (sys.argv[0] == "uninstall"):
+        if (len(sys.argv) == 2):
+            performAppUninstall(sys.argv[1])
+        else:
+            printHelp()
+        #endif
+    elif (sys.argv[0] == "export"):
+        if (len(sys.argv) == 1):
+            exportApp(sys.argv[1])
+        else:
+            printHelp()
+        #endif
+    elif (sys.argv[0] == "change-weight"):
+        if (len(sys.argv) == 2):
+            modifyStartupWeightForApplication(sys.argv[1], sys.argv[2])
+        else:
+            printHelp()
+        #endif
+    #endif
 #endif

@@ -33,23 +33,23 @@ nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def addOracleSessionDatabase(driverPath, oracleURL, entryName):
     ## add oracle jdbc driver
-    print("Adding ORACLE_JDBC_DRIVER_PATH variable to cell " + targetCell + "..")
+    print ("Adding ORACLE_JDBC_DRIVER_PATH variable to cell " + targetCell + "..")
 
     AdminTask.setVariable('[-variableName ORACLE_JDBC_DRIVER_PATH -variableValue ' + driverPath + ' -scope Cell=' + targetCell +']')
 
     ## add session jdbc provider
-    print("Adding JDBC Provider ..")
+    print ("Adding JDBC Provider ..")
     AdminTask.createJDBCProvider('[-scope Cell=' + targetCell + ' -databaseType Oracle ' +
         '-providerType "Oracle JDBC Driver" -implementationType "Connection pool data source" ' +
         '-name "Oracle JDBC Driver" -description "Oracle JDBC Driver" -classpath [${ORACLE_JDBC_DRIVER_PATH}/ojdbc6.jar]]')
 
     ## add session jdbc entry
-    print("Adding JDBC Entry..")
+    print ("Adding JDBC Entry..")
     AdminTask.createDatasource(AdminConfig.list("JDBCProvider", "*Oracle*cells/" + targetCell + "|*"),
         '[-name ' + entryName + ' -jndiName jdbc/' + entryName + ' -dataStoreHelperClassName com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper ' +
         '-containerManagedPersistence true -configureResourceProperties [[URL java.lang.String ' + oracleURL + ']]]')
 
-    print("Modifying JDBC entry..")
+    print ("Modifying JDBC entry..")
     AdminConfig.modify(AdminConfig.list("ConnectionPool", "*cells/" + targetCell + "|*"), '[[connectionTimeout "60"] [maxConnections "10"] [unusedTimeout "300"] [minConnections "1"]' '[purgePolicy "FailingConnectionOnly"] [agedTimeout "1800"] [reapTime "180"]]')
 
     includes.saveWorkspaceChanges()
@@ -58,11 +58,11 @@ def addOracleSessionDatabase(driverPath, oracleURL, entryName):
 
 def addDB2SessionDatabase(driverPath, databaseName, serverName, portNumber, entryName):
     ## add oracle jdbc driver
-    print("Adding DB2UNIVERSAL_JDBC_DRIVER_PATH..")
+    print ("Adding DB2UNIVERSAL_JDBC_DRIVER_PATH..")
     AdminTask.setVariable('[-variableName DB2UNIVERSAL_JDBC_DRIVER_PATH -variableValue ' + driverPath + ' -scope Cell=' + targetCell + ']')
 
     ## add session jdbc provider
-    print("Adding JDBC Provider..")
+    print ("Adding JDBC Provider..")
     AdminTask.createJDBCProvider('[-scope Cell=' + targetCell + ' -databaseType DB2 ' +
         '-providerType "DB2 Universal JDBC Driver Provider" -implementationType "Connection pool data source" ' +
         '-name "DB2 Universal JDBC Driver Provider" -description "DB2 Universal JDBC Provider" ' +
@@ -70,10 +70,10 @@ def addDB2SessionDatabase(driverPath, databaseName, serverName, portNumber, entr
         '${DB2UNIVERSAL_JDBC_DRIVER_PATH}/db2jcc_license_cisuz.jar ] -nativePath [${DB2UNIVERSAL_JDBC_DRIVER_NATIVEPATH} ] ]')
 
     ## add session jdbc entry
-    print("Adding JDBC entry..")
+    print ("Adding JDBC entry..")
     AdminTask.createDatasource(AdminConfig.list("JDBCProvider", "*DB2*cells/" + targetCell + "|*"), '[-name ' + entryName + ' -jndiName jdbc/' + entryName + ' -dataStoreHelperClassName com.ibm.websphere.rsadapter.DB2UniversalDataStoreHelper -containerManagedPersistence true -componentManagedAuthenticationAlias -configureResourceProperties [[databaseName java.lang.String ' + databaseName + '] [driverType java.lang.Integer 4] [serverName java.lang.String ' + serverName + '] [portNumber java.lang.Integer ' + portNumber + ']]]')
 
-    print("Modifying JDBC entry..")
+    print ("Modifying JDBC entry..")
     AdminConfig.modify(AdminConfig.list("ConnectionPool", "*cells/" + targetCell + "|*"), '[[connectionTimeout "60"] [maxConnections "10"] [unusedTimeout "300"] [minConnections "1"] [purgePolicy "FailingConnectionOnly"] [agedTimeout "1800"] [reapTime "180"]]')
 
     includes.saveWorkspaceChanges()
@@ -81,10 +81,10 @@ def addDB2SessionDatabase(driverPath, databaseName, serverName, portNumber, entr
 #enddef
 
 def printHelp():
-    print("This script applies session database information to the cell")
-    print("Format is configureSessionDatabase (oracle|db2) <args>")
-    print("For an Oracle session database, the path to the JDBC driver, the JDBC URL and the JNDI entry name is required.")
-    print("For a DB2 session database, the path to the JDBC driver, the database name, server name, port number and JNDI entry name are required")
+    print ("This script applies session database information to the cell")
+    print ("Format is configureSessionDatabase (oracle|db2) <args>")
+    print ("For an Oracle session database, the path to the JDBC driver, the JDBC URL and the JNDI entry name is required.")
+    print ("For a DB2 session database, the path to the JDBC driver, the database name, server name, port number and JNDI entry name are required")
 #enddef
 
 ##################################

@@ -19,11 +19,11 @@
 #==============================================================================
 
 ## load aliases
-for file_entry in "${HOME}"/.alias.d/*; do
+for file_entry in ${HOME}/.alias.d/*; do
     [[ -z "${file_entry}" ]] && continue;
 
     if [[ -d "${file_entry}" ]]; then
-        for dir_entry in "${file_entry}"/*; do
+        for dir_entry in ${file_entry}/*; do
             [[ -n "${dir_entry}" ]] && continue;
 
             if [[ "${dir_entry}" == "OSAliases" ]]; then
@@ -31,7 +31,7 @@ for file_entry in "${HOME}"/.alias.d/*; do
 
                 if [[ -n "${osname}" ]] && [[ "${dir_entry}" == "${osname}" ]]; then
                     if [[ -r "${dir_entry}" ]] && [[ -s "${dir_entry}" ]]; then
-                        source "${dir_entry}";
+                        alias_file="${dir_entry}";
                     fi
 
                     [[ -n "${dir_entry}" ]] && unset -v dir_entry;
@@ -41,29 +41,27 @@ for file_entry in "${HOME}"/.alias.d/*; do
             elif [[ "${dir_entry}" == "ApplicationAliases" ]]; then
                 for alias_file in $(find "${dir_entry}" -type f -name "A*"); do
                     if [[ -r "${alias_file}" ]] && [[ -s "${alias_file}" ]]; then
-                        source "${alias_file}";
-
-                        [[ -n "${alias_file}" ]] && unset -v alias_file;
+                        alias_file="${dir_entry}";
                     fi
                 done
 
-                [[ -n "${alias_file}" ]] && unset -v alias_file;
                 [[ -n "${dir_entry}" ]] && unset -v dir_entry;
             fi
 
-            [[ -n "${alias_file}" ]] && unset -v alias_file;
             [[ -n "${dir_entry}" ]] && unset -v dir_entry;
             [[ -n "${osname}" ]] && unset -v osname;
         done
 
-        [[ -n "${alias_file}" ]] && unset -v alias_file;
         [[ -n "${dir_entry}" ]] && unset -v dir_entry;
         [[ -n "${file_entry}" ]] && unset -v file_entry;
         [[ -n "${osname}" ]] && unset -v osname;
+    else
+        alias_file="${file_entry}";
     fi
 
-    if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+    if [[ -r "${alias_file}" ]] && [[ -s "${alias_file}" ]]; then source "${alias_file}"; fi
 
+    [[ -n "${alias_file}" ]] && unset -v alias_file;
     [[ -n "${dir_entry}" ]] && unset -v dir_entry;
     [[ -n "${file_entry}" ]] && unset -v file_entry;
     [[ -n "${osname}" ]] && unset -v osname;
