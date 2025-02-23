@@ -1,0 +1,29 @@
+#==============================================================================
+#
+#          FILE:  ibm-was-nodeagent.service
+#         USAGE:  Install unit file using appropriate systemctl syntax.
+#     ARGUMENTS:  None
+#   DESCRIPTION:  systemd unit file for IBM WebSphere Application Server
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
+[Unit]
+Description=IBM WebSphere Application Server - nodeagent
+
+[Service]
+Type=forking
+ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startNode.sh
+ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/stopNode.sh
+PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/nodeagent/nodeagent.pid
+SuccessExitStatus=143 0
+
+[Install]
+WantedBy=default.target

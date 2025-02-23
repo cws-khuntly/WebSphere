@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<agent-input>
+  <variables>
+    <variable name='sharedLocation' value='/opt/IBM/IMShared'/>
+    <variable name='wpsInstallLocation' value='/opt/IBM/WebSphere/PortalServer'/>
+    <variable name='configEngineLocation' value='/opt/IBM/WebSphere/ConfigEngine'/>
+    <variable name='wasInstallLocation' value='/opt/IBM/WebSphere/AppServer'/>
+    <variable name='wasProfilesLocation' value='/opt/IBM/WebSphere/AppServer/profiles'/>
+    <variable name='wpsProfileLocation' value='/opt/IBM/WebSphere/profiles/<PROFILE NAME>'/>
+    <variable name='wpsProfileName' value='<SPECIFY VALUE>'/>
+    <variable name='cfgAdminUsername' value='cwprovider'/>
+    <variable name='cfgAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
+    <variable name='wpsAdminUsername' value='wpsadminprovider'/>
+    <variable name='wpsAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
+    <variable name='hostname' value='<SPECIFY VALUE>'/> <!-- This should be the FQDN -->
+    <variable name='nodename' value='<SPECIFY VALUE>'/> <!-- This should be a combination of the hostname with the word Node, e.g. myhostNode -->
+    <variable name='cellname' value='<SPECIFY VALUE>'/> <!-- This should be a combination of the hostname with the word Cell, e.g. myhostCell -->
+  </variables>
+  <server>
+    <repository location='/nas/software/HCL/WPS/Base/WP85_Server'/>
+    <repository location='/nas/software/HCL/WPS/Base/IFPI59896/8.5.0.0-WP-Server-IFPI59896.zip'/>
+  </server>
+  <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
+    <data key='cic.selector.arch' value='x86_64'/>
+    <data key='user.configengine.binaryLocation,com.ibm.websphere.PORTAL.SERVER.v85' value='${configEngineLocation}'/>
+    <data key='user.was.installLocation,com.ibm.websphere.PORTAL.SERVER.v85' value='${wasInstallLocation}'/>
+    <data key='user.wp.wasprofiles.location,com.ibm.websphere.PORTAL.SERVER.v85' value='${wasProfilesLocation}'/>
+    <data key='user.cw.userid,com.ibm.websphere.PORTAL.SERVER.v85' value='${cfgAdminUsername}'/>
+    <data key='user.cw.password,com.ibm.websphere.PORTAL.SERVER.v85' value='${cfgAdminPassword}'/>
+    <data key='user.iim.currentlocale,com.ibm.websphere.PORTAL.SERVER.v85' value='en'/>
+    <data key='user.wp.base.offering,com.ibm.websphere.PORTAL.SERVER.v85' value='portal.server'/>
+    <data key='user.wp.hostname,com.ibm.websphere.PORTAL.SERVER.v85' value='${hostname}'/>
+    <data key='user.wp.nodename,com.ibm.websphere.PORTAL.SERVER.v85' value='${nodename}'/>
+    <data key='user.wp.cellname,com.ibm.websphere.PORTAL.SERVER.v85' value='${cellname}'/>
+    <data key='user.wp.userid,com.ibm.websphere.PORTAL.SERVER.v85' value='${wpsAdminUsername}'/>
+    <data key='user.wp.password,com.ibm.websphere.PORTAL.SERVER.v85' value='${wpsAdminPassword}'/>
+    <data key='user.wp.custom.contextroot,com.ibm.websphere.PORTAL.SERVER.v85' value='wps'/>
+    <data key='user.wp.custom.defaulthome,com.ibm.websphere.PORTAL.SERVER.v85' value='portal'/>
+    <data key='user.wp.custom.personalhome,com.ibm.websphere.PORTAL.SERVER.v85' value='myportal'/>
+    <data key='user.wp.profilename,com.ibm.websphere.PORTAL.SERVER.v85' value='${wpsProfileName}'/>
+    <data key='user.wp.profilepath,com.ibm.websphere.PORTAL.SERVER.v85' value='${wpsProfileLocation}'/>
+    <data key='user.wp.starting.port,com.ibm.websphere.PORTAL.SERVER.v85' value='10012'/>
+  </profile>
+  <install>
+    <!-- IBM WebSphere Portal Server 8.5.0.0 -->
+    <offering profile='IBM WebSphere Portal Server V8.5' id='com.ibm.websphere.PORTAL.SERVER.v85' version='8.5.0.20140424_2155' features='ce.install,portal.binary,portal.profile'/>
+    <!-- 8.5.0.0-WP-Server-IFPI59896 -->
+    <offering profile='IBM WebSphere Portal Server V8.5' id='8.5.0.0-WP-Server-IFPI59896'/>
+  </install>
+  <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
+</agent-input>
