@@ -28,7 +28,7 @@ com.ibm.SOAP.securityEnabled=false
 #------------------------------------------------------------------------------
 com.ibm.SOAP.authenticationTarget=BasicAuth
 
-com.ibm.SOAP.loginUserid=wasadminprovider
+com.ibm.SOAP.loginUserid=wasadm
 com.ibm.SOAP.loginPassword=ReplaceWithYourPassword
 
 #------------------------------------------------------------------------------

@@ -22,7 +22,6 @@ Description=IBM HTTP Server - Admin Server
 Type=forking
 ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/admin.conf -k start
 ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/admin.conf -k stop
-User=ihsadm
 PIDFile=/opt/IBM/HTTPServer/logs/admin.pid
 SuccessExitStatus=143 0
 
