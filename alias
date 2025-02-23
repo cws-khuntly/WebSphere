@@ -34,26 +34,20 @@ for entry in ${HOME}/.alias.d/*; do
         if [[ "${dir_name}" == "OSAliases" ]]; then
             [[ -r "/etc/os-release" ]] && osname="$(grep "NAME=" /etc/os-release | cut -d "" -f 2)";
 
-            if [[ -n "${osname}" ]] && [[ "${dir_name}" == "${osname}" ]]; then
-                for os_entry in ${dir_name}/*; do
-                    [[ -z "${os_entry}" ]] && continue;
+            for os_entry in ${dir_name}/*; do
+                [[ -z "${os_entry}" ]] && continue;
 
-                    [[ -r "${os_entry}" ]] && [[ -s "${os_entry}" ]] && source "${os_entry}";
+                [[ "$(cut -d "-" -f 2 <<< "${os_entry}")" == "${osname}" ]] && [[ -r "${os_entry}" ]] && [[ -s "${os_entry}" ]] && source "${os_entry}";
 
-                    [[ -n "${os_entry}" ]] && unset -v os_entry;
-                done
-            fi
-        elif [[ "${dir_name}" == "ApplicationAliases" ]]; then
-            for subdir in $(ls -ltrR | grep -E "^d" | awk '{print $NF}'); do
-                [[ -z "${subdir}" ]] && continue;
+                [[ -n "${os_entry}" ]] && unset -v os_entry;
+            done
+        else
+            for app_entry in ${dir_name}/*; do
+                [[ -z "${app_entry}" ]] && continue;
 
-                for app_entry in ${subdir}/*; do
-                    [[ -z "${app_entry}" ]] && continue;
+                [[ -r "${app_entry}" ]] && [[ -s "${app_entry}" ]] && source "${app_entry}";
 
-                    [[ -r "${app_entry}" ]] && [[ -s "${app_entry}" ]] && source "${app_entry}";
-
-                    [[ -n "${app_entry}" ]] && unset -v app_entry;
-                done
+                [[ -n "${app_entry}" ]] && unset -v app_entry;
             done
         fi
     fi
