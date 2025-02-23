@@ -67,7 +67,7 @@ def configureTargetServer(serverName, runAsUser="", runAsGroup=""):
                         poolName = threadPool.split("(")[0]
 
                         if (poolName == "server.startup"):
-                            AdminConfig.modify(threadPool, '[[maximumSize "10"] [name %s] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]') % (poolName
+                            AdminConfig.modify(threadPool, '[[maximumSize "10"] [name %s] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]') % (poolName)
                         elif (poolName == "WebContainer"):
                             AdminConfig.modify(threadPool, '[[maximumSize "75"] [name %s] [inactivityTimeout "5000"] [minimumSize "20"] [description ""] [isGrowable "false"]]') % (poolName)
                         elif (poolName == "HAManagerService.Pool"):
