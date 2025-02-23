@@ -1,0 +1,1894 @@
+Export the following variables:
+ - ENV: The environment being built
+ - PROFILE_NAME: The name of the profile to build
+ - USER_INSTALL_ROOT: /opt/IBM/WebSphere/profiles/${PROFILE_NAME}
+ - WAS_INSTALL_ROOT: /opt/IBM/WebSphere/AppServer
+ - WPS_INSTALL_ROOT: /opt/IBM/WebSphere/PortalServer
+ - CLUSTER_NAME: The name of the cluster to be built
+ - DMGR_HOSTNAME: The fully qualified name of the owning deployment manager
+ - ApplicationType: ProviderPortal or ProviderServices
+
+INSTALL WAS
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-fp18.xml -nosplash -acceptLicense -showProgress
+
+INSTALL WCT
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
+
+INSTALL PORTAL
+Copy the base installation response files to the working directory:
+mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
+cp /nas/software/WebSphere/PortalServer/responsefiles/wps85-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml
+
+Edit the response files, modifying the following values:
+ - Name: wpsProfileLocation
+  - Current value: <PROFILE NAME>
+  - New value: The profile name to install
+ - Name: wpsProfileName
+  - Current value: <PROFILE NAME>
+  - New value: The desired profile name. Must match the value provided to wpsProfileLocation
+ - Name: cfgAdminPassword
+  - Current value: <SPECIFY VALUE>
+  - New value: Response from imcl
+   - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
+    - Replace <VALUE> with the plaintext password for the cwprovider account
+ - Name: wpsAdminPassword
+  - Current value: <SPECIFY VALUE>
+  - New value: Response from imcl
+   - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
+    - Replace <VALUE> with the plaintext password for the wpsAdminPassword account
+ - Name: hostname
+  - Current value: <SPECIFY VALUE>
+  - New value: Fully qualified hostname
+   - e.g. myserver.myhost.com
+ - Name: nodename
+  - Current value: <SPECIFY VALUE>
+  - New value: Short hostname + Node
+   - e.g. myserverNode
+ - Name: cellname
+  - Current value: <SPECIFY VALUE>
+  - New value: Short hostname + Cell
+   - e.g. myserverCell
+
+Modify file permissions:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml
+
+Install Portal 8.5:
+/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml -nosplash -acceptLicense -showProgress
+
+Copy the workplace property file to the working directory:
+mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
+cp /nas/software/WebSphere/PortalServer/properties/wkplc.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties
+
+Update the workplace property file, modifying the following values:
+ - Name: config.wizard.profile.password
+  - Current value: ReplaceWithYourPassword
+  - New value: Plaintext password for the cwprovider account
+ - Name: WasPassword
+  - Current value: ReplaceWithYourPassword
+  - New value: Plaintext password for the wpsadminprovider account
+ - Name: CellName
+  - Current value: ReplaceWithCellName
+  - New value: Short hostname + Cell
+   - e.g. myserverCell
+ - Name: NodeName
+  - Current value: ReplaceWithNodeName
+  - New value: Short hostname + Node
+   - e.g. myserverNode
+ - Name: WpsHostName
+  - Current value: ReplaceWithServerFQDN
+  - New value: Fully qualified hostname
+   - e.g. myserver.mydomain.com
+ - Name: PortalAdminPwd
+  - Current value: ReplaceWithYourPassword
+  - New value: Plaintext password for wpsadminprovider account
+ - Name WasRemoteHostName
+  - Current value: ReplaceWithDmgrFQDN
+  - New value: Fully qualified hostname of the local Portal node
+   - e.g. mydmgr.mydomain.com
+
+Set file security:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties
+
+Copy the resultant file into the ConfigEngine for Portal:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+
+Copy the soap.client.props file for the Portal profile to the working directory:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props
+
+Update the SOAP property file, modifying the following values:
+ - Name: com.ibm.SOAP.loginPassword
+  - Current value: ReplaceWithYourPassword
+  - New value: Plaintext password for the wpsadminprovider account
+
+Encode the resultant file using PropFilePasswordEncoder:
+${WAS_INSTALL_ROOT}/bin/PropFilePasswordEncoder.sh \
+    ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props \
+    com.ibm.SOAP.loginPassword
+
+Set file security:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props;
+
+Copy the file to the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Copy the soap.client.props file for the Configuration Wizard to the working directory:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props
+
+Update the SOAP property file, modifying the following values:
+ - Name: com.ibm.SOAP.loginPassword
+  - Current value: ReplaceWithYourPassword
+  - New value: Plaintext password for the cwprovider account
+
+Encode the resultant file using PropFilePasswordEncoder:
+${WAS_INSTALL_ROOT}/bin/PropFilePasswordEncoder.sh \
+    ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props \
+    com.ibm.SOAP.loginPassword
+
+Set file security:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props;
+
+Copy the file to the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Stop all running servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+
+Prior to installing the Cumulative Fix, execute the following:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh health-check-update
+ - Fix any errors that appear
+
+Install Cumulative Fix:
+/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps-cf224.xml -nosplash -acceptLicense -showProgress
+
+Apply the Cumulative Fix:
+export install_95=false; ${USER_INSTALL_ROOT}/PortalServer/bin/applyCF.sh
+
+Stop all running servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+
+Install Portal 9.5:
+Copy the base installation response files to the working directory:
+mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
+cp /nas/software/WebSphere/PortalServer/responsefiles/wps95-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml
+
+Edit the response files, modifying the following values:
+ - Name: wpsProfileLocation
+  - Current value: <PROFILE NAME>
+  - New value: The profile name to install
+ - Name: wpsProfileName
+  - Current value: <PROFILE NAME>
+  - New value: The desired profile name. Must match the value provided to wpsProfileLocation
+ - Name: cfgAdminPassword
+  - Current value: <SPECIFY VALUE>
+  - New value: Response from imcl
+   - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
+    - Replace <VALUE> with the plaintext password for the cwprovider account
+ - Name: wpsAdminPassword
+  - Current value: <SPECIFY VALUE>
+  - New value: Response from imcl
+   - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
+    - Replace <VALUE> with the plaintext password for the wpsAdminPassword account
+ - Name: hostname
+  - Current value: <SPECIFY VALUE>
+  - New value: Fully qualified hostname
+   - e.g. myserver.myhost.com
+ - Name: nodename
+  - Current value: <SPECIFY VALUE>
+  - New value: Short hostname + Node
+   - e.g. myserverNode
+ - Name: cellname
+  - Current value: <SPECIFY VALUE>
+  - New value: Short hostname + Cell
+   - e.g. myserverCell
+
+Modify file permissions:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml
+
+Install Portal 9.5:
+/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml -nosplash -acceptLicense -showProgress
+
+Stop all servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+
+UPDATE WAS TO FP22
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-fp22.xml -nosplash -acceptLicense -showProgress
+
+CHECKPOINT
+
+Deployment Manager:
+ - No deployment manager changes have been made, no backup is necessary.
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostInstall-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+/opt/IBM/WebSphere/AppServer/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostInstall-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property file:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
+
+DATABASE TRANSFER
+
+Populate the following files:
+Copy the following files to the working directory:
+cp /nas/software/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties
+
+Update the workplace database domain property file, modifying the following values:
+ - Feedback database:
+  - Name: feedback.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: feedback.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: feedback.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: feedback.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: feedback.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+ - Likeminds database:
+  - Name: likeminds.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: likeminds.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: likeminds.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: likeminds.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: likeminds.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+ - Release database:
+  - Name: release.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: release.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: release.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: release.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: release.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+ - Community database:
+  - Name: community.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: community.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: community.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: community.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: community.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+ - Customization database:
+  - Name: customization.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: customization.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: customization.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: customization.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: customization.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+ - JCR database:
+  - Name: jcr.DbName
+   - Current value: ReplaceWithYourDatabaseName
+   - New value: ReplaceWithYourDatabaseName
+  - Name: jcr.DbUrl
+   - Current value: jdbc:oracle:thin:@ReplaceWithDatabaseHostFQDN:ReplaceWithDatabasePort:ReplaceWithDatabaseName
+   - New value: jdbc:oracle:thin:@databasehost.domain.com:1521:ReplaceWithYourDatabaseName
+  - Name: jcr.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: jcr.DBA.DbPassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+  - Name: jcr.DbRuntimePassword
+   - Current value: ReplaceWithYourPassword
+   - New value: See Password Manager
+
+Set file security:
+chmod 600 ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties
+
+Copy the resultant file into the ConfigEngine for Portal:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Copy the workplace database type file into the ConfigEngine for Portal:
+cp /nas/software/WebSphere/PortalServer/properties/wkplc_dbtype.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbtype.properties
+
+Begin the transfer process:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    backup-property-files-for-dbxfer
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    stop-portal-server
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DTransferDomainList=feedback,likeminds,release,community,customization,jcr \
+    database-transfer enable-profiles-check-managed package-profiles 
+
+Once complete, request DBA team to execute the following commands via SQL*Plus:
+sqlplus connect jcrusr@"databasehost.domain.com:1521/ReplaceWithYourDatabaseName"
+dbms_stats.gather_schema_stats
+execute dbms_stats.gather_schema_stats(ownname=> jcrusr, cascade=> TRUE);
+commit
+
+Start the Portal server:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    start-portal-server
+
+CHECKPOINT
+
+Deployment Manager:
+ - No deployment manager changes were made, no backup necessary
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostDatabaseTransfer-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostDatabaseTransfer-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostDatabaseTransfer-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property files:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
+
+FEDERATE AND CLUSTER
+Update ${WAS_INSTALL_ROOT}/bin/wsadmin.sh
+ - Name: PERF_JVM_OPTIONS
+  - Current value: -Xms256m -Xmx256m -Xquickstart
+  - New value: -Xms4096m -Xmx4096m -Xquickstart
+
+Execute the following commands:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DWasRemoteHostName=${DMGR_HOSTNAME} -DWasSoapPort=8879  \
+    -DDmgrNodeName=dmgrNode01 -DDmgrCellName=dmgrCell01 -DdmgrProfilePath=/opt/IBM/WebSphere/profiles/dmgr01 -DisRemoteDmgr=true \
+    -DPrimaryNode=true add-node
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DClusterName=${CLUSTER_NAME} \
+    -DWasRemoteHostName=${DMGR_HOSTNAME} -DWasSoapPort=8879  \
+    -DPrimaryNode=true cluster-node-config-post-federation
+
+Update /opt/IBM/WebSphere/PortalServer/search/wp.search.service/config/includes/wp.search.service_cfg.xml, changing all instances of failonerror="yes" to failonerror="no"
+sed -i.bk "s/failonerror=\"yes\"/failonerror=\"no\"/g" /opt/IBM/WebSphere/PortalServer/search/wp.search.service/config/includes/wp.search.service_cfg.xml
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DClusterName=fuckity \
+    -DWasRemoteHostName=${DMGR_HOSTNAME} -DWasSoapPort=8879  \
+    -DPrimaryNode=true cluster-node-config-cluster-setup
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property file:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
+
+CHANGE PORTAL URI
+Ensure the workplace property file has the appropriate value for the deployment manager:
+ - Name: WasRemoteHost
+  - Current value: local hostname
+  - New value: Fully qualified hostname of owning deployment manager
+
+Execute the following commands:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DValidationWpsContextRoot=MyNewContext -DValidationWpsDefaultHome=portal \
+    -DValidationWpsPersonalizedHome=myportal -DValidationWsrpContextRoot=MyNewContext/wsrp \
+    validate-context-root
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    stop-portal-server
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DWsrpContextRoot=MyNewContext/wsrp -DWpsContextRoot=MyNewContext \
+    -DWpsDefaultHome=portal -DWpsPersonalizedHome=myportal \
+    modify-servlet-path modify-servlet-path-portlets
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    stop-portal-server
+
+Update the workplace property file in the working directory:
+ - Name: WpsContextRoot
+  - Current value: wps
+  - New value: ProviderHome
+
+Copy the resultant file to the Portal Config Engine:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+
+Stop the node agent and perform a nodesync:
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+${USER_INSTALL_ROOT}/bin/syncNode.sh ${DMGR_HOSTNAME} 8879 -restart
+
+Start the Portal server:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    start-portal-server
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    configure-nav-stateinfo-urls
+
+Create the webserver definition
+On the webserver, as the appropriate user:
+ - Copy the PCT response file to the working directory:
+  - mkdir -pv ${HOME}/workspace/WebSphere/Toolbox/responsefiles;
+  - cp /nas/software/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-${ApplicationType}.txt;
+ - Update the following entries:
+  - ihsAdminPassword: See Password Manager
+  - webServerConfigFile1: /opt/IBM/HTTPServer/conf/${ApplicationType}/httpd.conf
+  - webServerDefinition: PP${ApplicationType}IHS
+  - wasMachineHostName: Appropriate deployment manager FQDN
+  - webServerHostName: Appropriate webserver FQDN
+   - NOTE: This becomes the node name, and we will be modifying it later on
+  - profileName: The appropriate WAS profile name
+
+Save and close the file.
+Set appropriate permissions:
+
+chmod 600 ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-${ApplicationType}.txt
+
+Generate the PCT tool definition:
+
+/opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct -importDefinitionLocation \
+    -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName IHSPlugins-v9.0.5.22
+
+Generate the webserver configuration script:
+
+/opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct \
+    -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName "IHSPlugins-v9.0.5.22" \
+    -createDefinition -response ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-${ApplicationType}.txt
+
+Change permissions:
+chmod 700 /opt/IBM/WebSphere/Plugins/bin/configure${ApplicationType}IHS.sh
+
+Edit the resulting file
+ - Change ${FQDN_HOSTNAME}-node to ${SHORT_HOSTNAME}Node
+
+Copy /opt/IBM/WebSphere/Plugins/bin/configure${ApplicationType}IHS.sh to the deployment manager into ${USER_INSTALL_ROOT}/bin/configure${ApplicationType}IHS.sh
+chmod 700 ${USER_INSTALL_ROOT}/bin/configure${PROFILE_NAME}IHS.sh
+
+Run the script:
+
+${USER_INSTALL_ROOT}/bin/configure${PROFILE_NAME}IHS.sh
+
+Resync:
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    stop-portal-server
+
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+${USER_INSTALL_ROOT}/bin/syncNode.sh ${DMGR_HOSTNAME} 8879 -restart
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    start-portal-server
+
+Log on to Digital Experience Portal.
+Go to Web Content Authoring.
+Under Preferences, select Edit Shared Settings.
+Under Library Selection, add Web Resources v70 to the Selected Libraries list.
+Click OK.
+Under Item Views, select All Items > All > Components > JSP.
+Select every JSP component from the Web Resources v70 library and then click Edit.
+Update the Path field for every JSP component with the new context root path.
+The JSP path includes two parts, which are separated by a semi-colon. The first part is the context path to the HCL Web Content Manager extensions web application and then the second part is the path to the JSP. Update the path to the web application.
+For example, the other path might be: /wcmextension;/jsp/html/general/UpdateItem.jsp. If you changed the context root to mynewcontext, change the old path to /mynewcontext/wcmextension;/jsp/html/general/UpdateItem.jsp.
+
+Log on to Digital Experience Portal as the administrator.
+Open the Manage Search portlet.
+Click Search Collections.
+Click the search collection that you want to update. For example: Default Search Collection.
+Start the Digital Experience Portal crawler content source for each collection:
+If the documents are not stored in the search collection but a schedule is defined for the crawler, the crawler automatically runs at the scheduled time. You can also start the crawler manually.
+If the documents are already collected, select Regather documents to update the documents with the new context root information.
+Click Collections from All Services in the breadcrumb trail and select the next search collection to modify.
+
+Resync:
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    stop-portal-server
+
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+${USER_INSTALL_ROOT}/bin/syncNode.sh ${DMGR_HOSTNAME} 8879 -restart
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    start-portal-server
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostPortalURIChange-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostPortalURIChange-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property file:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
+
+Configure Global Security
+
+Add the SSL certificate for the Authoring Portal
+Global Security -> SSL certificate and key management -> Key stores and certificates -> CellDefaultTrustStore -> Signer Certificates
+Retrieve from port
+ - Host: Authoring server FQDN
+ - Port: 10042
+ - SSL configuration for outbound connection: CellDefaultSSLSettings (default value)
+ - Alias: Authoring Server short hostname
+Click Retrieve signer information
+Click "OK"
+
+Save changes
+
+Add the SSL certificate for the LDAP instance
+Global Security -> SSL certificate and key management -> Key stores and certificates -> NodeDefaultTrustStore -> Signer Certificates
+Retrieve from port
+ - Host: Appropriate LDAP hostname
+ - Port: 636
+ - SSL configuration for outbound connection: CellDefaultSSLSettings (default value)
+ - Alias: LDAP-${ENV}
+Click Retrieve signer information
+Click "OK"
+
+Save changes
+
+Save changes
+
+Configure LDAP repository
+Navigate to Global Security
+ - Check "Allow operations if some of the repositories are down"
+Click "OK"
+
+Save changes
+
+Add the following custom property for Global Security
+Navigate to Global Security
+Click "Custom Properties"
+Click "New"
+ - For each new value, click "OK", and continue until each entry has been added
+  - Name: com.ibm.websphere.security.JAASAuthData.removeNodeNameGlobal
+  - Value: false
+  - Name: com.ibm.websphere.security.ltpa.disableSECJ0371W
+  - Value: true
+  - Name: com.ibm.websphere.security.util.authCacheMaxSize
+  - Value: 25000
+  - Name: com.ibm.websphere.security.util.authCacheSize
+  - Value: 50
+  - Name: com.ibm.websphere.security.util.csiv2SessionCacheLimitEnabled
+  - Value: false
+  - Name: com.ibm.ws.security.expirationMonitorNotificationPeriod
+  - Value: 90
+
+Save changes
+
+Navigate to Global Security
+Click "Configure" next to Federated Repositories
+Click Add repositories (LDAP, custom, etc)...
+New repository -> LDAP repository
+ - LDAP Server:
+  - Repository Identifier: LDAP-${ENV}
+  - Directory type: IBM Tivoli Directory Server
+  - Primary host name: Appropriate hostname for environment
+  - Port: 389 (fix to use ssl)
+ - Authentication:
+  - Simple authentication
+  - Bind distinguished name (DN): uid=binduser,ou=Service Accounts,ou=internal,o=myorg.com
+  - Bind password: See Password Manager
+ - Federated repository properties for login: uid
+ - Certificate mapping: EXACT_DN (default value)
+Click "Apply"
+
+Save changes
+
+Navigate to Global Security
+Click "Configure" next to Federated Repositories
+Click "Manage repositories"
+Select "LDAP-${ENV}"
+Click Performance
+ - Check "Use connection pooling"
+ - Click "OK"
+
+Save changes
+
+Navigate to Global Security
+Click "Configure" next to Federated Repositories
+Click "Manage repositories"
+Select "LDAP-${ENV}"
+Click "Group attribute definition"
+Click "Member attributes"
+Click "member"
+ - Change scope from "Direct" to "Nested"
+ - Click "OK"
+
+Navigate to Global Security
+Click "Manage repositories"
+Click "LDAP-${ENV}"
+Click "LDAP Test Query"
+ - Host: Appropriate host for environment
+ - Port: Appropriate port for environment
+ - Base distinguished name (DN): o=myorg.com
+ - Authentication:
+  - Simple Authentication
+  - Bind distinguished name (DN): uid=binduser,ou=Service Accounts,ou=internal,o=bcbsma.com
+  - Bind password: See Password Manager
+ - Test query:
+  - Search filter string: uid=wpsadmin,ou=Service Accounts,ou=internal,o=myorg.com
+  - Search limit: 20
+Click "Test Query"
+Ensure results are returned
+
+Navigate to Global Security
+Click "Configure" next to Federated Repositories
+Click Add repositories (LDAP, custom, etc)...
+Select "LDAP-${ENV}"
+ - Unique distinguished name of the base (or parent) entry in federated repositories: o=myorg.com
+Click "OK"
+
+Save changes
+
+Configure SSL Certificate monitoring
+Navigate to Security -> Global Security -> SSL certificate and key management
+Select "Manage certificate expiration"
+Select "Notifications"
+Click "New"
+ - Notification name: SSL Certificate Notifications
+ - Check "Email sent to notification list"
+ - Email address to add: sslmonitor@myorg.com
+ - Outgoing mail (SMTP) server: smtp-server.myorg.com
+ - Click "Add"
+ - Click "OK"
+
+Save changes
+
+Navigate to Security -> Global Security -> SSL certificate and key management
+Click "SSL configurations"
+Click "CellDefaultSSLSettings"
+Click "Quality of protection (QoP) settings
+ - In the "Protocol" section, select "Predefined protocols", and select "SSL_TLSv2"
+ - Click "OK"
+
+Save changes
+
+Navigate to Security -> Global Security -> SSL certificate and key management
+Click "SSL configurations"
+Click "NodeDefaultSSLSettings" (ensure the appropriate node is selected)
+Click "Quality of protection (QoP) settings
+ - In the "Protocol" section, select "Predefined protocols", and select "SSL_TLSv2"
+ - Click "OK"
+
+Save changes
+
+Navigate to System Adminstration -> Nodes
+Select all nodes and click "Full Resynchronize"
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+ - No Portal changes were made, no backup is required
+
+Configure WebSphere for JDBC
+
+Add PortalServices J2C entry
+Navigate to Global Security
+Expand "Java Authentication and Authorization Service"
+Click "J2C authentication data"
+Click "New"
+ - Alias: PortalServices
+ - User ID: PortalServicesUsername
+ - Password: See Password Manager
+Save changes
+
+Navigate to Resources -> JDBC -> JDBC Providers
+Change "Scope" from "All Scopes" to Cluster=${CLUSTER_NAME}
+Click "New"
+ - Database type: Oracle
+ - Provider type: Oracle JDBC Driver
+ - Implementation type: Connection pool data source
+ - Name: Oracle Connection Pool Provider
+ - Classpath: ${ORACLE_JDBC_DRIVER_PATH}/ojdbc8.jar
+ - Directory location for "ojdbc8.jar" which is saved as WebSphere variable ${ORACLE_JDBC_DRIVER_PATH}: /usr/lib/oracle/23/client64/lib
+Click "OK"
+Click "New"
+ - Database type: Oracle
+ - Provider type: Oracle JDBC Driver
+ - Implementation type: XA data source
+ - Name: Oracle XA Provider
+ - Classpath: ${ORACLE_JDBC_DRIVER_PATH}/ojdbc8.jar
+ - Directory location for "ojdbc8.jar" which is saved as WebSphere variable ${ORACLE_JDBC_DRIVER_PATH}: /usr/lib/oracle/23/client64/lib
+
+Select the new JDBC Provider
+Click "Data sources"
+Click "New"
+ - Data source name: "PortalServices Portal"
+ - JNDI name: jdbc/PortalServices
+Click "Next"
+ - URL: Appropriate JDBC URL for the Oracle datasource
+Click "Next"
+ - Authentication alias for XA recovery: dmgrNode01/PortalServices
+ - Component-managed  authentication alias: dmgrNode01/PortalServices
+ - Mapping configuration alias: (none)
+ - Container-managed authentication alias: dmgrNode01/PortalServices
+Click "Next"
+Click "Finish"
+
+Save changes
+
+Update the Provider Portal datasource
+Navigate to Resources -> Expand "JDBC" -> Select "JDBC Providers"
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select "Oracle JDBC Driver (XA)"
+Click "Data sources"
+Select "PortalServices"
+Click "Connection pools"
+ - Change "Max Connections"
+  - Current value: 10
+  - New value: 100
+ - Change "Aged timeout"
+  - Current value: 0
+  - New value: 900
+Click "OK"
+Click "WebSphere Application Server data source properties"
+ - Change "Statement cache size"
+  - Current value: 10
+  - New value: 100
+ - Check "Validate new connections"
+ - Change "Number of retries"
+  - Current value: 100
+  - New value: 5
+ - Change "Retry interval"
+  - Current value: 3
+  - New value: 5
+ - Check "Validate existing pooled connections"
+ - Change "Retry interval"
+  - Current value: 0
+  - New value: 5
+ - Change "Validation options"
+  - Select "Validation by JDBC driver"
+  - Change "Timeout"
+   - Current value: None
+   - New value: 5
+Click "OK"
+
+Save changes
+
+Navigate to System Adminstration -> Save changes to master repository
+Click "Save"
+
+Navigate to System Adminstration -> Nodes
+Select all nodes and click "Full Resynchronize"
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+ - No Portal changes were made, no backup is required
+
+Configure WebSphere Portal providers
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Node=<node name>"
+Select JCR ConfigService PortalContent
+Click "Custom Properties"
+Copy all name/value pairs
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Node=<node name>"
+Remove JCR ConfigService PortalContent
+Click "OK"
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select JCR ConfigService PortalContent
+Click "Custom Properties"
+Click "New"
+ - For each new value, click "OK", and continue until each entry has been added.
+  - Name: jcr.binaryValueFileDir
+  - Value: ${USER_INSTALL_ROOT}/PortalServer/jcr/binaryValues
+   - NOTE: The variable must be expanded here
+ - Update the following values
+  - Name: jcr.textsearch.enabled
+   - Current value: false
+   - New value: true
+  - Name: jcr.textsearch.indexdirectory
+   - Current value: /opt/IBM/WebSphere/profiles/${PROFILE_NAME}/PortalServer/jcr/searchIndexes
+   - New value: ${USER_INSTALL_ROOT}/PortalServer/jcr/searchIndexes
+    - NOTE: The variable must be expanded here
+Navigate back to JCR ConfigService PortalContent
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WCM SearchService
+Click "Custom Properties"
+Click "New"
+ - For each new value, click "OK", and continue until each entry has been added.
+  - Name: Searchservice.searchseed.excludeContentResourceTypeElement
+  - Value: true
+Navigate back to WCM SearchService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WCM WCMConfigService
+Click "Custom Properties"
+Add the following values:
+ - For each new value, click "OK", and continue until each entry has been added.
+  - Name: connect.businesslogic.defaultcache
+  - Value: false
+  - Name: connect.businesslogic.module.memberfixer.autoload
+  - Value: false
+  - Name: connect.businesslogic.module.memberfixer.class
+  - Value: com.aptrix.pluto.security.MemberFixerModule
+  - Name: connect.businesslogic.module.memberfixer.remoteaccess
+  - Value: true
+  - Name: connect.moduleconfig.ajpe.contentcache.contentcacheexpires
+  - Value: REL 2H
+  - Name: connect.moduleconfig.ajpe.contentcache.defaultcontentcache
+  - Value: SECURED
+  - Name: defaultcache
+  - Value: false
+  - Name: defaultcontentcache
+  - Value: none
+  - Name: wcm.path.traversal.security
+  - Value: true
+  - Name: deployment.subscriberOnly
+  - Value: true
+  - Name: connect.connector.httpconnector.denyunknownhosts
+  - Value: true
+  - Name: connect.connector.httpconnector.hosts.${AUTHORING_SERVER_SHORT_HOSTNAME}
+  - Value: true
+  - Name: connect.connector.httpconnector.hosts.${AUTHORING_SERVER_FQDN}
+  - Value: true  
+Update the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: resource.maxUploadSize
+   - Current value: 16
+   - New value: 50
+  - Name: user.cache.enable
+   - Current value: false
+   - New value: true
+  - Name: versioningStrategy.AuthoringTemplate
+  - Name: versioningStrategy.Component
+  - Name: versioningStrategy.Content
+  - Name: versioningStrategy.Default
+  - Name: versioningStrategy.PortalPage
+  - Name: versioningStrategy.PresentationTemplate
+  - Name: versioningStrategy.SiteArea
+  - Name: versioningStrategy.Taxonomy
+  - Name: versioningStrategy.Workflow
+   - Current value: always
+   - New value: manual
+Navigate back to WCM WCMConfigService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP AccessControlDataManagementService
+Click "Custom Properties"
+Update the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: accessControlDataManagement.domain.comm.admingroup
+   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
+   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
+  - Name: accessControlDataManagement.domain.cust.admingroup
+   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
+   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
+  - Name: accessControlDataManagement.domain.jcr.admingroup
+   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
+   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
+  - Name: accessControlDataManagement.domain.rel.admingroup
+   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
+   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
+Navigate back to WP AccessControlDataManagementService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP CPConfigurationService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: com.ibm.wps.cp.rating.inline.customLabelCommunityRatings
+  - Value: blank
+  - Name: com.ibm.wps.cp.rating.inline.customLabelPersonalPrivateRatings
+  - Value: blank
+  - Name: com.ibm.wps.cp.rating.inline.customLabelPersonalPublicRatings
+  - Value: blank
+  - Name: com.ibm.wps.cp.rating.inline.deletingEnabled
+  - Value: true
+  - Name: com.ibm.wps.cp.tagging.inline.customLabelCommunityTags
+  - Value: blank
+  - Name: com.ibm.wps.cp.tagging.inline.customLabelPersonalPrivateTags
+  - Value: blank
+  - Name: com.ibm.wps.cp.tagging.inline.customLabelPersonalPublicTags
+  - Value: blank
+  - Name: com.ibm.wps.cp.tagging.inline.deletingEnabled
+  - Value: true
+Update the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: com.ibm.wps.cp.tagging.isTaggingEnabled
+   - Current value: true
+   - New value: false
+  - Name: com.ibm.wps.cp.rating.isRatingEnabled
+   - Current value: true
+   - New value: false
+Navigate back to WP CPConfigurationService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP CacheManagerService
+Click "Custom Properties"
+Add the following values:
+ - For each new value, click "OK", and continue until each entry has been added.
+  - Name: cacheinstance.com.ibm.wps.ac.AccessControlUserContextCache.size
+  - Value: 6000
+  - Name: cacheinstance.com.ibm.wps.ac.ChildResourcesCache.lifetime
+  - Value: 28800
+  - Name: cacheinstance.com.ibm.wps.ac.CommonRolesCache.size
+  - Value: 33000
+  - Name: cacheinstance.com.ibm.wps.ac.ExternalOIDCache.lifetime
+  - Value: -1
+  - Name: cacheinstance.com.ibm.wps.ac.OwnedResourcesCache.enabled
+  - Value: false
+  - Name: cacheinstance.com.ibm.wps.ac.PermissionCollectionCache.lifetime
+  - Value: -1
+  - Name: cacheinstance.com.ibm.wps.ac.ProtectedResourceCache.lifetime
+  - Value: 14400
+  - Name: cacheinstance.com.ibm.wps.datastore.services.Identification.SerializedOidString.cache.size
+  - Value: 5000
+  - Name: cacheinstance.com.ibm.wps.model.factory.UserSpecificModelCache.size
+  - Value: 6000
+  - Name: cacheinstance.com.ibm.wps.pe.portletentity.lifetime
+  - Value: 28800
+  - Name: cacheinstance.com.ibm.wps.pe.portletentity.size
+  - Value: 45000
+  - Name: cacheinstance.com.ibm.wps.policy.services.PolicyCacheManager.lifetime
+  - Value: 43200
+  - Name: cacheinstance.com.ibm.wps.puma.CommonPrincipalCache.size
+  - Value: 30000
+  - Name: cacheinstance.com.ibm.wps.puma.DN_OID_Cache.size
+  - Value: 30000
+  - Name: cacheinstance.com.ibm.wps.puma.OID_DN_Cache.size
+  - Value: 5000
+  - Name: cacheinstance.com.ibm.wps.resolver.cor.cache.uri.size
+  - Value: 1149
+  - Name: cacheinstance.com.ibm.wps.resolver.data.cache.DataSourceCache.size
+  - Value: 8000
+  - Name: cacheinstance.com.ibm.wps.resolver.data.cache.FirstLevelDataSourceCache.size
+  - Value: 2003
+  - Name: cacheinstance.com.ibm.wps.resolver.resource.AbstractRequestDispatcherFactory.size
+  - Value: 200
+  - Name: cacheinstance.com.ibm.wps.resourceaggregator.ContributionsCache.size
+  - Value: 1007
+  - Name: cacheinstance.com.ibm.wps.services.vpmapping.HostnameToVirtualPortalIDCache.lifetime
+  - Value: -1
+  - Name: cacheinstance.com.ibm.wps.spa.parser.locale.FirstLevelLocalizationParserCache.size
+  - Value: 1009
+  - Name: cacheinstance.com.ibm.wps.spa.parser.skin.FirstLevelSkinParserCache.size
+  - Value: 1009
+  - Name: cacheinstance.com.ibm.wps.spa.parser.theme.FirstLevelThemeParserCache.size
+  - Value: 2003
+  - Name: cacheinstance.com.lotus.cs.services.UserEnvironment.size
+  - Value: 4500
+  - Name: cacheinstance.DigestCache.cache.size
+  - Value: 45000
+Navigate back to WP CacheManagerService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP CommonComponentConfigService
+Click "Custom Properties"
+Update the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: cc.multipart.correlatehosts
+   - Current value: true
+   - New value: false
+Navigate back to WP CommonComponentConfigService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP ConfigService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: application.lazystart
+  - Value: true
+  - Name: cache.dynamic.content.spot
+  - Value: false
+  - Name: com.ibm.wps.resolver.resource.DefaultWebAppBlackWhiteList.blacklist
+  - Value: WEB-INF/.*
+  - Name: logout.user.onpublic
+  - Value: true
+  - Name: redirect.logout
+  - Value: true
+  - Name: redirect.logout.ssl
+  - Value: true
+  - Name: resourceaggregation.cache.markup
+  - Value: true
+Update the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: resourceaggregation.enableRuntimePortletCapabilitiesFilter
+   - Current value: true
+   - New value: false
+  - Name: connect.businesslogic.module
+   - Current value: web,mail,default,ajpe,federatedproxy,ajpecatselect,memberfixer,workflowenablement,itemdispatcher,synd,subs,syndication,refreshallitems,unlocklibrary,custom,data,clearversions,findlargeresources,clearhistory,reseteventlog,profileenablement,exportcachesettings,arsm
+   - New value: web,default,ajpe,custom,syndication,subs,mail,refreshallitems,memberfixer,clearversions,clearhistory,exportcachesettings,reseteventlog
+nfig back to WP ConfigService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP GlobalThemeConfig
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: behaviors.navigation.autoNavigateToNewPages
+  - Value: true
+  - Name: resources.css.oneui.system
+  - Value: blank
+  - Name: resources.css.oneui.v
+  - Value: blank
+  - Name: resources.theme.isDebug
+  - Value: false
+  - Name: resources.urls.help
+  - Value: blank
+  - Name: resources.urls.userManagement
+  - Value: blank
+  - Name: resources.urls.userManagementSecure
+  - Value: blank
+Navigate back to WP GlobalThemeConfig
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP NavigatorService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: public.expires
+  - Value: 3600
+  - Name: public.reload
+  - Value: 3600
+  - Name: remote.cache.expiration
+  - Value: 28800
+Navigate back to WP NavigatorService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP PACGroupManagementService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: public.expires
+  - Value: 3600
+  - Name: public.reload
+  - Value: 3600
+  - Name: remote.cache.expiration
+  - Value: 28800
+Navigate back to WP PACGroupManagementService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP PumaStoreService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: store.puma_default.filter.assertionFilter.classname
+  - Value: com.ibm.wps.um.AssertionFilter
+  - Name: store.puma_default.userManagement.cacheMode
+  - Value: true
+  - Name: store.puma_default.wim.cacheinvalidation.enabled
+  - Value: true
+  - Name: store.puma_default.wim.cacheinvalidation.repositoryids
+  - Name: LDAP-${ENV}
+Navigate back to WP PumaStoreService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP RegistryService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Name: bucket.transformation.interval
+  - Value: 28800
+  - Name: bucket.transformationapplication.interval
+  - Value: 28800
+  - Name: default.interval
+  - Value: 28800
+Navigate back to WP RegistryService
+Click "OK"
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Node=<node name>"
+Select WP SearchConfigService
+Click "Custom Properties"
+Copy all name/value pairs
+
+Navigate back to Resource Environment Providers
+Change "Scope" from "All Scopes" to "Node=<node name>"
+Remove WP SearchConfigService
+Click "OK"
+
+Save changes
+
+Navigate to Resources -> Resource Environment -> Resource Environment Providers
+Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
+Select WP SearchConfigService
+Click "Custom Properties"
+Add the following values:
+ - For each updated value, click "OK", and continue until each entry has been added.
+  - Add each name/value pair identified in the previous step
+Navigate back to WP SearchConfigService
+Click "OK"
+
+Save changes
+
+Navigate to System Adminstration -> Save changes to master repository
+Click "Save"
+
+Navigate to System Adminstration -> Nodes
+Select all nodes and click "Full Resynchronize"
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+ - No Portal changes were made, no backup is required.
+
+Create wcmsyndicator account
+Navigate to Users and Groups -> Manage Users
+Click "Create..."
+ - User ID: wcmsyndicator
+ - First name: wcm
+ - Last name: syndicator
+ - Password/Confirm Password: See Password Manager
+Click "Create"
+
+Save changes
+
+Configure syndication
+Copy the file CredentialVaultSlot.xml from the NAS share:
+
+cp /nas/software/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml
+
+Edit the following values:
+ - Name: <password>
+ - Value: See Password Manager
+Save and close the file
+
+Enable managed pages
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    enable-managed-pages
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    create-page-nodes
+
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    create-virtual-portal-site-nodes
+
+Import the credential to Portal
+
+${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
+    -in ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml \
+    -out ${HOME}/log/xmlaccess/CredentialVaultSlot.xml \
+    -url https:/localhost:10042/ProviderHome/config \
+    -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
+    -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+
+Configure syndication on the Portal - TODO: change to ssl - add -DWcmConfigClientProtocol=https and find out why its not working
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    -DvaultSlotName=WCMSyndicator \
+    -Dsyndicator=http://${AUTHORING_HOST}.domain.com:${WC_DEFAULTHOST}/wps/wcm -DsyndicatorName=Syndicator \
+    -DsubscriberName=Syndicator \
+    -DupdateAfterCreation=true -Dmode=configured \
+    -Dpublished-items="MyLibrary" \
+    run-wcm-admin-task-subscribe-now
+
+Install applications to Deployment Manager
+Execute the following on the Deployment Manager:
+for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
+    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /nas/software/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
+        -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/appinstall-${app}.traceout \
+        install \
+        /nas/software/EarFiles/PPApplications/${app}  \
+        ApplicationsCluster \
+        WebServerNodeName \
+        ${PROFILE_NAME}IHS | tee -a ~/log/wsadmin/appinstall-${app}.log;
+done
+
+Change startup weight for all Provider Portal applications
+Execute the following on the Deployment Manager:
+for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
+    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /nas/software/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
+        -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/changeweight-${app}.traceout \
+        change-weight \
+        /nas/software/EarFiles/PPApplications/${app}  \
+        50 | tee -a ~/log/wsadmin/appinstall-${app}.log;
+done
+
+Install applications to Portal Server
+Create the xmlaccess password file
+Copy the template file to the home directory:
+ - cp /nas/software/WebSphere/PortalServer/properties/xmlaccess.properties ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+Edit the file to include the appropriate password:
+ - vi ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+  - Change the following values:
+   - Name: com.ibm.SOAP.loginPassword
+    - Current value: ReplaceWithYourPassword
+    - New value: See Password Manager
+Save and close the file
+
+Encode the password:
+
+${WAS_INSTALL_ROOT}/bin/PropFilePasswordEncoder.sh \
+    ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties \
+    com.ibm.SOAP.loginPassword
+
+Export the current Portal configuration:
+${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
+    -in /opt/IBM/WebSphere/PortalServer/doc/xml-samples/Export.xml \
+    -out ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CurrentPortalConfiguration.xml \
+    -url https:/localhost:10042/ProviderHome/config \
+    -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
+    -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+
+${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
+    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomThemesAndSkins.xml \
+    -out ${HOME}/log/xmlaccess/InstallCustomThemesAndSkins-output.xml \
+    -url https:/localhost:10042/ProviderHome/config \
+    -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
+    -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+
+${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
+    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalApplications.xml \
+    -out ${HOME}/log/xmlaccess/InstallCustomPortalApplications-output.xml \
+    -url https:/localhost:10042/ProviderHome/config \
+    -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
+    -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+
+${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
+    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalContent.xml \
+    -out ${HOME}/log/xmlaccess/InstallCustomPortalContent.xml \
+    -url https:/localhost:10042/ProviderHome/config \
+    -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
+    -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostApplicationsAndContentInstalls-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostApplicationsAndContentInstalls-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+/opt/IBM/WebSphere/AppServer/profiles/cw_profile/bin/stopServer.sh server1
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+sed -e "s/com.ibm.SOAP.loginPassword=.*/com.ibm.SOAP.loginPassword=/" ${USER_INSTALL_ROOT}/properties/soap.client.props >| ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${PROFILE_NAME} -backupFile /opt/IBM/backups/${profile}-PostApplicationsAndContentInstalls-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+sed -e "s/com.ibm.SOAP.loginPassword=.*/com.ibm.SOAP.loginPassword=/" ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props >| ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostApplicationsAndContentInstalls-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostApplicationsAndContentInstalls-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property file:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
+
+JVM Configuration/Tuning
+Run the following scripts:
+TODO: move this to dmgr
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureDeploymentManager.py ${LOGNAME}
+
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py ${NODE_NAME} ${LOGNAME}
+
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureApplicationServer.py WebSphere_Portal ${LOGNAME}
+
+Configure HTTP Access Logging
+Navigate to Servers -> Server Types -> WebSphere Application Servers
+For each server found, perform the following:
+ - Click on the associated server
+ - Select "NCSA access and HTTP error logging"
+ - Check "Enable logging service at server start-up"
+ - Click "OK"
+
+Save changes
+
+CHECKPOINT
+
+Deployment Manager:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop the deployment manager:
+${USER_INSTALL_ROOT}/bin/stopManager.sh
+
+Clean up temporary files:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Start the deployment manager:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startManager.sh
+
+Portal profile:
+Create the backup directory:
+mkdir -pv /opt/IBM/backups;
+
+Stop all running servers:
+${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
+${USER_INSTALL_ROOT}/bin/stopNode.sh
+
+Clean up the Portal profile:
+Clean up temporary files:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    cleanup-work-dir
+
+Remove passwords from the ConfigEngine:
+${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
+    delete-passwords
+
+Clean up temporary directories:
+rm -rf ${USER_INSTALL_ROOT}/temp/*
+rm -rf ${USER_INSTALL_ROOT}/wstemp/*
+
+${USER_INSTALL_ROOT}/bin/clearClassCache.sh
+${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Back up the Portal profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Configuration Wizard profile:
+Stop the configuration wizard server:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
+
+Clean up temporary directories:
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/temp/*
+rm -rf ${WAS_INSTALL_ROOT}/profiles/cw_profile/wstemp/*
+
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
+
+Remove passwords from soap.client.props:
+cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Back up the profile:
+${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+
+Back up the full WebSphere filesystem:
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+Replace property files for the Portal profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client.props-${PROFILE_NAME} ${USER_INSTALL_ROOT}/properties/soap.client.props
+
+Replace property files for the Configuration Wizard profile:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client.props-cw_profile ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+
+Replace the workplace property file:
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
+cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
+
+Start servers:
+${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/startServer.sh server1
+${USER_INSTALL_ROOT}/bin/startNode.sh
+${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
