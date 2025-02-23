@@ -33,25 +33,6 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 
-## mercury
-Mercury/
-Mercury.modules
-*.mh
-*.err
-*.init
-*.dll
-*.exe
-*.a
-*.so
-*.dylib
-*.beams
-*.c_date
-
-## mercurial
-/.hg/*
-*/.hg/*
-.hgignore
-
 ## perl
 /blib/
 /.build/
@@ -256,19 +237,6 @@ target/
 .target
 .texlipse
 
-## kate
-# Swap Files #
-.*.kate-swp
-.swp.*
-
-## monodevelop
-#User Specific
-*.userprefs
-*.usertasks
-*.pidb
-*.resources
-test-results/
-
 ## notepad++
 # Notepad++ backups #
 *.bak
@@ -319,20 +287,3 @@ vault.txt
 *.tar.gz
 *.gz
 *.tgz
-
-## synacor
-hosts
-yyz
-cmh
-dfw
-dev
-buf
-quartz
-topaz
-aga
-ams
-synacor
-sudo
-sudo.prd
-sudo.dev
-
