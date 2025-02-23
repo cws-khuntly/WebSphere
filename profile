@@ -24,7 +24,7 @@ for file_entry in ${HOME}/.profile.d/*; do
 
     if [[ -d "${file_entry}" ]]; then
         for dir_entry in ${file_entry}/*; do
-            [[ -n "${dir_entry}" ]] && continue;
+            [[ -z "${dir_entry}" ]] && continue;
 
             profile_file="${dir_entry}";
 
@@ -35,9 +35,12 @@ for file_entry in ${HOME}/.profile.d/*; do
         [[ -n "${file_entry}" ]] && unset -v file_entry;
     else
         profile_file="${file_entry}"
+
+        [[ -n "${dir_entry}" ]] && unset -v dir_entry;
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
     fi
 
-    if [[ -r "${profile_file}" ]] && [[ -s "${profile_file}" ]]; then
+    if [[ -n "${profile_file}" ]] && [[ -r "${profile_file}" ]] && [[ -s "${profile_file}" ]]; then
         source "${profile_file}";
     fi
 

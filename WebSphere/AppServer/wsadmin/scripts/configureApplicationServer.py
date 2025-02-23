@@ -19,10 +19,6 @@
 import os
 import sys
 
-sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
-
-import includes
-
 lineSplit = java.lang.System.getProperty("line.separator")
 
 targetCell = AdminControl.getCell()
@@ -49,100 +45,111 @@ def configureAllServers(runAsUser="", runAsGroup=""):
 #enddef
 
 def configureTargetServer(serverName, runAsUser="", runAsGroup=""):
-    for node in (nodeList):
-        targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
+    if (nodeList):
+        for node in (nodeList):
+            targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
 
-        if (targetServer):
-            print ("Starting configuration for server " + targetServer + "...")
+            if (targetServer):
+                print ("Starting configuration for server " + serverName + "...")
 
-            targetTransport = AdminConfig.list("TransportChannelService", targetServer)
-            targetWebContainer = AdminConfig.list("WebContainer", targetServer)
-            targetCookie = AdminConfig.list("Cookie", targetServer)
-            targetTuning = AdminConfig.list("TuningParams", targetServer)
-            monitorPolicy = AdminConfig.list("MonitoringPolicy", targetServer)
-            processExec = AdminConfig.list("ProcessExecution", targetServer)
-            haManager = AdminConfig.list("HAManagerService", targetServer)
-            threadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
-            targetTCPChannels = AdminConfig.list("TCPInboundChannel", targetServer).split(lineSplit)
-            targetHTTPChannels = AdminConfig.list("HTTPInboundChannel", targetServer).split(lineSplit)
-            containerChains = AdminTask.listChains(targetTransport, '[-acceptorFilter WebContainerInboundChannel]').split(lineSplit)
+                targetTransport = AdminConfig.list("TransportChannelService", targetServer)
+                targetWebContainer = AdminConfig.list("WebContainer", targetServer)
+                targetCookie = AdminConfig.list("Cookie", targetServer)
+                targetTuning = AdminConfig.list("TuningParams", targetServer)
+                monitorPolicy = AdminConfig.list("MonitoringPolicy", targetServer)
+                processExec = AdminConfig.list("ProcessExecution", targetServer)
+                haManager = AdminConfig.list("HAManagerService", targetServer)
+                threadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
+                targetTCPChannels = AdminConfig.list("TCPInboundChannel", targetServer).split(lineSplit)
+                targetHTTPChannels = AdminConfig.list("HTTPInboundChannel", targetServer).split(lineSplit)
+                containerChains = AdminTask.listChains(targetTransport, '[-acceptorFilter WebContainerInboundChannel]').split(lineSplit)
 
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.extractHostHeaderPort"] [description ""] [value "true"] [required "false"]]')
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "trusthostheaderport"] [description ""] [value "true"] [required "false"]]')
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.invokefilterscompatibility"] [description ""] [value "true"] [required "false"]]')
+                AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.extractHostHeaderPort"] [description ""] [value "true"] [required "false"]]')
+                AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "trusthostheaderport"] [description ""] [value "true"] [required "false"]]')
+                AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.invokefilterscompatibility"] [description ""] [value "true"] [required "false"]]')
 
-            AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-            AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
-            AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runAsGroup "' + runAsUser + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-            AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
-            AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "true"] [path "/"]]')
-            AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "60"]]')
+                AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
+                AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "PREVIOUS"]]')
+                AdminConfig.modify(targetWebContainer, '[[sessionAffinityTimeout "0"] [enableServletCaching "true"] [disablePooling "false"] [defaultVirtualHostName "default_host"]]')
+                AdminConfig.modify(targetCookie, '[[maximumAge "-1"] [name "JSESSIONID"] [domain ""] [secure "true"] [path "/"]]')
+                AdminConfig.modify(targetTuning, '[[writeContents "ONLY_UPDATED_ATTRIBUTES"] [writeFrequency "END_OF_SERVLET_SERVICE"] [scheduleInvalidation "false"] [invalidationTimeout "60"]]')
 
-            AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 8192 -maximumHeapSize 8192 -debugMode false -genericJvmArguments "' + genericJvmArgs + '"]')
+                if ((runAsUser) and (runAsGroup)):
+                    AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runAsGroup "' + runAsGroup + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
+                elif (runAsUser):
+                    AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
+                else:
+                    AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
+                #end if
 
-            if (threadPools):
-                for threadPool in (threadPools):
-                    poolName = threadPool.split("(")[0]
+                AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection true -initialHeapSize 8192 -maximumHeapSize 8192 -debugMode false -genericJvmArguments "' + genericJvmArgs + '"]')
 
-                    if (poolName == "server.startup"):
-                        AdminConfig.modify(threadPool, '[[maximumSize "10"] [name "' + poolName + '"] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]')
-                    elif (poolName == "WebContainer"):
-                        AdminConfig.modify(threadPool, '[[maximumSize "75"] [name "' + poolName + '"] [inactivityTimeout "5000"] [minimumSize "20"] [description ""] [isGrowable "false"]]')
-                    elif (poolName == "HAManagerService.Pool"):
-                        AdminConfig.modify(threadPool, '[[minimumSize "0"] [maximumSize "6"] [inactivityTimeout "5000"] [isGrowable "true" ]]')
-                    else:
-                        continue
-                    #endif
-                #endfor
+                if (threadPools):
+                    for threadPool in (threadPools):
+                        poolName = threadPool.split("(")[0]
+
+                        if (poolName == "server.startup"):
+                            AdminConfig.modify(threadPool, '[[maximumSize "10"] [name "' + poolName + '"] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]')
+                        elif (poolName == "WebContainer"):
+                            AdminConfig.modify(threadPool, '[[maximumSize "75"] [name "' + poolName + '"] [inactivityTimeout "5000"] [minimumSize "20"] [description ""] [isGrowable "false"]]')
+                        elif (poolName == "HAManagerService.Pool"):
+                            AdminConfig.modify(threadPool, '[[minimumSize "0"] [maximumSize "6"] [inactivityTimeout "5000"] [isGrowable "true" ]]')
+                        else:
+                            continue
+                        #endif
+                    #endfor
+                #endif
+
+                if (containerChains):
+                    for chain in (containerChains):
+                        chainName = chain.split("(")[0]
+
+                        if (chainName == "WCInboundDefault"):
+                            continue
+                        elif (chainName != "WCInboudDefaultSecure"):
+                            continue
+                        else:
+                            AdminTask.deleteChain(chain, '[-deleteChannels true]')
+                        #endif
+                    #endfor
+                #endif
+
+                if (targetTCPChannels):
+                    for tcpChannel in (targetTCPChannels):
+                        tcpName = tcpChannel.split("(")[0]
+
+                        if (tcpName == "TCP_2"):
+                            AdminConfig.modify(tcpChannel, '[[maxOpenConnections "50"]]')
+                        else:
+                            continue
+                        #endif
+                    #endfor
+                #endif
+
+                if (targetHTTPChannels):
+                    for httpChannel in (targetHTTPChannels):
+                        httpName = httpChannel.split("(")[0]
+
+                        if (httpName == "HTTP_2"):
+                            AdminConfig.modify(httpChannel, '[[maximumPersistentRequests "-1"] [persistentTimeout "300"] [enableLogging "true"]]')
+                            AdminConfig.create('Property', httpChannel, '[[validationExpression ""] [name "RemoveServerHeader"] [description ""] [value "true"] [required "false"]]')
+                        else:
+                            continue
+                        #endif
+                    #endfor
+                #endif
+
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+
+                print ("Completed configuration for server " + serverName + ".")
+            else:
+                continue
             #endif
-
-            if (containerChains):
-                for chain in (containerChains):
-                    chainName = chain.split("(")[0]
-
-                    if (chainName == "WCInboundDefault"):
-                        continue
-                    elif (chainName != "WCInboudDefaultSecure"):
-                        continue
-                    else:
-                        AdminTask.deleteChain(chain, '[-deleteChannels true]')
-                    #endif
-                #endfor
-            #endif
-
-            if (targetTCPChannels):
-                for tcpChannel in (targetTCPChannels):
-                    tcpName = tcpChannel.split("(")[0]
-
-                    if (tcpName == "TCP_2"):
-                        AdminConfig.modify(tcpChannel, '[[maxOpenConnections "50"]]')
-                    else:
-                        continue
-                    #endif
-                #endfor
-            #endif
-
-            if (targetHTTPChannels):
-                for httpChannel in (targetHTTPChannels):
-                    httpName = httpChannel.split("(")[0]
-
-                    if (httpName == "HTTP_2"):
-                        AdminConfig.modify(httpChannel, '[[maximumPersistentRequests "-1"] [persistentTimeout "300"] [enableLogging "true"]]')
-                        AdminConfig.create('Property', httpChannel, '[[validationExpression ""] [name "RemoveServerHeader"] [description ""] [value "true"] [required "false"]]')
-                    else:
-                        continue
-                    #endif
-                #endfor
-            #endif
-
-            print ("Completed configuration for server " + targetServer + ".")
-        else:
-            continue
-        #endif
-    #endfor
-
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+        #endfor
+    else:
+        print ("No nodes were found in the cell.")
+    #endif
 #enddef
 
 def printHelp():

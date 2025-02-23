@@ -19,17 +19,13 @@
 import os
 import sys
 
-sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
-
-import includes
-
 lineSplit = java.lang.System.getProperty("line.separator")
 
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def performNodeSync():
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 ##################################

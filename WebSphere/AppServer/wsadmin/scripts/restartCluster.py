@@ -86,38 +86,8 @@ def printHelp():
 ##################################
 # main
 #################################
-if ((len(sys.argv) == 1) and (sys.argv[0] == "list")):
-    listApps()
+if (len(sys.argv) == 0):
+    restartClusters()
 else:
-    if (sys.argv[0] == "install"):
-        if (len(sys.argv) == 5):
-            installSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-        else:
-            printHelp()
-        #endif
-    if (sys.argv[0] == "update"):
-        if (len(sys.argv) == 5):
-            updateSingleModule(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-        else:
-            printHelp()
-        #endif
-    elif (sys.argv[0] == "uninstall"):
-        if (len(sys.argv) == 2):
-            performAppUninstall(sys.argv[1])
-        else:
-            printHelp()
-        #endif
-    elif (sys.argv[0] == "export"):
-        if (len(sys.argv) == 1):
-            exportApp(sys.argv[1])
-        else:
-            printHelp()
-        #endif
-    elif (sys.argv[0] == "change-weight"):
-        if (len(sys.argv) == 2):
-            modifyStartupWeightForApplication(sys.argv[1], sys.argv[2])
-        else:
-            printHelp()
-        #endif
-    #endif
+    restartCluster(sys.argv[0])
 #endif

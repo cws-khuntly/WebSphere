@@ -19,10 +19,6 @@
 import os
 import sys
 
-sys.path.append(os.path.expanduser('~') + '/workspace/WebSphere/AppServer/wsadmin/includes/')
-
-import includes
-
 lineSplit = java.lang.System.getProperty('line.separator')
 
 targetCell = AdminControl.getCell()
@@ -45,8 +41,8 @@ def remapApplication(appName, targetCluster):
 
     AdminApp.edit('' + app + '', '[ -MapModulesToServers [[ \'' + appName + '\' ' + moduleName + ',WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster=' + targetCluster + ' ]]]')
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def exportApp(appName):
@@ -60,10 +56,10 @@ def exportApp(appName):
 #enddef
 
 def installSingleModule(appPath, clusterName, webserverNodeName, webserverName):
-    appFileName = includes.getFileNameFromPath(appPath)
-    appName = includes.getAppDisplayName(appPath)
-    appModuleName = includes.removeExtraExtension(includes.getAppModuleName(appPath), 4)
-    appWarName = includes.getAppWarName(appPath)
+    appFileName = getFileNameFromPath(appPath)
+    appName = getAppDisplayName(appPath)
+    appModuleName = removeExtraExtension(getAppModuleName(appPath), 4)
+    appWarName = getAppWarName(appPath)
     appMappingOptions = (
         '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
@@ -80,15 +76,15 @@ def installSingleModule(appPath, clusterName, webserverNodeName, webserverName):
 
     AdminApp.install(appPath, str(appInstallOptions).strip("()"))
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName, vhostName):
-    appFileName = includes.getFileNameFromPath(appPath)
-    appName = includes.getAppDisplayName(appPath)
-    appModuleName = includes.getAppModuleName(appPath)
-    appWarName = includes.getAppWarName(appPath)
+    appFileName = getFileNameFromPath(appPath)
+    appName = getAppDisplayName(appPath)
+    appModuleName = getAppModuleName(appPath)
+    appWarName = getAppWarName(appPath)
     appMappingOptions = (
         '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
@@ -107,15 +103,15 @@ def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName, v
 
     AdminApp.update(appName, 'app', str(appUpdateOptions).strip("()"))
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def installEJBApplication(appPath, clusterName, webserverNodeName, webserverName):
-    appFileName = includes.getFileNameFromPath(appPath)
-    appName = includes.getAppDisplayName(appPath)
-    appModuleName = includes.getAppModuleName(appPath)
-    appWarName = includes.getAppWarName(appPath)
+    appFileName = getFileNameFromPath(appPath)
+    appName = getAppDisplayName(appPath)
+    appModuleName = getAppModuleName(appPath)
+    appWarName = getAppWarName(appPath)
     appMappingOptions = (
         '-MapModulesToServers [[ ' + appModuleName + ' ' + appWarName + ',WEB-INF/web.xml '
         'WebSphere:cell=' + targetCell + ',cluster=' + clusterName + '+WebSphere:cell=' + targetCell + ',node=' + webserverNodeName + ',server=' + webserverName + ']]'
@@ -132,13 +128,13 @@ def installEJBApplication(appPath, clusterName, webserverNodeName, webserverName
 
     AdminApp.update(appName, 'app', str(appInstallOptions).strip("()"))
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def modifyStartupWeightForApplication(appPath, startWeight):
-    appFileName = includes.getFileNameFromPath(appPath)
-    appName = includes.getAppDisplayName(appPath)
+    appFileName = getFileNameFromPath(appPath)
+    appName = getAppDisplayName(appPath)
 
     print ("Changing the startup weight for " + appName + " to " + startWeight + "..")
 
@@ -147,8 +143,8 @@ def modifyStartupWeightForApplication(appPath, startWeight):
 
     AdminConfig.modify(appDeploymentObject, [['startingWeight', '' + startWeight + '']])
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def disableApplicationStartup(appName):
@@ -159,8 +155,8 @@ def disableApplicationStartup(appName):
 
     AdminConfig.modify(appDeploymentObject, [['startingWeight', '' + startWeight + '']])
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def performAppUninstall(appName):
@@ -168,8 +164,8 @@ def performAppUninstall(appName):
 
     AdminApp.uninstall(appName)
 
-    includes.saveWorkspaceChanges()
-    includes.syncAllNodes(nodeList)
+    saveWorkspaceChanges()
+    syncAllNodes(nodeList)
 #enddef
 
 def printHelp():
