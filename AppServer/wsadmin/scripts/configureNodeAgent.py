@@ -92,7 +92,7 @@ def configureNodeAgent(nodeName, runAsUser="", runAsGroup=""):
         configSyncService = AdminConfig.list("ConfigSynchronizationService", targetServer)
 
         AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-        AdminConfig.modify(configSyncService, '[[synchInterval "1"] [exclusions ""] [enable "true"] [synchOnServerStartup "true"] [autoSynchEnabled "true"]]')
+        AdminConfig.modify(configSyncService, '[[synchInterval "1"] [exclusions ""] [enable "true"] [synchOnServerStartup "true"] [autoSynchEnabled "false"]]')
 
         if ((runAsUser) and (runAsGroup)):
             AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runAsGroup "' + runAsGroup + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
