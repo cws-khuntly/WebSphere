@@ -24,6 +24,63 @@ lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()
 clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
 
+def createCluster(cellname, clustername, createReplicationDomain=False, nodeScopedRouting=False ):
+    m = "createCluster:"
+    sop(m,"Entry. cellname=%s clustername=%s createReplicationDomain=%s nodeScopedRouting=%s" % ( cellname, clustername, createReplicationDomain, nodeScopedRouting ))
+
+    # Check input.
+    if (False != createReplicationDomain and True != createReplicationDomain):
+        raise m + " Error. createReplicationDomain must be True or False. createReplicationDomain=%s" % repr(createReplicationDomain)
+    if (False != nodeScopedRouting and True != nodeScopedRouting):
+        raise m + " Error. nodeScopedRouting must be True or False. nodeScopedRouting=%s" % repr(nodeScopedRouting)
+
+    # Convert to a string value.
+    preferLocal = nodeScopedRouting and 'true' or 'false'
+
+    if createReplicationDomain == True:
+        sop(m,'Calling AdminTask.createCluster([-clusterConfig [-clusterName %s -preferLocal %s] -replicationDomain [-createDomain true]]' % (clustername, preferLocal))
+        return AdminTask.createCluster('[-clusterConfig [-clusterName %s -preferLocal %s] -replicationDomain [-createDomain true]]' % (clustername, preferLocal))
+    else:
+        sop(m,'Calling AdminTask.createCluster([-clusterConfig [-clusterName %s -preferLocal %s]]' % (clustername, preferLocal))
+        return AdminTask.createCluster('[-clusterConfig [-clusterName %s -preferLocal %s]]' % (clustername, preferLocal))
+
+def createServerInCluster( clustername, nodename, servername, sessionReplication = False):
+    sop(m,"Entry. clustername=%s nodename=%s servername=%s sessionReplication=%s" % ( clustername, nodename, servername, sessionReplication ))
+    if sessionReplication == True:
+        sop(m,'Calling AdminTask.createClusterMember([-clusterName %s -memberConfig[-memberNode %s -memberName %s -memberWeight 2 -replicatorEntry true]])' % (clustername,nodename,servername))
+        AdminTask.createClusterMember('[-clusterName %s -memberConfig[-memberNode %s -memberName %s -memberWeight 2 -replicatorEntry true]]' % (clustername,nodename,servername))
+    else:
+        sop(m,'Calling AdminTask.createClusterMember([-clusterName %s -memberConfig[-memberNode %s -memberName %s -memberWeight 2]])' % (clustername,nodename,servername))
+        AdminTask.createClusterMember('[-clusterName %s -memberConfig[-memberNode %s -memberName %s -memberWeight 2]]' % (clustername,nodename,servername))
+
+def isClusterStarted (clustername):
+    m = "isClusterStarted"
+    sop (m, "Entering %s function..." % m)
+
+    sop(m, "Calling AdminControl.completeObjectName to get cluster %s's ObjectName" % clustername)
+    cluster = AdminControl.completeObjectName('cell='+getCellName()+',type=Cluster,name='+clustername+',*')
+    sop(m, "Returning from AdminControl.completeObjectName, ObjectName for %s is %s" % (clustername,cluster))
+
+    if cluster == '' :
+        raise "Exception getting ObjectName for cluster %s, it must not exist" % clustername
+    #endif
+
+    try:
+        sop(m, "Calling AdminControl.getAttribute to get cluster %s's state" % clustername)
+        output = AdminControl.getAttribute(cluster, 'state')
+        sop(m, "Returning from AdminControl.getAttribute, the state of %s is %s" % (clustername, output))
+    except:
+        raise "Exception getting attribute for cluster %s's state" % clustername
+    #endtry
+
+    if output.find('running') != -1 :
+        return 1
+    else :
+        return 0
+    #endif
+
+#endDef
+
 def restartClusters():
     print ("Restarting all found clusters...")
 

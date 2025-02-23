@@ -127,30 +127,3 @@ def removeExtraExtension(inString, removeNumber):
     #endif
 #enddef
 
-def saveWorkspaceChanges():
-    print('Saving configuration..')
-
-    AdminConfig.save()
-#enddef
-
-def syncAllNodes(nodeList):
-    print('Performing nodeSync...')
-
-    AdminNodeManagement.syncActiveNodes()
-
-    for node in nodeList:
-        nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
-
-        if (nodeRepo):
-            AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
-        #endif
-
-        syncNode = AdminControl.completeObjectName('cell=' + targetCell + ',node=' + node + ',type=NodeSync,*')
-
-        if (syncNode):
-            AdminControl.invoke(syncNode, 'sync')
-        #endif
-
-        continue
-    #endfor
-#enddef
