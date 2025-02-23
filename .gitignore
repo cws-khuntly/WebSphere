@@ -175,7 +175,3 @@ cython_debug/
 *.tar.gz
 *.gz
 *.tgz
-
-## cct
-AppServer/CCT/*
-
