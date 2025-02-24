@@ -49,7 +49,7 @@ def configureNodeAgents(runAsUser="", runAsGroup=""):
                     AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
                 #end if
 
-                AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection false -initialHeapSize 4096 -maximumHeapSize 4096 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
+                AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection false -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
 
                 if (threadPools):
                     for threadPool in (threadPools):
@@ -102,7 +102,7 @@ def configureNodeAgent(nodeName, runAsUser="", runAsGroup=""):
             AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
         #end if
 
-        AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + nodeName + ' -verboseModeGarbageCollection false -initialHeapSize 4096 -maximumHeapSize 4096 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
+        AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + nodeName + ' -verboseModeGarbageCollection false -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
 
         if (threadPools):
             for threadPool in (threadPools):
