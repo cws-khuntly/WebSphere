@@ -1,22 +1,12 @@
 INSTALL WAS
-mkdir -pv ${HOME}/workspace/WebSphere/AppServer/responsefiles
-cp /nas/software/workspace/WebSphere//responsefiles/was-base.xml ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-base.xml
-cp /nas/software/workspace/WebSphere/AppServer/responsefiles/was-fp18.xml ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-fp18.xml
-cp /nas/software/workspace/WebSphere/AppServer/responsefiles/was-fp22.xml ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-fp22.xml
-
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-fp18.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/AppServer/responsefiles/was-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/AppServer/responsefiles/was-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/AppServer/responsefiles/was-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/AppServer/responsefiles/was-fp22.xml -nosplash -acceptLicense -showProgress
 
 INSTALL TOOLKIT
-mkdir -pv ${HOME}/workspace/WebSphere/Toolbox/responsefiles
-cp /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-base.xml ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-base.xml
-cp /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-fp018.xml ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-fp18.xml
-cp /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-fp022.xml ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-fp22.xml
-
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/Toolbox/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/workspace/WebSphere/Toolbox/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
 
 CHECKPOINT
 
@@ -195,7 +185,7 @@ On the webserver, as the appropriate user:
   - wasExistingLocation: /opt/IBM/WebSphere/AppServer
   - webServerSelected: ihs
   - ihsAdminPort: 8008
-  - ihsAdminUserID: ihsadin
+  - ihsAdminUserID: ihsadmin
   - ihsAdminUserGroup: webadmin
   - ihsAdminPassword: See PAM
   - webServerConfigFile1: /opt/IBM/HTTPServer/conf/ApplicationServices/httpd.conf

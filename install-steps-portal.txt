@@ -6,7 +6,6 @@ Export the following variables:
  - WPS_INSTALL_ROOT: /opt/IBM/WebSphere/PortalServer
  - CLUSTER_NAME: The name of the cluster to be built
  - DMGR_HOSTNAME: The fully qualified name of the owning deployment manager
- - ApplicationType: ProviderPortal or ProviderServices
 
 INSTALL WAS
 /opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-base.xml -nosplash -acceptLicense -showProgress
@@ -33,7 +32,7 @@ Edit the response files, modifying the following values:
   - Current value: <SPECIFY VALUE>
   - New value: Response from imcl
    - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
-    - Replace <VALUE> with the plaintext password for the cwprovider account
+    - Replace <VALUE> with the plaintext password for the cwadmin account
  - Name: wpsAdminPassword
   - Current value: <SPECIFY VALUE>
   - New value: Response from imcl
@@ -65,10 +64,10 @@ cp /nas/software/WebSphere/PortalServer/properties/wkplc.properties ${HOME}/work
 Update the workplace property file, modifying the following values:
  - Name: config.wizard.profile.password
   - Current value: ReplaceWithYourPassword
-  - New value: Plaintext password for the cwprovider account
+  - New value: Plaintext password for the cwadmin account
  - Name: WasPassword
   - Current value: ReplaceWithYourPassword
-  - New value: Plaintext password for the wpsadminprovider account
+  - New value: Plaintext password for the wpsadmin account
  - Name: CellName
   - Current value: ReplaceWithCellName
   - New value: Short hostname + Cell
@@ -83,7 +82,7 @@ Update the workplace property file, modifying the following values:
    - e.g. myserver.mydomain.com
  - Name: PortalAdminPwd
   - Current value: ReplaceWithYourPassword
-  - New value: Plaintext password for wpsadminprovider account
+  - New value: Plaintext password for wpsadmin account
  - Name WasRemoteHostName
   - Current value: ReplaceWithDmgrFQDN
   - New value: Fully qualified hostname of the local Portal node
@@ -101,7 +100,7 @@ cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props
 Update the SOAP property file, modifying the following values:
  - Name: com.ibm.SOAP.loginPassword
   - Current value: ReplaceWithYourPassword
-  - New value: Plaintext password for the wpsadminprovider account
+  - New value: Plaintext password for the wpsadmin account
 
 Encode the resultant file using PropFilePasswordEncoder:
 ${WAS_INSTALL_ROOT}/bin/PropFilePasswordEncoder.sh \
@@ -120,7 +119,7 @@ cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.pro
 Update the SOAP property file, modifying the following values:
  - Name: com.ibm.SOAP.loginPassword
   - Current value: ReplaceWithYourPassword
-  - New value: Plaintext password for the cwprovider account
+  - New value: Plaintext password for the cwadmin account
 
 Encode the resultant file using PropFilePasswordEncoder:
 ${WAS_INSTALL_ROOT}/bin/PropFilePasswordEncoder.sh \
@@ -167,7 +166,7 @@ Edit the response files, modifying the following values:
   - Current value: <SPECIFY VALUE>
   - New value: Response from imcl
    - Execute the following command: /opt/IBM/IIM/eclipse/tools/imcl encryptString <VALUE>
-    - Replace <VALUE> with the plaintext password for the cwprovider account
+    - Replace <VALUE> with the plaintext password for the cwadmin account
  - Name: wpsAdminPassword
   - Current value: <SPECIFY VALUE>
   - New value: Response from imcl
@@ -621,7 +620,7 @@ ${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
 Update the workplace property file in the working directory:
  - Name: WpsContextRoot
   - Current value: wps
-  - New value: ProviderHome
+  - New value: MyNewContext
 
 Copy the resultant file to the Portal Config Engine:
 cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
@@ -1053,7 +1052,7 @@ Click "Finish"
 
 Save changes
 
-Update the Provider Portal datasource
+Update the datasource
 Navigate to Resources -> Expand "JDBC" -> Select "JDBC Providers"
 Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
 Select "Oracle JDBC Driver (XA)"
@@ -1230,29 +1229,6 @@ Update the following values:
    - Current value: always
    - New value: manual
 Navigate back to WCM WCMConfigService
-Click "OK"
-
-Save changes
-
-Navigate to Resources -> Resource Environment -> Resource Environment Providers
-Change "Scope" from "All Scopes" to "Cluster=${CLUSTER_NAME}"
-Select WP AccessControlDataManagementService
-Click "Custom Properties"
-Update the following values:
- - For each updated value, click "OK", and continue until each entry has been added.
-  - Name: accessControlDataManagement.domain.comm.admingroup
-   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
-   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
-  - Name: accessControlDataManagement.domain.cust.admingroup
-   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
-   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
-  - Name: accessControlDataManagement.domain.jcr.admingroup
-   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
-   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
-  - Name: accessControlDataManagement.domain.rel.admingroup
-   - Current value: cn=wpsadmins,o=defaultWIMFileBasedRealm
-   - New value: cn=PP_WPADMINS_GROUP,ou=Groups,ou=Providers,ou=BtoB,ou=external,o=bcbsma.com
-Navigate back to WP AccessControlDataManagementService
 Click "OK"
 
 Save changes
@@ -1597,7 +1573,7 @@ Import the credential to Portal
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -in ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml \
     -out ${HOME}/log/xmlaccess/CredentialVaultSlot.xml \
-    -url https:/localhost:10042/ProviderHome/config \
+    -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
@@ -1622,13 +1598,13 @@ for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
         ${PROFILE_NAME}IHS | tee -a ~/log/wsadmin/appinstall-${app}.log;
 done
 
-Change startup weight for all Provider Portal applications
+Change startup weight for all custom Portal applications
 Execute the following on the Deployment Manager:
 for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
     ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /nas/software/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
         -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/changeweight-${app}.traceout \
         change-weight \
-        /nas/software/EarFiles/PPApplications/${app}  \
+        /nas/software/EarFiles/PortalApplications/${app}  \
         50 | tee -a ~/log/wsadmin/appinstall-${app}.log;
 done
 
@@ -1654,28 +1630,28 @@ Export the current Portal configuration:
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -in /opt/IBM/WebSphere/PortalServer/doc/xml-samples/Export.xml \
     -out ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CurrentPortalConfiguration.xml \
-    -url https:/localhost:10042/ProviderHome/config \
+    -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomThemesAndSkins.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomThemesAndSkins-output.xml \
-    -url https:/localhost:10042/ProviderHome/config \
+    -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalApplications.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomPortalApplications-output.xml \
-    -url https:/localhost:10042/ProviderHome/config \
+    -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalContent.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomPortalContent.xml \
-    -url https:/localhost:10042/ProviderHome/config \
+    -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 

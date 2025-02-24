@@ -1,0 +1,68 @@
+INSTALL IHS
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-fp22.xml -nosplash -acceptLicense -showProgress
+
+INSTALL TOOLKIT
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
+
+CHECKPOINT
+
+Deployment Manager:
+No changes have been made to the Deployment Manager, no backups taken
+
+HTTP Server:
+mkdir -pv /opt/IBM/backups;
+
+tar -C /opt/IBM -cvf - ./WebSphere ./HTTPServer | gzip > /opt/IBM/backups/WebServices-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+
+CREATE IHS INSTANCE
+mkdir -pv /opt/IBM/HTTPServer/logs/WebServices /opt/IBM/HTTPServer/conf.d/WebServices /opt/IBM/WebSphere/Plugins/logs/WebServicesIHS /opt/IBM/WebSphere/Plugins/conf/WebServicesIHS
+cp /nas/software/WebSphere/IHS/conf/WebServices/httpd.conf /opt/IBM/HTTPServer/conf/WebServices/httpd.conf
+
+CREATE WEBSERVER DMGR SCRIPTS
+Create the webserver definition
+For WebServicesIHS:
+On the webserver, as the appropriate user:
+ - Copy the PCT response file to the working directory:
+  - mkdir -pv ${HOME}/workspace/WebSphere/Toolbox/responsefiles;
+  - cp /nas/software/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt;
+ - Update the following entries:
+  - ihsAdminPassword: See PAM
+  - webServerConfigFile1: /opt/IBM/HTTPServer/conf/httpd.conf
+  - webServerDefinition: WebServicesIHS
+  - wasMachineHostName: Appropriate deployment manager FQDN
+  - webServerHostName: Appropriate webserver FQDN
+   - NOTE: This becomes the node name, and we will be modifying it later on
+  - profileName: The appropriate WAS profile name
+
+Save and close the file.
+Set appropriate permissions:
+
+chmod 600 ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt
+
+Generate the PCT tool definition:
+
+/opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct -importDefinitionLocation \
+    -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName IHSPlugins-v9.0.5.22
+
+Generate the webserver configuration scripts:
+
+/opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct \
+    -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName "IHSPlugins-v9.0.5.22" \
+    -createDefinition -response ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt
+
+Change permissions:
+chmod 700 /opt/IBM/WebSphere/Plugins/bin/configureWebServicesIHS.sh /opt/IBM/WebSphere/Plugins/bin/configureWebServicesIHS.sh
+
+Edit the resulting file
+ - Change ${FQDN_HOSTNAME}-node to ${SHORT_HOSTNAME}Node
+
+Copy /opt/IBM/WebSphere/Plugins/bin/configureWebServicesIHS.sh to the deployment manager into ${USER_INSTALL_ROOT}/bin/configureWebServicesIHS.sh
+chmod 700 ${USER_INSTALL_ROOT}/bin/configureWebServicesIHS.sh
+
+Run the script:
+
+${USER_INSTALL_ROOT}/bin/configureWebServicesIHS.sh
