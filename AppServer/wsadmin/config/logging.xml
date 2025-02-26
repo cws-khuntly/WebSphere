@@ -1,38 +1,57 @@
-<Configuration xmlns="https://logging.apache.org/xml/ns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd">
-    <Appenders>
-        <Console name="CONSOLE">
-            <PatternLayout pattern="[Level: %s] - [Thread: %d] [Method: %s] - %s"/>
-        </Console>
-        <File name="main-log" fileName="logs/main.log">
-            <PatternLayout pattern="[Time: %s] [Log: %s] [Level: %s] - [Thread: %d] [File: %s:%d] [Method: %s] - %s"/>
-        </File>
-        <File name="debug-log" fileName="logs/debug.log">
-            <PatternLayout pattern="[Time: %s] [Log: %s] [Level: %s] - [Thread: %d] [File: %s:%d] [Method: %s] - %s"/>
-        </File>
-        <File name="info-log" fileName="logs/info.log">
-            <PatternLayout pattern="[Time: %s] [Log: %s] [Level: %s] - [Thread: %d] [File: %s:%d] [Method: %s] - %s"/>
-        </File>
-        <File name="error-log" fileName="logs/error.log">
-            <PatternLayout pattern="[Time: %s] [Log: %s] [Level: %s] - [Thread: %d] [File: %s:%d] [Method: %s] - %s"/>
-        </File>
-        <File name="warn-log" fileName="logs/warn.log">
-            <PatternLayout pattern="[Time: %s] [Log: %s] [Level: %s] - [Thread: %d] [File: %s:%d] [Method: %s] - %s"/>
-        </File>
-    </Appenders>
-    <Loggers>
-        <Root level="INFO">
-            <AppenderRef ref="CONSOLE" level="WARN"/>
-            <AppenderRef ref="main-log"/>
-        </Root>
-        <Logger name="info-loggger" level="INFO">
-            <AppenderRef ref="info-log"/>
-        </Logger>
-        <Logger name="error-logger" level="ERROR">
-            <AppenderRef ref="error-log"/>
-        </Logger>
-        <Logger name="warn-logger" level="WARN">
-            <AppenderRef ref="warn-log"/>
-        </Logger>
-    </Loggers>
+<configuration>
+    <appender name="console">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+    </appender>
+    <appender name="main-log">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+        <file>logs/main.log</file>
+    </appender>
+    <appender name="info-log">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+        <file>logs/info.log</file>
+    </appender>
+    <appender name="warn-log">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+        <file>logs/warn.log</file>
+    </appender>
+    <appender name="error-log">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+        <file>logs/error.log</file>
+    </appender>
+    <appender name="debug-log">
+        <formatter>
+            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+        </formatter>
+        <file>logs/debug.log</file>
+    </appender>
+
+    <logger name="main-logger" level="INFO">
+        <appender-ref ref="info-log" />
+    </logger>
+    <logger name="info-logger" level="INFO">
+        <appender-ref ref="info-log" />
+    </logger>
+    <logger name="warn-logger" level="WARN">
+        <appender-ref ref="warn-log" />
+    </logger>
+    <logger name="error-logger" level="ERROR">
+        <appender-ref ref="error-log" />
+    </logger>
+    <logger name="debug-logger" level="DEBUG">
+        <appender-ref ref="debug-log" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="console" />
+    </root>
 </Configuration>
