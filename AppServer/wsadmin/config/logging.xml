@@ -1,7 +1,7 @@
 <configuration>
     <appender name="console">
         <formatter>
-            <pattern>%(asctime)s - %(name)s - %(levelname)s - %(message)s</pattern>
+            <pattern>%(name)s - %(message)s</pattern>
         </formatter>
     </appender>
     <appender name="main-log">
