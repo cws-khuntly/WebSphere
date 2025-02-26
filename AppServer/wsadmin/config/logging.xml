@@ -35,7 +35,7 @@
         <file>logs/debug.log</file>
     </appender>
 
-    <logger name=console-logger" level="INFO">
+    <logger name="console-logger" level="INFO">
         <appender-ref ref="console" />
     </logger>
     <logger name="main-logger" level="INFO">
