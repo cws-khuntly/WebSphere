@@ -44,7 +44,7 @@ def convertXmlToDict(element):
     result = {}
 
     for child in (element):
-        if (len(child) != 0)):
+        if (len(child) != 0):
             tag = child.tag
             text = child.text.strip() if (child.text) else None
 
