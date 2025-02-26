@@ -1,34 +1,62 @@
-def getSopTimestamp():
-    """Returns the current system timestamp in a nice internationally-generic format."""
-    # Assemble the formatting string in pieces, so that some code libraries do not interpret
-    # the strings as special keywords and substitute them upon extraction.
-    formatting_string = "[" + "%" + "Y-" + "%" + "m" + "%" + "d-" + "%" + "H" + "%" + "M-" + "%" + "S00]"
-    return time.strftime(formatting_string)
+#==============================================================================
+#
+#          FILE:  logging.py
+#         USAGE:  Simple class to configure a logger
+#     ARGUMENTS:  logConfigFile: The file to use for configuration options
+#   DESCRIPTION:  Configures a logging subsystem based on a provided configuration file
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
 
-DEBUG_SOP=0
-def enableDebugMessages():
-    """
-    Enables tracing by making future calls to the sop() method actually print messages.
-    A message will also be printed to notify the user that trace messages will now be printed.
-    """
-    global DEBUG_SOP
-    DEBUG_SOP=1
-    sop('enableDebugMessages', 'Verbose trace messages are now enabled; future debug messages will now be printed.')
+import os
+import logging
+import logging.config
+import xml.etree.ElementTree as ET
 
-def disableDebugMessages():
-    """
-    Disables tracing by making future calls to the sop() method stop printing messages.
-    If tracing is currently enabled, a message will also be printed to notify the user that future messages will not be printed.
-    (If tracing is currently disabled, no message will be printed and no future messages will be printed).
-    """
-    global DEBUG_SOP
-    sop('enableDebugMessages', 'Verbose trace messages are now disabled; future debug messages will not be printed.')
-    DEBUG_SOP=0
+def configureLogging(logConfigFile):
+    if (len(logConfigFile) != 0):
+        if (os.path.exists(logConfigFile)) and (os.access(logConfigFile, os.R_OK)):
+            try:
+                tree = ET.parse(logConfigFile)
+                root = tree.getroot()
 
-def sop(methodname,message):
-    """Prints the specified method name and message with a nicely formatted timestamp.
-    (sop is an acronym for System.out.println() in java)"""
-    global DEBUG_SOP
-    if(DEBUG_SOP):
-        timestamp = getSopTimestamp()
-        print "%s %s %s" % (timestamp, methodname, message)
+                logging.config.dictConfig(convertXmlToDict(root))
+            except Exception as e:
+                print(f"Error configuring logging from XML: {e}")
+            #endtry
+        else:
+            print ("Unable to load logging configuration file. No logging enabled!")
+        #endif
+    else:
+        print ("No logging configuration file was provided. No logging enabled!")
+    #endif
+#enddef
+
+def convertXmlToDict(element):
+    result = {}
+
+    for child in (element):
+        if (len(child) != 0)):
+            tag = child.tag
+            text = child.text.strip() if (child.text) else None
+
+            if (len(child) > 0):
+                result[tag] = convertXmlToDict(child)
+            elif (len(text) != 0):
+                result[tag] = text
+            else:
+                result[tag] = {}
+            #endif
+        #endif
+    #endfor
+
+    return result
+#enddef

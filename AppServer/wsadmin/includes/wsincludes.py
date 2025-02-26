@@ -33,24 +33,26 @@ def saveWorkspaceChanges():
     AdminConfig.save()
 #enddef
 
-def syncAllNodes(nodeList):
-    print('Performing nodeSync...')
+def syncAllNodes(nodeList, cellName):
+    if (len(nodeList) != 0):
+        print("Performing nodeSync..")
 
-    AdminNodeManagement.syncActiveNodes()
+        AdminNodeManagement.syncActiveNodes()
 
-    for node in nodeList:
-        nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=' + node + ',*')
+        for node in (nodeList):
+            nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=%s,*') % (node)
 
-        if (nodeRepo):
-            AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
-        #endif
+            if (nodeRepo):
+                AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
+            #endif
 
-        syncNode = AdminControl.completeObjectName('cell=' + targetCell + ',node=' + node + ',type=NodeSync,*')
+            syncNode = AdminControl.completeObjectName('cell=%s,node=%s,type=NodeSync,*') % (cellName, node)
 
-        if (syncNode):
-            AdminControl.invoke(syncNode, 'sync')
-        #endif
+            if (syncNode):
+                AdminControl.invoke(syncNode, 'sync')
+            #endif
 
-        continue
-    #endfor
+            continue
+        #endfor
+    #endif
 #enddef

@@ -19,8 +19,10 @@
 import os
 import sys
 
-lineSplit = java.lang.System.getProperty("line.separator")
+configureLogging("../config/logging.xml")
+logger = logging.getLogger(__name__)
 
+lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()
 clusterList = AdminConfig.list('ServerCluster').split(lineSplit)
 
@@ -82,13 +84,13 @@ def isClusterStarted (clustername):
 #endDef
 
 def restartClusters():
-    print ("Restarting all found clusters...")
+    print("Restarting all found clusters...")
 
     for cluster in (clusterList):
         clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
 
-        print ("Restarting cluster " + cluster + "...")
-        print ("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
+        print("Restarting cluster " + cluster + "...")
+        print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
         
         AdminControl.invoke(clusterName, "stop")
         
@@ -108,8 +110,8 @@ def restartCluster(clusterName):
             for cluster in (clusterList):
                 clusterName = AdminControl.completeObjectName('cell=' + targetCell + ',type=Cluster,name=' + cluster.split("(")[0] + ',*')
 
-                print ("Restarting cluster " + clusterName + "...")
-                print ("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
+                print("Restarting cluster " + clusterName + "...")
+                print("Cluster " + cluster.split("(")[0] + " is currently: " + AdminControl.getAttribute(clusterName, "state" ).split(".")[2])
                 
                 AdminControl.invoke(clusterName, "stop")
                 
@@ -130,14 +132,14 @@ def restartCluster(clusterName):
 #enddef    
 
 def printHelp():
-    print ("This script performs an application management.")
-    print ("Execution: wsadmin.sh -lang jython -f /path/to/clusterInstallApp.py <option> <appname> <binary path> <cluster name>")
-    print ("<option> - One of list, install, update, uninstall, change-weight, export.")
-    print ("<app path> - The path to the application to install or modify.")
-    print ("<cluster name> - The cluster to install or update the application into. Required if option is install or update.")
-    print ("<webserver node name> - The webserver node name as defined in the deployment manager for mapping. Required if option is install or update.")
-    print ("<webserver name> - The webserver name as defined in the deployment manager for mapping. Required if option is install or update.")
-    print ("<start weight> - Only required if option is change-weight.")
+    print("This script performs an application management.")
+    print("Execution: wsadmin.sh -lang jython -f /path/to/clusterInstallApp.py <option> <appname> <binary path> <cluster name>")
+    print("<option> - One of list, install, update, uninstall, change-weight, export.")
+    print("<app path> - The path to the application to install or modify.")
+    print("<cluster name> - The cluster to install or update the application into. Required if option is install or update.")
+    print("<webserver node name> - The webserver node name as defined in the deployment manager for mapping. Required if option is install or update.")
+    print("<webserver name> - The webserver name as defined in the deployment manager for mapping. Required if option is install or update.")
+    print("<start weight> - Only required if option is change-weight.")
 #enddef
 
 ##################################

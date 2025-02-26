@@ -16,16 +16,15 @@
 #      REVISION:  ---
 #==============================================================================
 
-import os
-import sys
+configureLogging("../config/logging.xml")
+logger = logging.getLogger(__name__)
 
 lineSplit = java.lang.System.getProperty("line.separator")
-
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def performNodeSync():
     saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+    syncAllNodes(nodeList, targetCell)
 #enddef
 
 ##################################

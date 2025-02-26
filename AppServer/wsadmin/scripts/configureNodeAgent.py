@@ -1,9 +1,9 @@
 #==============================================================================
 #
 #          FILE:  configureNodeAgent.py
-#         USAGE:  wsadmin.sh -lang jython -f configureNodeAgent.py
-#     ARGUMENTS:  wasVersion
-#   DESCRIPTION:  Executes an scp connection to a pre-defined server
+#         USAGE:  wsadmin.sh -lang jython -f configureNodeAgent.py nodeName
+#     ARGUMENTS:  The node to be configured
+#   DESCRIPTION:  Configures various properties for a nodeagent in a WebSpere cell
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -16,11 +16,12 @@
 #      REVISION:  ---
 #==============================================================================
 
-import os
 import sys
 
-lineSplit = java.lang.System.getProperty("line.separator")
+configureLogging("../config/logging.xml")
+logger = logging.getLogger(__name__)
 
+lineSplit = java.lang.System.getProperty("line.separator")
 serverName = "nodeagent"
 targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
@@ -28,55 +29,10 @@ nodeList = AdminTask.listManagedNodes().split(lineSplit)
 def configureNodeAgents(runAsUser="", runAsGroup=""):
     if (nodeList):
         for node in (nodeList):
-            targetServer = AdminConfig.getid('/Node:' + node + '/Server:' + serverName + '/')
-
-            if (targetServer):
-                print ("Starting nodeagent configuration for node " + node + "...")
-
-                haManager = AdminConfig.list("HAManagerService", targetServer)
-                threadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
-                processExec = AdminConfig.list("ProcessExecution", targetServer)
-                configSyncService = AdminConfig.list("ConfigSynchronizationService", targetServer)
-
-                AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-                AdminConfig.modify(configSyncService, '[[synchInterval "1"] [exclusions ""] [enable "true"] [synchOnServerStartup "true"] [autoSynchEnabled "true"]]')
-
-                if ((runAsUser) and (runAsGroup)):
-                    AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runAsGroup "' + runAsGroup + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-                elif (runAsUser):
-                    AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-                else:
-                    AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-                #end if
-
-                AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + node + ' -verboseModeGarbageCollection false -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
-
-                if (threadPools):
-                    for threadPool in (threadPools):
-                        poolName = threadPool.split("(")[0]
-
-                        if (poolName == "server.startup"):
-                            AdminConfig.modify(threadPool, '[[maximumSize "10"] [name "' + poolName + '"] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]')
-                        elif (poolName == "WebContainer"):
-                            AdminConfig.modify(threadPool, '[[maximumSize "75"] [name "' + poolName + '"] [inactivityTimeout "5000"] [minimumSize "20"] [description ""] [isGrowable "false"]]')
-                        elif (poolName == "HAManagerService.Pool"):
-                            AdminConfig.modify(threadPool, '[[minimumSize "0"] [maximumSize "6"] [inactivityTimeout "5000"] [isGrowable "true" ]]')
-                        else:
-                            continue
-                        #endif
-                    #endfor
-                #endif
-
-                saveWorkspaceChanges()
-                syncAllNodes(nodeList)
-
-                print ("Completed configuration for node " + node + ".")
-            else:
-                print ("No servers were found for the provided criteria.")
-            #endif
+            configureNodeAgent(node, runAsUser, runAsGroup)
         #endfor
     else:
-        print ("No nodes were found in the cell.")
+        print("No nodes were found in the cell.")
     #endif
 #enddef
 
@@ -84,76 +40,69 @@ def configureNodeAgent(nodeName, runAsUser="", runAsGroup=""):
     targetServer = AdminConfig.getid('/Node:' + nodeName + '/Server:' + serverName + '/')
 
     if (targetServer):
-        print ("Starting nodeagent configuration for node " + nodeName + "...")
+        print("Starting configuration for nodeagent %s on server %s...") % (nodeName, serverName)
 
-        haManager = AdminConfig.list("HAManagerService", targetServer)
-        threadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
-        processExec = AdminConfig.list("ProcessExecution", targetServer)
-        configSyncService = AdminConfig.list("ConfigSynchronizationService", targetServer)
+        setProcessExec(targetServer, runAsUser, runAsGroup)
+        setJVMProperties(serverName, nodeName)
 
-        AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-        AdminConfig.modify(configSyncService, '[[synchInterval "1"] [exclusions ""] [enable "true"] [synchOnServerStartup "true"] [autoSynchEnabled "false"]]')
+        saveWorkspaceChanges()
+        syncAllNodes(nodeList, targetCell)
 
-        if ((runAsUser) and (runAsGroup)):
-            AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runAsGroup "' + runAsGroup + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-        elif (runAsUser):
-            AdminConfig.modify(processExec, '[[runAsUser "' + runAsUser + '"] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-        else:
-            AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-        #end if
-
-        AdminTask.setJVMProperties('[-serverName ' + serverName + ' -nodeName ' + nodeName + ' -verboseModeGarbageCollection false -initialHeapSize 2048 -maximumHeapSize 2048 -genericJvmArguments "-Xshareclasses:none -Djava.awt.headless=true"]')
-
-        if (threadPools):
-            for threadPool in (threadPools):
-                poolName = threadPool.split("(")[0]
-
-                if (poolName == "server.startup"):
-                    AdminConfig.modify(threadPool, '[[maximumSize "10"] [name "' + poolName + '"] [inactivityTimeout "30000"] [minimumSize "0"] [description "This pool is used by WebSphere during server startup."] [isGrowable "false"]]')
-                elif (poolName == "WebContainer"):
-                    AdminConfig.modify(threadPool, '[[maximumSize "75"] [name "' + poolName + '"] [inactivityTimeout "5000"] [minimumSize "20"] [description ""] [isGrowable "false"]]')
-                elif (poolName == "HAManagerService.Pool"):
-                    AdminConfig.modify(threadPool, '[[minimumSize "0"] [maximumSize "6"] [inactivityTimeout "5000"] [isGrowable "true" ]]')
-                else:
-                    continue
-                #endif
-            #endfor
-        #endif
-
-        print ("Completed configuration for node " + nodeName + ".")
+        print("Completed configuration for deployment manager %s") % (serverName)
     else:
-        print ("No servers were found for the provided criteria.")
+        print("Deployment manager not found with server name %s") % (serverName)
     #endif
+#enddef
 
-    saveWorkspaceChanges()
-    syncAllNodes(nodeList)
+def setProcessExec(targetServer, runAsUser, runAsGroup):
+    if (targetServer):
+        processExec = AdminConfig.list("ProcessExecution", targetServer)
+
+	    if (processExec):
+        	if ((runAsUser) and (runAsGroup)):
+        	    AdminConfig.modify(processExec, '[[runAsUser %s] [runAsGroup %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser, runAsGroup)
+        	elif (runAsUser):
+        	    AdminConfig.modify(processExec, '[[runAsUser %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser)
+        	else:
+            	AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
+            #endif
+        else:
+            raise ("Process execution configuration could not be found.")
+        #end if
+    else:
+        raise ("No server was provided to work against.")
+    #endif
+#enddef
+
+def setJVMProperties(serverName, nodeName, initialHeapSize=2048, maxHeapSize=2048):
+    genericJvmArgs = ("-Djava.io.tmpdir=${WAS_TEMP_DIR} -Xgcpolicy:gencon -Xnoagent -Dcom.ibm.cacheLocalHost=true "
+        "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xshareclasses:none -Dcom.ibm.xml.xlxp.jaxb.opti.level=3 "
+        "-Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -Djava.awt.headless=true -Djava.compiler=NONE")
+
+    if ((serverName) and (nodeName)):
+        AdminTask.setJVMProperties('[-serverName %s -nodeName %s -verboseModeGarbageCollection false -initialHeapSize %s -maximumHeapSize + %s -debugMode false -genericJvmArguments %s]') \
+            % (serverName, nodeName, initialHeapSize, maxHeapSize)
+    else:
+        raise ("No server was found with the provided name: %s") % (serverName)
+    #endif
 #enddef
 
 def printHelp():
-    print ("This script configures a deployment manager for optimal settings.")
-    print ("Execution: wsadmin.sh -lang jython -f configureDeploymentManager.py <nodeName> <runAsUser> <runAsGroup>")
-    print ("<nodeName> - The node name the nodeagent is running against. One of \"all\" or a node name known to the deployment manager.")
-    print ("<runAsUser> - The operating system username to run the process as. The user must exist on the local machine. Optional, if not provided no user is configured.")
-    print ("<runAsGroup> - The operating system group to run the process as. The group must exist on the local machine. Optional, if not provided no group is configured.")
+    print("This script configures a deployment manager for optimal settings.")
+    print("Execution: wsadmin.sh -lang jython -f configureDeploymentManager.py <runAsUser> <runAsGroup>")
+    print("<runAsUser> - The operating system username to run the process as. The user must exist on the local machine. Optional, if not provided no user is configured.")
+    print("<runAsGroup> - The operating system group to run the process as. The group must exist on the local machine. Optional, if not provided no group is configured.")
 #enddef
 
 ##################################
 # main
 #################################
-if (sys.argv[0] == "all"):
-    if (len(sys.argv) == 1):
-        configureNodeAgents()
-    elif (len(sys.argv) == 2):
-        configureNodeAgents(sys.argv[1])
-    elif (len(sys.argv) == 3):
-        configureNodeAgents(sys.argv[1], sys.argv[2])
-    #endif
+
+
+if (len(sys.argv) == 1):
+    configureNodeAgent(sys.argv[0])
+elif (len(sys.argv) == 2):
+    configureDeploymentManager(sys.argv[0], sys.argv[1])
 else:
-    if (len(sys.argv) == 1):
-        configureNodeAgent(sys.argv[0])
-    elif (len(sys.argv) == 2):
-        configureNodeAgent(sys.argv[0], sys.argv[1])
-    elif (len(sys.argv) == 3):
-        configureNodeAgents(sys.argv[0], sys.argv[1], sys.argv[2])
-    #endif
+    configureDeploymentManager()
 #endif

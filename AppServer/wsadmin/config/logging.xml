@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="file" class="logging.FileHandler">
+        <file>app.log</file>
+        <formatter class="logging.Formatter">
+            <format>%(asctime)s - %(levelname)s - %(message)s</format>
+        </formatter>
+    </appender>
+    <root level="DEBUG">
+        <appender-ref ref="file"/>
+    </root>
+</configuration>
