@@ -22,6 +22,7 @@ import time
 import logging
 
 configureLogging("../config/logging.xml")
+consoleLogger = logging.getLogger("console-logger")
 errorLogger = logging.getLogger("error-logger")
 
 global configFile
