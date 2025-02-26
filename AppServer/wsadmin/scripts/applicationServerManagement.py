@@ -22,7 +22,7 @@ import time
 import logging
 
 configureLogging("../config/logging.xml")
-logger = logging.getLogger(__name__)
+errorLogger = logging.getLogger("error-log")
 
 global configFile
 
