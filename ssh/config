@@ -1,17 +1,11 @@
 #===  CONFIGURATION  ==========================================================
-#          NAME:  E09-network
-#   DESCRIPTION:  Configuration file defining directories and platforms
+#          NAME:  config
+#   DESCRIPTION:  Base SSH configuration file. Includes dropins from ~/.ssh/config.d
 #    PARAMETERS:  N/A
 #       RETURNS:  N/A
 #==============================================================================
 
 Include                         config.d/*
-
-Host github.com
-    HostName                    = github.com
-    User                        = cws-khuntly
-    IdentitiesOnly              = yes
-    IdentityFile                = ~/.ssh/id_ed25519
 
 Host *
     AddressFamily               = inet
@@ -41,4 +35,3 @@ Host *
     IdentitiesOnly              = yes
     IdentityFile                = ~/.ssh/id_ed25519
     IdentityFile                = ~/.ssh/id_rsa
-
