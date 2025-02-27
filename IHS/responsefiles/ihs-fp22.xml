@@ -6,23 +6,23 @@
     </variables>
     <server>
         <repository location='/opt/installables/IBM/IHS/FP/FP22'/>
-        <repository location='/opt/installables/IBM/JDK/FP/FP35'/>
+        <repository location='/opt/installables/IBM/JDK/FP/FP40/IIMPackage'/>
     </server>
     <profile id='IBM HTTP Server V9.0' installLocation='${ihsInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
-        <data key='user.ihs.allowNonRootSilentInstall' value='false'/>
+        <data key='user.ihs.allowNonRootSilentInstall' value='true'/>
         <data key='user.ihs.httpPort' value='8080'/>
         <data key='user.ihs.http.server.service.name.key' value='IBMHTTPServerV9.0'/>
-        <data key='user.ihs.win.serverServicePassword' value='XjTveChg5ba6olBVMK/Reg=='/>
-        <data key='user.ihs.http.server.service.name' value='IBM HTTP Server V9.0'/>
+        <data key='user.ihs.http.server.service.name' value='none'/>
         <data key='user.ihs.win.serverServiceLogOnAsLocalSystem' value='true'/>
         <data key='user.ihs.win.serverServiceUser' value='ihsadm'/>
+        <data key='user.ihs.installHttpService' value='false'/>
     </profile>
     <install>
         <!-- IBM HTTP Server for WebSphere Application Server 9.0.5.22 -->
         <offering profile='IBM HTTP Server V9.0' id='com.ibm.websphere.IHS.v90' version='9.0.5022.20241118_0055' features='core.feature'/>
-        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.35 -->
-        <offering profile='IBM HTTP Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8035.20241125_0150' features='com.ibm.sdk.8'/>
+        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.40 -->
+        <offering profile='IBM HTTP Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8040.20250128_0059' features='com.ibm.sdk.8'/>
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>

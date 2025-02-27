@@ -4,7 +4,7 @@ Create IIM group:
 groupadd -r ibmiim
 
 As root:
-/opt/installables/IBM/IIM/installc -acceptLicense -installationDirectory /opt/IBM/IIM
+/opt/installables/IBM/InstallationManager/installc -acceptLicense -installationDirectory /opt/IBM/IIM
 
 Upgrade JDK:
 

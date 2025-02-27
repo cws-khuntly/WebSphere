@@ -6,6 +6,10 @@ INSTALL TOOLKIT
 /opt/IBM/IIM/eclipse/tools/imcl input ~/wct-base.xml -nosplash -acceptLicense -showProgress
 /opt/IBM/IIM/eclipse/tools/imcl input ~/wct-fp22.xml -nosplash -acceptLicense -showProgress
 
+INSTALL PLUGIN
+/opt/IBM/IIM/eclipse/tools/imcl input ~/plugin-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/plugin-fp22.xml -nosplash -acceptLicense -showProgress
+
 CHECKPOINT
 
 Deployment Manager:
