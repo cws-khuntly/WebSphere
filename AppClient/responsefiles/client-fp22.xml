@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<agent-input>
+    <variables>
+        <variable name='sharedLocation' value='/opt/IBM/IMShared'/>
+        <variable name='clientInstallLocation' value='/opt/IBM/WebSphere/AppClient'/>
+        <variable name="serverHostName" value="localhost"/>
+    </variables>
+    <server>
+        <repository location='/opt/installables/IBM/Client/FP/FP22'/>
+        <repository location='/opt/installables/IBM/JDK/FP/FP40/IIMPackage'/>
+    </server>
+    <profile id='Application Client for IBM WebSphere Application Server V9.0' installLocation='${clientInstallLocation}'>
+        <data key='cic.selector.arch' value='x86_64'/>
+        <data key='user.appclient.serverHostname' value='${serverHostName}'/>
+        <data key='user.appclient.serverPort' value='2809'/>
+    </profile>
+    <install>
+        <!-- Application Client for IBM WebSphere Application Server 9.0.5.22 -->
+        <offering profile='Application Client for IBM WebSphere Application Server V9.0' id='com.ibm.websphere.APPCLIENT.v90' version='9.0.5022.20241118_0055' features='javaee.thinclient.core.feature,embeddablecontainer,standalonethinclient.resourceadapter.runtime'/>
+        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.40 -->
+        <offering profile='Application Client for IBM WebSphere Application Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8040.20250128_0059' features='com.ibm.sdk.8'/>
+    </install>
+    <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
+    <preference name='offering.service.repositories.areUsed' value='false'/>
+</agent-input>

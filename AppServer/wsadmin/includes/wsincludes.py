@@ -19,13 +19,13 @@
 #      REVISION:  ---
 #==============================================================================
 
-def setWebSphereVariable ( name, value, nodeName=None, serverName=None, clusterName=None ):
-    """Creates a VariableSubstitutionEntry at the specified scope, removing any previously existing entry in the process"""
+def setWebSphereVariable (variableName, variableValue, nodeName = None, serverName = None, clusterName = None):
     map = getVariableMap(nodeName, serverName, clusterName)
     attrs = []
     attrs.append( [ 'symbolicName', name ] )
     attrs.append( [ 'value', value ] )
-    return removeAndCreate('VariableSubstitutionEntry', map, attrs, ['symbolicName'])
+
+    AdminConfig.create('VariableSubstitutionEntry', targetWebContainer, '[[symbolicName "%s"] [description ""] [value "%s"]]') % (variableName, variableValue)
 
 def saveWorkspaceChanges():
     print('Saving configuration..')

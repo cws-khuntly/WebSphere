@@ -4,13 +4,13 @@ Create IIM group:
 groupadd -r ibmiim
 
 As root:
-/opt/installers/Exploded/ibm.repo.193.iim/linux_x86_64/installc -acceptLicense -installationDirectory /opt/IBM/IIM
+/opt/installables/IBM/IIM/installc -acceptLicense -installationDirectory /opt/IBM/IIM
 
 Upgrade JDK:
 
 mkdir -pv /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150/jre
 
-tar -C /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150/jre --strip-components=1 -xf /nas/software/IBM/JDK/ibm-java-sdk-8.0-8.35-linux-x86_64.tgz
+tar -C /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150/jre --strip-components=1 -xf /opt/installables/IBM/JDK/ibm-java-sdk-8.0-8.35-linux-x86_64.tgz
 
 for file in /opt/IBM/IIM/eclipse/IBMIM.ini /opt/IBM/IIM/eclipse/silent-install.ini /opt/IBM/IIM/eclipse/tools/imcl.ini /opt/IBM/IIM/eclipse/tools/imutilsc.ini /opt/IBM/IIM/eclipse/web/ibmim-web.ini; do
     sed -i.bk -e "s/jre_8.0.8030.20240821_1049/jre_8.0.8035.20241125_0150/g" ${file};

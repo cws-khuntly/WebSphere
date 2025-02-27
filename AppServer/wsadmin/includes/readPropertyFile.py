@@ -18,7 +18,7 @@
 
 import configparser
 
-def readConfigurationFile(configFile, separator="=", comment="#"):
+def readConfigurationFile(configFile, separator = "=", comment = "#"):
     properties = {}
 
     with (open(configFile, "r")) as propFile:

@@ -24,6 +24,7 @@ import logging
 configureLogging("../config/logging.xml")
 consoleLogger = logging.getLogger("console-logger")
 errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
 
 global configFile
 
@@ -369,7 +370,7 @@ def setJVMProperties(initialHeapSize = 2048, maxHeapSize = 2048):
         "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Xnoagent -XX:+HeapDumpOnOutOfMemoryError "
         "-Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 -XX:+UseStringDeduplication "
         "-Dcom.ibm.websphere.webservices.http.connectionTimeout=0 -Dlog4j2.formatMsgNoLookups=true -Xjit:iprofilerMemoryConsumptionLimit=67108864 -XX:+AggressiveOpts "
-        "-Dephox.config.file=/opt/ephox/application.conf -Xrunjdwp=dt_socket,server=y,suspend=n,address=7792 -Dcom.ibm.xml.xlxp.jaxb.opti.level=3")
+        "-Dephox.config.file=/opt/ephox/application.conf -Xrunjdwp=dt_socket,server=y,suspend=n,address=7792 -Dcom.ibm.xml.xlxp.jaxb.opti.level=3 -XtlhPrefetch")
 
     if (len(configFile) != 0):
         properties = readConfigurationFileSection(configFile, "server-information")

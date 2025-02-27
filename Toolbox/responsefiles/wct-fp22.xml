@@ -5,8 +5,8 @@
         <variable name='wctInstallLocation' value='/opt/IBM/WebSphere/Toolbox'/>
     </variables>
     <server>
-        <repository location='/nas/software/IBM/WCT/FP/FP022'/>
-        <repository location='/nas/software/IBM/JDK/FP/FP035'/>
+        <repository location='/opt/installables/IBM/WCT/FP/FP22'/>
+        <repository location='/opt/installables/IBM/JDK/FP/FP40/IIMPackage'/>
     </server>
     <profile id='WebSphere Customization Toolbox V9.0' installLocation='${wctInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -14,8 +14,8 @@
     <install>
         <!-- WebSphere Customization Toolbox 9.0.5.22 -->
         <offering profile='WebSphere Customization Toolbox V9.0' id='com.ibm.websphere.WCT.v90' version='9.0.5022.20241118_0055' features='core.feature,pct,zmmt,zpmt'/>
-        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.35 -->
-        <offering profile='WebSphere Customization Toolbox V9.0' id='com.ibm.java.jdk.v8' version='8.0.8035.20241125_0150' features='com.ibm.sdk.8'/>
+        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.40 -->
+        <offering profile='WebSphere Customization Toolbox V9.0' id='com.ibm.java.jdk.v8' version='8.0.8040.20250128_0059' features='com.ibm.sdk.8'/>
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>

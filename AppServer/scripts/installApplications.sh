@@ -255,7 +255,7 @@ function installRequestedApplication()
     for app in $(</var/tmp/portal-apps.txt); do
         /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
             install \
-            /nas/software/workspace/WebSphere/AppServer/files/EarFiles/${app}  \
+            /opt/installables/workspace/WebSphere/AppServer/files/EarFiles/${app}  \
             ApplicationsCluster \
             bwebd02vrNode \
             PPApplicationsIHS | tee -a ~/log/appinstall-${app}.log;

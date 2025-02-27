@@ -19,7 +19,9 @@
 import sys
 
 configureLogging("../config/logging.xml")
-logger = logging.getLogger(__name__)
+consoleLogger = logging.getLogger("console-logger")
+errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
 
 lineSplit = java.lang.System.getProperty("line.separator")
 serverName = "nodeagent"

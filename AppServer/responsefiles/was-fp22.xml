@@ -5,8 +5,8 @@
         <variable name='wasInstallLocation' value='/opt/IBM/WebSphere/AppServer'/>
     </variables>
     <server>
-        <repository location='/nas/software/IBM/WAS/FP/FP22'/>
-        <repository location='/nas/software/IBM/JDK/FP/FP35'/>
+        <repository location='/opt/installables/IBM/WAS/FP/FP22'/>
+        <repository location='/opt/installables/IBM/JDK/FP/FP40/IIMPackage'/>
     </server>
     <profile id='IBM WebSphere Application Server V9.0' installLocation='${wasInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -14,8 +14,8 @@
     <install>
         <!-- IBM WebSphere Application Server Network Deployment  9.0.5.22 -->
         <offering profile='IBM WebSphere Application Server V9.0' id='com.ibm.websphere.ND.v90' version='9.0.5022.20241118_0055' features='core.feature,ejbdeploy,embeddablecontainer,thinclient'/>
-        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.35 -->
-        <offering profile='IBM WebSphere Application Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8035.20241125_0150' features='com.ibm.sdk.8'/>
+        <!-- IBM SDK, Java Technology Edition, Version 8 8.0.8.40 -->
+        <offering profile='IBM WebSphere Application Server V9.0' id='com.ibm.java.jdk.v8' version='8.0.8040.20250128_0059' features='com.ibm.sdk.8'/>
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>

@@ -1,12 +1,10 @@
 INSTALL IHS
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-fp18.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/IHS/responsefiles/ihs-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/ihs-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/ihs-fp22.xml -nosplash -acceptLicense -showProgress
 
 INSTALL TOOLKIT
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/Toolbox/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wct-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wct-fp22.xml -nosplash -acceptLicense -showProgress
 
 CHECKPOINT
 
@@ -20,7 +18,7 @@ tar -C /opt/IBM -cvf - ./WebSphere ./HTTPServer | gzip > /opt/IBM/backups/WebSer
 
 CREATE IHS INSTANCE
 mkdir -pv /opt/IBM/HTTPServer/logs/WebServices /opt/IBM/HTTPServer/conf.d/WebServices /opt/IBM/WebSphere/Plugins/logs/WebServicesIHS /opt/IBM/WebSphere/Plugins/conf/WebServicesIHS
-cp /nas/software/WebSphere/IHS/conf/WebServices/httpd.conf /opt/IBM/HTTPServer/conf/WebServices/httpd.conf
+cp /opt/installables/WebSphere/IHS/conf/WebServices/httpd.conf /opt/IBM/HTTPServer/conf/WebServices/httpd.conf
 
 CREATE WEBSERVER DMGR SCRIPTS
 Create the webserver definition
@@ -28,7 +26,7 @@ For WebServicesIHS:
 On the webserver, as the appropriate user:
  - Copy the PCT response file to the working directory:
   - mkdir -pv ${HOME}/workspace/WebSphere/Toolbox/responsefiles;
-  - cp /nas/software/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt;
+  - cp /opt/installables/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt;
  - Update the following entries:
   - ihsAdminPassword: See PAM
   - webServerConfigFile1: /opt/IBM/HTTPServer/conf/httpd.conf

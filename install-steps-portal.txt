@@ -8,18 +8,18 @@ Export the following variables:
  - DMGR_HOSTNAME: The fully qualified name of the owning deployment manager
 
 INSTALL WAS
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/was-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/was-fp18.xml -nosplash -acceptLicense -showProgress
 
 INSTALL WCT
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-base.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-fp18.xml -nosplash -acceptLicense -showProgress
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/wct-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wct-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wct-fp18.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wct-fp22.xml -nosplash -acceptLicense -showProgress
 
 INSTALL PORTAL
 Copy the base installation response files to the working directory:
 mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
-cp /nas/software/WebSphere/PortalServer/responsefiles/wps85-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml
+cp /opt/installables/WebSphere/PortalServer/responsefiles/wps85-base.xml ~/wps85-base.xml
 
 Edit the response files, modifying the following values:
  - Name: wpsProfileLocation
@@ -52,14 +52,14 @@ Edit the response files, modifying the following values:
    - e.g. myserverCell
 
 Modify file permissions:
-chmod 600 ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml
+chmod 600 ~/wps85-base.xml
 
 Install Portal 8.5:
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps85-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wps85-base.xml -nosplash -acceptLicense -showProgress
 
 Copy the workplace property file to the working directory:
 mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
-cp /nas/software/WebSphere/PortalServer/properties/wkplc.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties
+cp /opt/installables/WebSphere/PortalServer/properties/wkplc.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties
 
 Update the workplace property file, modifying the following values:
  - Name: config.wizard.profile.password
@@ -95,7 +95,7 @@ Copy the resultant file into the ConfigEngine for Portal:
 cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc.properties
 
 Copy the soap.client.props file for the Portal profile to the working directory:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props
 
 Update the SOAP property file, modifying the following values:
  - Name: com.ibm.SOAP.loginPassword
@@ -114,7 +114,7 @@ Copy the file to the Portal profile:
 cp ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Copy the soap.client.props file for the Configuration Wizard to the working directory:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${HOME}/workspace/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props
 
 Update the SOAP property file, modifying the following values:
  - Name: com.ibm.SOAP.loginPassword
@@ -141,7 +141,7 @@ ${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh health-check-update
  - Fix any errors that appear
 
 Install Cumulative Fix:
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps-cf224.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wps-cf224.xml -nosplash -acceptLicense -showProgress
 
 Apply the Cumulative Fix:
 export install_95=false; ${USER_INSTALL_ROOT}/PortalServer/bin/applyCF.sh
@@ -153,7 +153,7 @@ ${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
 Install Portal 9.5:
 Copy the base installation response files to the working directory:
 mkdir -pv ${HOME}/workspace/responsefiles/HCL/WPS/
-cp /nas/software/WebSphere/PortalServer/responsefiles/wps95-base.xml ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml
+cp /opt/installables/WebSphere/PortalServer/responsefiles/wps95-base.xml ~/wps95-base.xml
 
 Edit the response files, modifying the following values:
  - Name: wpsProfileLocation
@@ -186,17 +186,17 @@ Edit the response files, modifying the following values:
    - e.g. myserverCell
 
 Modify file permissions:
-chmod 600 ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml
+chmod 600 ~/wps95-base.xml
 
 Install Portal 9.5:
-/opt/IBM/IIM/eclipse/tools/imcl input ${HOME}/workspace/WebSphere/PortalServer/responsefiles/WPS/wps95-base.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input ~/wps95-base.xml -nosplash -acceptLicense -showProgress
 
 Stop all servers:
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/stopServer.sh server1
 ${USER_INSTALL_ROOT}/bin/stopServer.sh WebSphere_Portal
 
 UPDATE WAS TO FP22
-/opt/IBM/IIM/eclipse/tools/imcl input /nas/software/WebSphere/AppServer/responsefiles/was-fp22.xml -nosplash -acceptLicense -showProgress
+/opt/IBM/IIM/eclipse/tools/imcl input /opt/installables/WebSphere/AppServer/responsefiles/was-fp22.xml -nosplash -acceptLicense -showProgress
 
 CHECKPOINT
 
@@ -228,7 +228,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the Portal profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostInstall-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -245,7 +245,7 @@ ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostInstall-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -270,7 +270,7 @@ DATABASE TRANSFER
 
 Populate the following files:
 Copy the following files to the working directory:
-cp /nas/software/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties
+cp /opt/installables/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties
 
 Update the workplace database domain property file, modifying the following values:
  - Feedback database:
@@ -382,7 +382,7 @@ Copy the resultant file into the ConfigEngine for Portal:
 cp ${HOME}/workspace/WebSphere/PortalServer/properties/wkplc_dbdomain.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbdomain.properties
 
 Copy the workplace database type file into the ConfigEngine for Portal:
-cp /nas/software/WebSphere/PortalServer/properties/wkplc_dbtype.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbtype.properties
+cp /opt/installables/WebSphere/PortalServer/properties/wkplc_dbtype.properties ${USER_INSTALL_ROOT}/ConfigEngine/properties/wkplc_dbtype.properties
 
 Begin the transfer process:
 ${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
@@ -435,7 +435,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the Portal profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostDatabaseTransfer-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -452,7 +452,7 @@ ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostDatabaseTransfer-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -516,7 +516,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -555,7 +555,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the Portal profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -572,7 +572,7 @@ ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -640,7 +640,7 @@ Create the webserver definition
 On the webserver, as the appropriate user:
  - Copy the PCT response file to the working directory:
   - mkdir -pv ${HOME}/workspace/WebSphere/Toolbox/responsefiles;
-  - cp /nas/software/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-${ApplicationType}.txt;
+  - cp /opt/installables/WebSphere/Toolbox/responsefiles/responsefile.txt ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-${ApplicationType}.txt;
  - Update the following entries:
   - ihsAdminPassword: See Password Manager
   - webServerConfigFile1: /opt/IBM/HTTPServer/conf/${ApplicationType}/httpd.conf
@@ -738,7 +738,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -777,7 +777,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the Portal profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -794,7 +794,7 @@ ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostPortalURIChange-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -988,7 +988,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1113,7 +1113,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1519,7 +1519,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1550,7 +1550,7 @@ Save changes
 Configure syndication
 Copy the file CredentialVaultSlot.xml from the NAS share:
 
-cp /nas/software/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml
+cp /opt/installables/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml ${HOME}/workspace/WebSphere/PortalServer/xmlaccess/CredentialVaultSlot.xml
 
 Edit the following values:
  - Name: <password>
@@ -1588,11 +1588,11 @@ ${USER_INSTALL_ROOT}/ConfigEngine/ConfigEngine.sh \
 
 Install applications to Deployment Manager
 Execute the following on the Deployment Manager:
-for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
-    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /nas/software/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
+for app in $(</opt/installables/WebSphere/AppServer/properties/portal-apps.lst); do
+    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /opt/installables/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
         -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/appinstall-${app}.traceout \
         install \
-        /nas/software/EarFiles/PPApplications/${app}  \
+        /opt/installables/EarFiles/PPApplications/${app}  \
         ApplicationsCluster \
         WebServerNodeName \
         ${PROFILE_NAME}IHS | tee -a ~/log/wsadmin/appinstall-${app}.log;
@@ -1600,18 +1600,18 @@ done
 
 Change startup weight for all custom Portal applications
 Execute the following on the Deployment Manager:
-for app in $(</nas/software/WebSphere/AppServer/properties/portal-apps.lst); do
-    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /nas/software/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
+for app in $(</opt/installables/WebSphere/AppServer/properties/portal-apps.lst); do
+    ${USER_INSTALL_ROOT}/bin/wsadmin.sh -f /opt/installables/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py \
         -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/changeweight-${app}.traceout \
         change-weight \
-        /nas/software/EarFiles/PortalApplications/${app}  \
+        /opt/installables/EarFiles/PortalApplications/${app}  \
         50 | tee -a ~/log/wsadmin/appinstall-${app}.log;
 done
 
 Install applications to Portal Server
 Create the xmlaccess password file
 Copy the template file to the home directory:
- - cp /nas/software/WebSphere/PortalServer/properties/xmlaccess.properties ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
+ - cp /opt/installables/WebSphere/PortalServer/properties/xmlaccess.properties ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 Edit the file to include the appropriate password:
  - vi ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
   - Change the following values:
@@ -1635,21 +1635,21 @@ ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
-    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomThemesAndSkins.xml \
+    -in /opt/installables/WebSphere/PortalServer/xmlaccess/InstallCustomThemesAndSkins.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomThemesAndSkins-output.xml \
     -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
-    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalApplications.xml \
+    -in /opt/installables/WebSphere/PortalServer/xmlaccess/InstallCustomPortalApplications.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomPortalApplications-output.xml \
     -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
     -useEncryptedCredentials ${HOME}/workspace/WebSphere/PortalServer/properties/xmlaccess.properties
 
 ${USER_INSTALL_ROOT}/PortalServer/bin/xmlaccess.sh \
-    -in /nas/software/WebSphere/PortalServer/xmlaccess/InstallCustomPortalContent.xml \
+    -in /opt/installables/WebSphere/PortalServer/xmlaccess/InstallCustomPortalContent.xml \
     -out ${HOME}/log/xmlaccess/InstallCustomPortalContent.xml \
     -url https:/localhost:10042/MyNewContext/config \
     -truststore ${USER_INSTALL_ROOT}/etc/trust.p12  -trustpwd WebAS -trusttype PKCS12\
@@ -1672,7 +1672,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostApplicationsAndContentInstalls-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1754,14 +1754,14 @@ ${USER_INSTALL_ROOT}/bin/startServer.sh WebSphere_Portal
 JVM Configuration/Tuning
 Run the following scripts:
 TODO: move this to dmgr
-${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
-    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureDeploymentManager.py ${LOGNAME}
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /opt/installables/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /opt/installables/WebSphere/AppServer/wsadmin/scripts/configureDeploymentManager.py ${LOGNAME}
 
-${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
-    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py ${NODE_NAME} ${LOGNAME}
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /opt/installables/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /opt/installables/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py ${NODE_NAME} ${LOGNAME}
 
-${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /nas/software/WebSphere/AppServer/properties/wsadmin.properties \
-    -f /nas/software/WebSphere/AppServer/wsadmin/scripts/configureApplicationServer.py WebSphere_Portal ${LOGNAME}
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -p /opt/installables/WebSphere/AppServer/properties/wsadmin.properties \
+    -f /opt/installables/WebSphere/AppServer/wsadmin/scripts/configureApplicationServer.py WebSphere_Portal ${LOGNAME}
 
 Configure HTTP Access Logging
 Navigate to Servers -> Server Types -> WebSphere Application Servers
@@ -1790,7 +1790,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/AppServer/properties/soap.client.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1829,7 +1829,7 @@ ${USER_INSTALL_ROOT}/bin/clearClassCache.sh
 ${USER_INSTALL_ROOT}/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-wps-profile.props ${USER_INSTALL_ROOT}/properties/soap.client.props
 
 Back up the Portal profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName ${profile} -backupFile /opt/IBM/backups/${profile}-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
@@ -1846,7 +1846,7 @@ ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/clearClassCache.sh
 ${WAS_INSTALL_ROOT}/profiles/cw_profile/bin/osgiCfgInit.sh
 
 Remove passwords from soap.client.props:
-cp /nas/software/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
+cp /opt/installables/WebSphere/PortalServer/properties/soap.client-was-cwprofile.props ${WAS_INSTALL_ROOT}/profiles/cw_profile/properties/soap.client.props
 
 Back up the profile:
 ${WAS_INSTALL_ROOT}/bin/manageprofiles.sh -backupProfile -profileName cw_profile -backupFile /opt/IBM/backups/cw_profile-PostFederation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
