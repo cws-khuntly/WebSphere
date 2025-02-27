@@ -9,4 +9,4 @@ Host github.com
     HostName                    = github.com
     User                        = cws-khuntly
     IdentitiesOnly              = yes
-    IdentityFile                = ~/.ssh/id@cws-khuntly
+    IdentityFile                = ~/.ssh/id_ed25519@cws-khuntly
