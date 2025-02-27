@@ -1,6 +1,10 @@
 Install IIM 1.9.3:
 
-/nas/software/IBM/IIM/1.9.3/userinstc -acceptLicense -installationDirectory /opt/IBM/IIM
+Create IIM group:
+groupadd -r ibmiim
+
+As root:
+/opt/installers/Exploded/ibm.repo.193.iim/linux_x86_64/installc -acceptLicense -installationDirectory /opt/IBM/IIM
 
 Upgrade JDK:
 
@@ -13,3 +17,6 @@ for file in /opt/IBM/IIM/eclipse/IBMIM.ini /opt/IBM/IIM/eclipse/silent-install.i
 done
 
 rm -rf /opt/IBM/IIM/eclipse/jre_8.0.8030.20240821_1049
+
+Permission the installation:
+
