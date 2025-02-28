@@ -1,0 +1,17 @@
+## Syntax:
+##
+##    user  MACHINE=COMMANDS
+##
+## The COMMANDS section may have other options added to it.
+
+Cmnd_Alias WAS_CONTROL =  /bin/systemctl start ibm-was-dmgr, /bin/systemctl stop ibm-was-dmgr, /bin/systemctl restart ibm-was-dmgr, \
+    /bin/systemctl start ibm-was-nodeagent@*, /bin/systemctl stop ibm-was-nodeagent@*, /bin/systemctl restart ibm-was-nodeagent@*, \
+    /bin/systemctl start ibm-was-server@*, /bin/systemctl stop ibm-was-server@*, /bin/systemctl restart ibm-was-server@*
+Cmnd_Alias SYSCTL_RELOAD = /bin/systemctl daemon-reload, /bin/systemctl enable ibm-was-dmgr, /bin/systemctl disable ibm-was-dmgr, \
+    /bin/systemctl edit ibm-was-dmgr, /bin/systemctl edit --full ibm-was-dmgr, /bin/systemctl edit ibm-was-dmgr --drop-in=override.conf \
+    /bin/systemctl enable ibm-was-nodeagent@*, /bin/systemctl disable ibm-was-nodeagent@*, \
+    /bin/systemctl edit ibm-was-nodeagent@*, /bin/systemctl edit --full ibm-was-nodeagent@*, /bin/systemctl edit ibm-was-nodeagent@* --drop-in=override.conf \
+    /bin/systemctl enable ibm-was-server@*, /bin/systemctl disable ibm-was-server@*, \
+    /bin/systemctl edit ibm-was-server@*, /bin/systemctl edit --full ibm-was-server@*, /bin/systemctl edit ibm-was-server@* --drop-in=override.conf \
+
+%wasgrp    ALL=(root)    NOPASSWD: WAS_CONTROL, SYSCTL_RELOAD

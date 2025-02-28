@@ -20,9 +20,9 @@ Description=IBM WebSphere Application Server - Deployment Manager
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh
-ExecStop=/opt/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh
-PIDFile=/opt/IBM/WebSphere/profiles/dmgr01/logs/dmgr/dmgr.pid
+ExecStart=/opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
+ExecStop=/opt/IBM/WebSphere/profiles/dmgr/bin/stopManager.sh
+PIDFile=/opt/IBM/WebSphere/profiles/dmgr/logs/dmgr/dmgr.pid
 SuccessExitStatus=143 0
 
 [Install]

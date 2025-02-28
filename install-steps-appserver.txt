@@ -1,3 +1,12 @@
+Create user/group
+# groupadd wasgrp; useradd -g wasgrp -s /bin/bash wasadm
+
+Create installation directory
+# mkdir -pv /opt/IBM
+
+Change ownership
+chown wasadm:wasgrp /opt/IBM
+
 INSTALL WAS
 /opt/IBM/IIM/eclipse/tools/imcl input ~/was-base.xml -nosplash -acceptLicense -showProgress
 /opt/IBM/IIM/eclipse/tools/imcl input ~/was-fp22.xml -nosplash -acceptLicense -showProgress
@@ -12,21 +21,21 @@ Deployment Manager:
 No changes have been made to the Deployment Manager, no backups taken
 
 Application Server:
-mkdir -pv /opt/IBM/backups;
+mkdir -pv /backups/backups;
 
 No profiles exist yet, no profile backups taken
 
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
 CREATE SERVER INSTANCE
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -create -profileName ApplicationServices -profilePath /opt/IBM/WebSphere/profiles/ApplicationServices \
-    -cellName bppwd01vrCell -nodeName bppwd01vrNode -federateLater -serverName ApplicationServices01
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -create -profileName AppServices -profilePath /opt/IBM/WebSphere/profiles/AppServices \
+    -cellName fedora-appserverCell -nodeName fedora-appserverNode -federateLater -serverName AppServices
 
-vi /opt/IBM/WebSphere/profiles/ApplicationServices/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/ApplicationServices/properties/soap.client.props
+vi /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props
 
 /opt/IBM/WebSphere/AppServer/bin/PropFilePasswordEncoder.sh \
-    /opt/IBM/WebSphere/profiles/ApplicationServices/properties/soap.client.props \
+    /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props \
     com.ibm.SOAP.loginPassword
 
 FEDERATE AND CLUSTER
@@ -35,58 +44,58 @@ Update /opt/IBM/WebSphere/AppServer/bin/wsadmin.sh
  - change PERF_JVM_OPTIONS, change -Xms256m to -Xms1024m and -Xmx256m to -Xmx1024m
 
 set +o history
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/addNode.sh \
-    dmgrhost.domain.com 8879 -conntype SOAP -includeapps -includebuses \
-    -username wasadmn -password password -profileName ApplicationServices
+/opt/IBM/WebSphere/profiles/AppServices/bin/addNode.sh \
+    fedora-appserver 8879 -conntype SOAP -includeapps -includebuses \
+    -username wasadm -password *** -profileName AppServices
 set -o history
 
 Cluster ->
 First Node:
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/wsadmin.sh -lang jython -conntype SOAP -host dmgrhost.domain.com -port 8879
- - server = AdminConfig.getid('/Cell:dmgrCell01/Node:appserverNode/Server:ApplicationServices01/')
- - AdminConfig.convertToCluster(server, 'ServicesCluster')
+/opt/IBM/WebSphere/profiles/AppServices/bin/wsadmin.sh -lang jython -conntype SOAP -host fedora-appserver -port 8879
+ - server = AdminConfig.getid('/Cell:dmgrCell01/Node:fedora-appserverNode/Server:AppServices/')
+ - AdminConfig.convertToCluster(server, 'AppServicesCluster')
  - AdminConfig.save()
  - AdminNodeManagement.syncActiveNodes()
 
 CHECKPOINT
 
 Deployment Manager:
-mkdir -pv /opt/IBM/backups
+mkdir -pv /backups/backups
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/stopManager.sh
 
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/temp/*
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/wstemp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/temp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/wstemp/*
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/clearClassCache.sh
-/opt/IBM/WebSphere/profiles/dmgr01/bin/osgiCfgInit.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/clearClassCache.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/AppServer/dmgr-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
 
 Application Server:
-mkdir -pv /opt/IBM/backups;
+mkdir -pv /backups/WebSphere/AppServer;
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/stopServer.sh ApplicationServices01
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/stopNode.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/stopServer.sh AppServices
+/opt/IBM/WebSphere/profiles/AppServices/bin/stopNode.sh
 
-rm -rf /opt/IBM/WebSphere/profiles/ApplicationServices/temp/*
-rm -rf /opt/IBM/WebSphere/profiles/ApplicationServices/wstemp/*
+rm -rf /opt/IBM/WebSphere/profiles/AppServices/temp/*
+rm -rf /opt/IBM/WebSphere/profiles/AppServices/wstemp/*
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/clearClassCache.sh
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/osgiCfgInit.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/clearClassCache.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName ApplicationServices -backupFile /opt/IBM/backups/ApplicationServices-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName AppServices -backupFile /backups/WebSphere/AppServer/AppServices-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/startNode.sh
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/startServer.sh ApplicationServices01
+/opt/IBM/WebSphere/profiles/AppServices/bin/startNode.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/startServer.sh AppServices
 
 Add Oracle JDBC Providers:
 Navigate to Resources -> JDBC -> JDBC providers
-Change "Scope" from "All Scopes" to "Cluster=ServicesCluster"
+Change "Scope" from "All Scopes" to "Cluster=AppServicesCluster"
 Click "New"
  - Database type: Oracle
  - Provider type: Oracle JDBC Driver
@@ -117,14 +126,14 @@ Click "New"
 
 Save changes
 
-Add the ApplicationServices JDBC datasource
+Add the AppServices JDBC datasource
 Navigate to Resources -> Expand "JDBC" -> Select "JDBC Providers"
-Change "Scope" from "All Scopes" to Cluster=ServicesCluster
+Change "Scope" from "All Scopes" to Cluster=AppServicesCluster
 Select "Oracle JDBC Driver (XA)"
 Click "Data sources"
 Click "New"
- - Data source name: ApplicationServices JDBC
- - JNDI name: jdbc/ApplicationServices
+ - Data source name: AppServices JDBC
+ - JNDI name: jdbc/AppServices
  - URL: jdbc:oracle:thin:@dbhost.domain.com:dbport:dbname
  - Component-managed authentication alias: dmgrNode01/JDBC Username
  - Mapping-configuration alias: (none)
@@ -132,7 +141,7 @@ Click "New"
 
 Save changes
 
-Select "ApplicationServices JDBC"
+Select "AppServices JDBC"
 Click "Connection pools"
  - Change "Max Connections"
   - Current value: 10
@@ -167,17 +176,17 @@ Save changes
 
 Install applications
 for app in $(</opt/installables/workspace/WebSphere/AppServer/properties/services-apps.lst); do
-    /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/appinstall-${app}.traceout \
+    /opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/applicationManagement.py -lang jython -conntype SOAP -host localhost -port 8879 -tracefile ${HOME}/log/wsadmin/appinstall-${app}.traceout \
         install \
-        /opt/installables/workspace/WebSphere/AppServer/files/EarFiles/ApplicationServices/${app}  \
+        /opt/installables/workspace/WebSphere/AppServer/files/EarFiles/AppServices/${app}  \
         ServicesCluster \
         webserverNode \
-        ApplicationServicesIHS | tee -a ~/log/wsadmin/appinstall-${app}.log;
+        AppServicesIHS | tee -a ~/log/wsadmin/appinstall-${app}.log;
 done
 
 Create the webserver definition
 On the webserver, as the appropriate user:
- - Create ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-ApplicationServices.txt
+ - Create ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-AppServices.txt
  - Update the following entries:
   - configType: remote
   - wasExistingLocation: /opt/IBM/WebSphere/AppServer
@@ -186,9 +195,9 @@ On the webserver, as the appropriate user:
   - ihsAdminUserID: ihsadmin
   - ihsAdminUserGroup: webadmin
   - ihsAdminPassword: See PAM
-  - webServerConfigFile1: /opt/IBM/HTTPServer/conf/ApplicationServices/httpd.conf
+  - webServerConfigFile1: /opt/IBM/HTTPServer/conf/AppServices/httpd.conf
   - webServerPortNumber: 8080
-  - webServerDefinition: ApplicationServicesIHS
+  - webServerDefinition: AppServicesIHS
   - wasMachineHostName: Appropriate deployment manager FQDN
   - webServerHostName: Appropriate webserver FQDN
    - NOTE: This becomes the node name, and we will be modifying it later on
@@ -203,7 +212,7 @@ On the webserver, as the appropriate user:
 Save and close the file.
 Set appropriate permissions:
 
-chmod 600 ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-ApplicationServices.txt
+chmod 600 ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-AppServices.txt
 
 Generate the PCT tool definition:
 
@@ -214,25 +223,22 @@ Generate the webserver configuration script:
 
 /opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct \
     -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName "IHSPlugins-v9.0.5.22" \
-    -createDefinition -response ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-ApplicationServices.txt
+    -createDefinition -response ${HOME}/workspace/WebSphere/IHS/responsefiles/pct-responsefile-AppServices.txt
 
 Change permissions:
-chmod 700 /opt/IBM/WebSphere/Plugins/bin/configureApplicationServicesIHS.sh
+chmod 700 /opt/IBM/WebSphere/Plugins/bin/configureAppServicesIHS.sh
 
 Edit the resulting file
  - Change ${FQDN_HOSTNAME}-node to ${SHORT_HOSTNAME}-node
 
-Copy /opt/IBM/WebSphere/Plugins/bin/configurePPApplicationsIHS.sh to the deployment manager into /opt/IBM/WebSphere/profiles/dmgr01/bin/configureApplicationServicesIHS.sh
-chmod 700 /opt/IBM/WebSphere/profiles/dmgr01/bin/configureApplicationServicesIHS.sh
+Copy /opt/IBM/WebSphere/Plugins/bin/configurePPApplicationsIHS.sh to the deployment manager into /opt/IBM/WebSphere/profiles/dmgr/bin/configureAppServicesIHS.sh
+chmod 700 /opt/IBM/WebSphere/profiles/dmgr/bin/configureAppServicesIHS.sh
 
 Run the script:
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/configureApplicationServicesIHS.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/configureAppServicesIHS.sh
 
 Resync:
-
-/opt/IBM/WebSphere/profiles/PPApplications/ConfigEngine/ConfigEngine.sh \
-    stop-portal-server
 
 /opt/IBM/WebSphere/profiles/PPApplications/bin/stopNode.sh
 /opt/IBM/WebSphere/profiles/PPApplications/bin/syncNode.sh dmgrhost.domain.com 8879 -restart
@@ -240,40 +246,40 @@ Resync:
 CHECKPOINT
 
 Deployment Manager:
-mkdir -pv /opt/IBM/backups;
+mkdir -pv /backups/backups;
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/stopManager.sh
 
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/temp/*
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/wstemp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/temp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/wstemp/*
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/clearClassCache.sh
-/opt/IBM/WebSphere/profiles/dmgr01/bin/osgiCfgInit.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/clearClassCache.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostWPSConfiguration-backup.$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostWPSConfiguration-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/AppServer/dmgr/dmgr-PostAppServerInstallation-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostWPSConfiguration-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
 
 Application server:
  - No server changes were made, no backup is necessary
 
 JVM Configuration/Tuning
 Edit the following scripts:
- - /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureDMGR.py
- - /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py
- - /opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureTargetServer.py
+ - /opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureDMGR.py
+ - /opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py
+ - /opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureTargetServer.py
   - Change:
    - Locate and update all instances of <USER> and <GROUP> to the appropriate values for the environment
 
 Run the following scripts:
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureDMGR.py
-/opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py
+/opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureDMGR.py
+/opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureNodeAgent.py
 
 For each application server held within the cell, execute the following:
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureTargetServer.py ${SERVER_NAME}
+/opt/IBM/WebSphere/profiles/dmgr/bin/wsadmin.sh -lang jython -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/configureTargetServer.py ${SERVER_NAME}
 
 Configure HTTP Access Logging
 Navigate to Servers -> Server Types -> WebSphere Application Servers
@@ -288,35 +294,35 @@ Save changes
 CHECKPOINT
 
 Deployment Manager:
-mkdir -pv /opt/IBM/backups;
+mkdir -pv /backups/backups;
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/stopManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/stopManager.sh
 
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/temp/*
-rm -rf /opt/IBM/WebSphere/profiles/dmgr01/wstemp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/temp/*
+rm -rf /opt/IBM/WebSphere/profiles/dmgr/wstemp/*
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/clearClassCache.sh
-/opt/IBM/WebSphere/profiles/dmgr01/bin/osgiCfgInit.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/clearClassCache.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr01 -backupFile /opt/IBM/backups/dmgr01-PostServicesConfiguration-backup.$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostServicesConfiguration-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/AppServer/dmgr-PostServicesConfiguration-backup.$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostServicesConfiguration-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
-/opt/IBM/WebSphere/profiles/dmgr01/bin/startManager.sh
+/opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
 
 Application Server:
-mkdir -pv /opt/IBM/backups;
+mkdir -pv /backups/backups;
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/stopServer.sh ApplicationServices01
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/stopNode.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/stopServer.sh AppServices01
+/opt/IBM/WebSphere/profiles/AppServices/bin/stopNode.sh
 
-rm -rf /opt/IBM/WebSphere/profiles/ApplicationServices/temp/*
-rm -rf /opt/IBM/WebSphere/profiles/ApplicationServices/wstemp/*
+rm -rf /opt/IBM/WebSphere/profiles/AppServices/temp/*
+rm -rf /opt/IBM/WebSphere/profiles/AppServices/wstemp/*
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/clearClassCache.sh
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/osgiCfgInit.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/clearClassCache.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName ApplicationServices -backupFile /opt/IBM/backups/ApplicationServices-backup-PostAppInstallation-$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /opt/IBM/backups/WebSphere-full-backup-PostAppInstallation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName AppServices -backupFile /backups/WebSphere/AppServer/AppServices-backup-PostAppInstallation-$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostAppInstallation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/startNode.sh
-/opt/IBM/WebSphere/profiles/ApplicationServices/bin/startServer.sh ApplicationServices01
+/opt/IBM/WebSphere/profiles/AppServices/bin/startNode.sh
+/opt/IBM/WebSphere/profiles/AppServices/bin/startServer.sh AppServices01

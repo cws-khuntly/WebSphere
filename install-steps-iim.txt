@@ -1,22 +1,19 @@
 Install IIM 1.9.3:
-
-Create IIM group:
-groupadd -r ibmiim
-
-As root:
 /opt/installables/IBM/InstallationManager/installc -acceptLicense -installationDirectory /opt/IBM/IIM
 
 Upgrade JDK:
+Copy the installation package to /var/tmp
 
-mkdir -pv /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150/jre
+Create the new directory
+mkdir -pv /opt/IBM/IIM/eclipse/jre_8.0.8040.20250128_0059/jre
 
-tar -C /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150/jre --strip-components=1 -xf /opt/installables/IBM/JDK/ibm-java-sdk-8.0-8.35-linux-x86_64.tgz
+tar -C /opt/IBM/IIM/eclipse/jre_8.0.8040.20250128_0059/jre --strip-components=1 -xf /var/tmp/ibm-java-sdk-8.0-8.40-linux-x86_64.tgz
 
 for file in /opt/IBM/IIM/eclipse/IBMIM.ini /opt/IBM/IIM/eclipse/silent-install.ini /opt/IBM/IIM/eclipse/tools/imcl.ini /opt/IBM/IIM/eclipse/tools/imutilsc.ini /opt/IBM/IIM/eclipse/web/ibmim-web.ini; do
-    sed -i.bk -e "s/jre_8.0.8030.20240821_1049/jre_8.0.8035.20241125_0150/g" ${file};
+    sed -i.bk -e "s/jre_8.0.8035.20241125_0150/jre_8.0.8040.20250128_0059/g" ${file};
 done
 
-rm -rf /opt/IBM/IIM/eclipse/jre_8.0.8030.20240821_1049
+rm -rf /opt/IBM/IIM/eclipse/jre_8.0.8035.20241125_0150
 
-Permission the installation:
-
+Remove backup files (optional)
+cd /opt/IBM/IIM; find . -type f -name \*.bk -exec rm -f {} \;;

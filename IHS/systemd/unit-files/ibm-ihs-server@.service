@@ -22,9 +22,9 @@ Description=IBM HTTP Server
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k start
-ExecReload=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k reload
-ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf/%i/httpd.conf -k stop
+ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt/IBM/HTTPServer/conf/httpd.conf -k start
+ExecReload=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt/IBM/HTTPServer/conf/httpd.conf -k reload
+ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop
 PIDFile=/opt/IBM/HTTPServer/logs/%i/httpd.pid
 SuccessExitStatus=143 0
 
