@@ -1,12 +1,10 @@
 #==============================================================================
 #
-#          FILE:  configureSessionDatabase.py
-#         USAGE:  wsadmin.sh -lang jython -f configureSessionDatabase.py
-#     ARGUMENTS:  databaseType
-#                     Oracle: <driver path> <jdbc url> <jndi entry>
-#                     DB2: <driver path> <database name> <server name> <port number> <jndi entry>
+#          FILE:  wsincludes.py
+#         USAGE:  Include file containing various wsadmin functions
+#     ARGUMENTS:  N/A
 #
-#   DESCRIPTION:  Executes an scp connection to a pre-defined server
+#   DESCRIPTION:  Various useful wsadmin functions
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -19,40 +17,81 @@
 #      REVISION:  ---
 #==============================================================================
 
-def setWebSphereVariable (variableName, variableValue, nodeName = None, serverName = None, clusterName = None):
-    map = getVariableMap(nodeName, serverName, clusterName)
-    attrs = []
-    attrs.append( [ 'symbolicName', name ] )
-    attrs.append( [ 'value', value ] )
+import sys
+import logging
 
-    AdminConfig.create('VariableSubstitutionEntry', targetWebContainer, '[[symbolicName "%s"] [description ""] [value "%s"]]') % (variableName, variableValue)
+errorLogger = logging.getLogger(str("error-logger"))
+debugLogger = logging.getLogger(str("debug-logger"))
+infoLogger = logging.getLogger(str("info-logger"))
 
 def saveWorkspaceChanges():
-    print('Saving configuration..')
+    try:
+        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.save()"))
+        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.save()"))
 
-    AdminConfig.save()
+        AdminConfig.save()
+
+        debugLogger.log(logging.DEBUG, str("Saved all pending workspace changes."))
+        infoLogger.log(logging.INFO, str("Saved all pending workspace changes."))
+    except:
+        (exception, parms, tback) = sys.exc_info()
+
+        errorLogger.log(logging.ERROR, str("An error occurred while saving workspace changes: {0} {1}").format(str(exception), str(parms)))
+
+        raise Exception(str("An error occurred while saving workspace changes. Please review logs."))
+    #endtry    
 #enddef
 
 def syncAllNodes(nodeList, cellName):
+    debugLogger.log(logging.DEBUG, str(nodeList))
+    debugLogger.log(logging.DEBUG, str(cellName))
+
     if (len(nodeList) != 0):
-        print("Performing nodeSync..")
+        try:
+            debugLogger.log(logging.DEBUG, str("Performing nodeSync for cell {0}..").format(cellName))
+            consoleInfoLogger.log(logging.INFO, str("Performing nodeSync for cell {0}..").format(cellName))
 
-        AdminNodeManagement.syncActiveNodes()
+            AdminNodeManagement.syncActiveNodes()
 
-        for node in (nodeList):
-            nodeRepo = AdminControl.completeObjectName('type=ConfigRepository,process=nodeagent,node=%s,*') % (node)
+            for node in (nodeList):
+                debugLogger.log(logging.DEBUG, str(node))
 
-            if (nodeRepo):
-                AdminControl.invoke(nodeRepo, 'refreshRepositoryEpoch')
-            #endif
+                nodeRepo = AdminControl.completeObjectName(str("type=ConfigRepository,process=nodeagent,node={0},*").format(node))
 
-            syncNode = AdminControl.completeObjectName('cell=%s,node=%s,type=NodeSync,*') % (cellName, node)
+                debugLogger.log(logging.DEBUG, str(nodeRepo))
 
-            if (syncNode):
-                AdminControl.invoke(syncNode, 'sync')
-            #endif
+                if (nodeRepo):
+                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
+                    debugLogger.log(logging.DEBUG, str("AdminControl.invoke(nodeRepo, str(\"refreshRepositoryEpoch\"))"))
 
-            continue
-        #endfor
+                    AdminControl.invoke(nodeRepo, str("refreshRepositoryEpoch"))
+
+                    debugLogger.log(logging.DEBUG, str("Submitted refreshRepositoryEpoch."))
+                    infoLogger.log(logging.INFO, str("Submitted refreshRepositoryEpoch."))
+                #endif
+
+                syncNode = AdminControl.completeObjectName(str("cell={0},node={1},type=NodeSync,*").format(cellName, node))
+
+                debugLogger.log(logging.DEBUG, str(syncNode))
+
+                if (syncNode):
+                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
+                    debugLogger.log(logging.DEBUG, str("AdminControl.invoke(syncNode, str(\"sync\"))"))
+
+                    AdminControl.invoke(syncNode, str("sync"))
+
+                    debugLogger.log(logging.DEBUG, str("Submitted sync."))
+                    infoLogger.log(logging.INFO, str("Submitted sync."))
+                #endif
+
+                continue
+            #endfor
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred performing the node synchronization operation: {0} {1}").format(str(exception), str(parms)))
+
+            raise Exception(str("An error occurred performing node synchronization operation. Please review logs."))
+        #endtry
     #endif
 #enddef

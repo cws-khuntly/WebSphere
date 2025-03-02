@@ -31,13 +31,21 @@ vi /opt/IBM/WebSphere/profiles/dmgr/properties/soap.client.props; chmod 600 /opt
 
 CHECKPOINT
 mkdir -pv /backups/WebSphere/dmgr
+
+/opt/IBM/WebSphere/profiles/dmgr/bin/stopManager.sh
+
 rm -rf /opt/IBM/WebSphere/profiles/dmgr/temp/*
 rm -rf /opt/IBM/WebSphere/profiles/dmgr/wstemp/*
 
 /opt/IBM/WebSphere/profiles/dmgr/bin/clearClassCache.sh
 /opt/IBM/WebSphere/profiles/dmgr/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/dmgr/dmgr-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/dmgr/dmgr-backup-PostDMGRInstall-$(date +"%d-%m-%Y_%H-%M-%S");
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-backup-PostDMGRInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
 /opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
+
+CONFIGURATION
+${USER_INSTALL_ROOT}/bin/wsadmin.sh -lang jython -p ${HOME}/workspace/WebSphere/AppServer/properties/wsadmin.properties \
+    -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/dmgrServerManagement.py configure-dmgr \
+    ${HOME}/workspace/WebSphere/AppServer/properties/createDeploymentManager.properties

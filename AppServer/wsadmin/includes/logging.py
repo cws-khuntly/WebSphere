@@ -19,44 +19,19 @@
 import os
 import logging
 import logging.config
-import xml.etree.ElementTree as ET
 
 def configureLogging(logConfigFile):
     if (len(logConfigFile) != 0):
         if (os.path.exists(logConfigFile)) and (os.access(logConfigFile, os.R_OK)):
             try:
-                tree = ET.parse(logConfigFile)
-                root = tree.getroot()
-
-                logging.config.dictConfig(convertXmlToDict(root))
+                logging.config.fileConfig(logConfigFile)
             except Exception as e:
-                print(f"Error configuring logging from XML: {e}")
+                print(str("Failed to configure logging: {0}. No logging enabled!").format(str(e)))
             #endtry
         else:
-            print ("Unable to load logging configuration file. No logging enabled!")
+            print(str("Unable to load logging configuration file. No logging enabled!"))
         #endif
     else:
-        print ("No logging configuration file was provided. No logging enabled!")
+        print(str("No logging configuration file was provided. No logging enabled!"))
     #endif
-#enddef
-
-def convertXmlToDict(element):
-    result = {}
-
-    for child in (element):
-        if (len(child) != 0):
-            tag = child.tag
-            text = child.text.strip() if (child.text) else None
-
-            if (len(child) > 0):
-                result[tag] = convertXmlToDict(child)
-            elif (len(text) != 0):
-                result[tag] = text
-            else:
-                result[tag] = {}
-            #endif
-        #endif
-    #endfor
-
-    return result
 #enddef

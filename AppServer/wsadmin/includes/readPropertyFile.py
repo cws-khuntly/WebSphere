@@ -16,52 +16,20 @@
 #      REVISION:  ---
 #==============================================================================
 
-import configparser
+import logging
+import ConfigParser
 
-def readConfigurationFile(configFile, separator = "=", comment = "#"):
-    properties = {}
+debugLogger = logging.getLogger("debug-logger")
 
-    with (open(configFile, "r")) as propFile:
-        if (propFile):
-            for entry in (propFile):
-                if (entry):
-                    line = entry.strip()
+def returnPropertyConfiguration(configFile, sectionName, valueName):
+    debugLogger.log(logging.DEBUG, configFile)
+    debugLogger.log(logging.DEBUG, sectionName)
+    debugLogger.log(logging.DEBUG, valueName)
 
-                    if ((line) and not (line.startswith(comment))):
-                        keyValue = line.split(separator)
-                        keyName = keyValue[0].strip()
-                        returnValue = separator.join(keyValue[1:]).strip().strip('"')
+    config = ConfigParser.ConfigParser()
+    config.read(configFile)
 
-                        properties[keyName] = returnValue
-                    #endif
-                #endif
-            #endfor
-        #endif
-    #endwhile
-#enddef
+    debugLogger.log(logging.DEBUG, config)
 
-def readConfigurationFileSection(configFile, sectionName):
-    properties = {}
-
-    with (open(configFile, "r")) as propFile:
-        if (propFile):
-            config = configparser.ConfigParser()
-
-            if (config):
-                try:
-                    config.read(configFile)
-
-                    for keyName, keyValue in (config[sectionName].items()):
-                        properties[keyName] = keyValue
-                    #endfor
-                except:
-                    raise ("An error occurred while parsing the provided configuration file.")
-                #endtry
-            #endif
-        else:
-            raise ("Unable to read the provided configuration file.")
-        #endif
-    #endwhile
-
-    return properties
+    return config.get(sectionName, valueName)
 #enddef

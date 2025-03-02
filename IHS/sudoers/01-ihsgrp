@@ -6,9 +6,5 @@
 
 Cmnd_Alias IHS_CONTROL =  /bin/systemctl start ibm-ihs-admin, /bin/systemctl stop ibm-ihs-admin, /bin/systemctl restart ibm-ihs-admin, \
     /bin/systemctl start ibm-ihs-server@*, /bin/systemctl stop ibm-ihs-server@*, /bin/systemctl restart ibm-ihs-server@*
-Cmnd_Alias SYSCTL_RELOAD = /bin/systemctl daemon-reload, /bin/systemctl enable ibm-ihs-admin, /bin/systemctl disable ibm-ihs-admin, \
-    /bin/systemctl edit ibm-ihs-admin, /bin/systemctl edit --full ibm-ihs-admin, /bin/systemctl edit --full ibm-ihs-admin --drop-in=override.conf \
-    /bin/systemctl enable ibm-ihs-server@*, /bin/systemctl disable ibm-ihs-server@*, \
-    /bin/systemctl edit ibm-ihs-server@*, /bin/systemctl edit --full ibm-ihs-server@*, /bin/systemctl edit --full ibm-ihs-server@* --drop-in=override.conf
 
-%ihsgrp    ALL=(root)    NOPASSWD: IHS_CONTROL, SYSCTL_RELOAD
+%ihsgrp    ALL=(root)    NOPASSWD: IHS_CONTROL
