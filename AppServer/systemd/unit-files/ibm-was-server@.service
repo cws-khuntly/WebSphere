@@ -28,9 +28,10 @@ Type=forking
 ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
 ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
 PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/%i/${SERVER_NAME}.pid
-SuccessExitStatus=143 0
-TimeoutStartSec=10min
-TimeoutStopSec=10min
+SuccessExitStatus=0
+TimeoutStartSec=180
+TimeoutStopSec=180
+RemainAfterExit=true
 
 [Install]
 WantedBy=default.target

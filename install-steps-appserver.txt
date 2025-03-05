@@ -29,7 +29,13 @@ tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-ba
 
 CREATE SERVER INSTANCE
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -create -profileName AppServices -profilePath /opt/IBM/WebSphere/profiles/AppServices \
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh \
+    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/default -isDefault -applyPerfTuningSetting standard \
+    -hostName fedora-appserver -cellName fedora-appserverCell -nodeName 
+    -profileName AppServices 
+
+
+-create -profileName AppServices -profilePath /opt/IBM/WebSphere/profiles/AppServices \
     -cellName fedora-appserverCell -nodeName fedora-appserverNode -federateLater -serverName AppServices
 
 vi /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props
@@ -70,7 +76,7 @@ rm -rf /opt/IBM/WebSphere/profiles/dmgr/wstemp/*
 /opt/IBM/WebSphere/profiles/dmgr/bin/clearClassCache.sh
 /opt/IBM/WebSphere/profiles/dmgr/bin/osgiCfgInit.sh
 
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/AppServer/dmgr-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S");
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName dmgr -backupFile /backups/WebSphere/dmgr/dmgr-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S");
 tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostServicesInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
 /opt/IBM/WebSphere/profiles/dmgr/bin/startManager.sh
@@ -88,7 +94,7 @@ rm -rf /opt/IBM/WebSphere/profiles/AppServices/wstemp/*
 /opt/IBM/WebSphere/profiles/AppServices/bin/osgiCfgInit.sh
 
 /opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -backupProfile -profileName AppServices -backupFile /backups/WebSphere/AppServer/AppServices-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S");
-tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/AppServer/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-backup-PostFederation-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
 /opt/IBM/WebSphere/profiles/AppServices/bin/startNode.sh
 /opt/IBM/WebSphere/profiles/AppServices/bin/startServer.sh AppServices

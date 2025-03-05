@@ -20,10 +20,14 @@ Description=IBM HTTP Server - Admin Server
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf.d/admin/admin.conf -k start
-ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -f /opt/IBM/HTTPServer/conf.d/admin/admin.conf -k stop
-PIDFile=/opt/IBM/HTTPServer/logs/admin/admin.pid
-SuccessExitStatus=143 0
+ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D admin -f /opt/IBM/HTTPServer/conf/httpd.conf -k start
+ExecReload=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D admin -f /opt/IBM/HTTPServer/conf/httpd.conf -k reload
+ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D admin -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop
+PIDFile=/opt/IBM/HTTPServer/logs/admin/httpd.pid
+SuccessExitStatus=0
+TimeoutStartSec=90
+TimeoutStopSec=90
+RemainAfterExit=true
 
 [Install]
 WantedBy=default.target

@@ -5,6 +5,6 @@
 ## The COMMANDS section may have other options added to it.
 
 Cmnd_Alias IHS_CONTROL =  /bin/systemctl start ibm-ihs-admin, /bin/systemctl stop ibm-ihs-admin, /bin/systemctl restart ibm-ihs-admin, \
-    /bin/systemctl start ibm-ihs-server@*, /bin/systemctl stop ibm-ihs-server@*, /bin/systemctl restart ibm-ihs-server@*
+    /bin/systemctl start ibm-ihs-server*, /bin/systemctl stop ibm-ihs-server*, /bin/systemctl restart ibm-ihs-server*
 
 %ihsgrp    ALL=(root)    NOPASSWD: IHS_CONTROL

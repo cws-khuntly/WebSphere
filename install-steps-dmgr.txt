@@ -16,11 +16,12 @@ INSTALL TOOLKIT
 /opt/IBM/IIM/eclipse/tools/imcl input~/wct-fp22.xml -nosplash -acceptLicense -showProgress
 
 set +o history
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -create -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/dmgr/ \
-    -isDefault -profileName dmgr -adminUserName wasadm -adminPassword *** \
-    -applyPerfTuningSetting standard -appServerNodeName dmgrNode01 -cellName dmgrCell01 -enableAdminSecurity true \
-    -hostName fedora-appserver -nodeName dmgrNode01 -profilePath /opt/IBM/WebSphere/profiles/dmgr -serverName dmgr \
-    -serverType DEPLOYMENT_MANAGER -create
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh \
+    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/dmgr/ -isDefault \
+    -enableAdminSecurity true -adminUserName wasadm -adminPassword *** \
+    -appServerNodeName dmgrNode -cellName dmgrCell -nodeName dmgrNode -hostName fedora-appserver \
+    -profileName dmgr -profilePath /opt/IBM/WebSphere/profiles/dmgr \
+    -serverName dmgr -serverType DEPLOYMENT_MANAGER -applyPerfTuningSetting standard -create
 set -o history
 
 vi /opt/IBM/WebSphere/profiles/dmgr/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/dmgr/properties/soap.client.props
@@ -47,5 +48,8 @@ tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-ba
 
 CONFIGURATION
 ${USER_INSTALL_ROOT}/bin/wsadmin.sh -lang jython -p ${HOME}/workspace/WebSphere/AppServer/properties/wsadmin.properties \
-    -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/dmgrServerManagement.py configure-dmgr \
-    ${HOME}/workspace/WebSphere/AppServer/properties/createDeploymentManager.properties
+    -f ${HOME}/workspace/WebSphere/AppServer/wsadmin/scripts/manageDeploymentManager.py configure-dmgr \
+    ${HOME}/workspace/WebSphere/AppServer/wsadmin/properties/manageDeploymentManager.properties
+
+AUGMENT
+cd /opt/IBM/WebSphere/AppServer; unzip filesForDmgr.zip -d /opt/IBM/WebSphere/AppServer

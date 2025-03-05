@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+    <short>IBMIHS</short>
+    <description>IBM WebSphere HTTP Server</description>
+    <interface name="ens160" />
+    <rule family="ipv4">
+        <port port="8080" protocol="tcp"/>
+        <accept/>
+    </rule>
+    <rule family="ipv4">
+        <port port="8008" protocol="tcp"/>
+        <accept/>
+    </rule>
+    <rule family="ipv4">
+        <port port="8443" protocol="tcp"/>
+        <accept/>
+    </rule>
+</zone>

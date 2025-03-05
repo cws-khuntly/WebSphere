@@ -23,7 +23,10 @@ Type=forking
 ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startNode.sh
 ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/stopNode.sh
 PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/nodeagent/nodeagent.pid
-SuccessExitStatus=143 0
+SuccessExitStatus=0
+TimeoutStartSec=180
+TimeoutStopSec=180
+RemainAfterExit=true
 
 [Install]
 WantedBy=default.target

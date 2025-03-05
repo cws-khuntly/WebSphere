@@ -1,6 +1,9 @@
 Create user/group
 # groupadd ihsgrp; useradd -g ihsgrp -s /bin/bash ihsadm
 
+Install dependencies
+dnf install psmisc libnsl libxcrypt-compat
+
 Create installation directory
 # mkdir -pv /opt/IBM
 
@@ -63,7 +66,7 @@ Generate the webserver configuration scripts:
 
 /opt/IBM/WebSphere/Toolbox/WCT/wctcmd.sh -tool pct \
     -defLocPathname /opt/IBM/WebSphere/Plugins -defLocName "IHSPlugins-v9.0.5.22" \
-    -createDefinition -response ${HOME}/workspace/WebSphere/Toolbox/responsefiles/pct-WebServicesIHS.txt
+    -createDefinition -response ${HOME}/workspace/WebSphere/Toolbox/responsefiles/responsefile.txt
 
 Change permissions:
 chmod 700 /opt/IBM/WebSphere/Plugins/bin/configureWebServicesIHS.sh /opt/IBM/WebSphere/Plugins/bin/configureWebServicesIHS.sh

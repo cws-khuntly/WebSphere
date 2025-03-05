@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone target="%%REJECT%%">
+    <short>IBMWAS</short>
+    <description>IBM WebSphere Application Server</description>
+    <interface name="ens160" />
+    <rule family="ipv4">
+        <port port="9043" protocol="tcp" />
+        <accept />
+    </rule>
+    <rule family="ipv4">
+        <port port="9080" protocol="tcp" />
+        <accept />
+    </rule>
+</zone>

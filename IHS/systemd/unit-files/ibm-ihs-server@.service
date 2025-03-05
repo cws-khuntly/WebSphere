@@ -26,7 +26,10 @@ ExecStart=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt
 ExecReload=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt/IBM/HTTPServer/conf/httpd.conf -k reload
 ExecStop=/opt/IBM/HTTPServer/bin/apachectl -d /opt/IBM/HTTPServer -D %i -f /opt/IBM/HTTPServer/conf/httpd.conf -k stop
 PIDFile=/opt/IBM/HTTPServer/logs/%i/httpd.pid
-SuccessExitStatus=143 0
+SuccessExitStatus=0
+TimeoutStartSec=90
+TimeoutStopSec=90
+RemainAfterExit=true
 
 [Install]
 WantedBy=default.target
