@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  configureDMGR.py
-#         USAGE:  wsadmin.sh -lang jython -f configureDMGR.py
-#     ARGUMENTS:  wasVersion
-#   DESCRIPTION:  Executes an scp connection to a pre-defined server
+#          FILE:  manageApplications.py
+#         USAGE:  wsadmin.sh -lang jython -f manageApplications.py <options>
+#     ARGUMENTS:  See help section
+#   DESCRIPTION:  Performs application management functions
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,253 +18,556 @@
 
 import os
 import sys
+import logging
 
-configureLogging("../config/logging.xml")
-consoleLogger = logging.getLogger("console-logger")
-errorLogger = logging.getLogger("error-logger")
-debugLogger = logging.getLogger("debug-logger")
+configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
+errorLogger = logging.getLogger(str("error-logger"))
+debugLogger = logging.getLogger(str("debug-logger"))
+infoLogger = logging.getLogger(str("info-logger"))
+consoleInfoLogger = logging.getLogger(str("info-logger"))
+consoleErrorLogger = logging.getLogger(str("info-logger"))
 
 lineSplit = java.lang.System.getProperty('line.separator')
 targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def listApps():
-    print("Listing all installed applications...")
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#listApps()"))
+    debugLogger.log(logging.DEBUG, str("Listing installed applications in cell {0}").format(targetCell))
+    consoleInfoLogger.log(logging.INFO, str("Listing installed applications in cell {0}").format(targetCell))
 
     appList = AdminApp.list().split(lineSplit)
 
-    if (appList):
+    debugLogger.log(logging.DEBUG, str(appList))
+
+    if (len(appList) != 0):
         for app in (appList):
-            print("Application: %s") % (app)
+            debugLogger.log(logging.DEBUG, str(app))
+
+            consoleInfoLogger.log(logging.INFO, str("Application: {0}").format(app))
  
             continue
         #endfor
     else:
-        raise ("No installed applications were found.")
+        consoleErrorLogger.log(logging.ERROR, str("No installed applications were found in cell {0}").format(targetCell))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#listApps()"))
 #enddef
 
 def exportApp(appName):
-    print("Exporting application " + appName + "..")
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#exportApp(appName)"))
+    debugLogger.log(logging.DEBUG, str(appName))
 
-    exportPath = os.path.expanduser('~') + '/workspace/WebSphere/AppServer/files/EarFiles'
+    print(str("Exporting application {0}..").format(appName))
 
-    os.makedirs(exportPath, exist_ok=True)
+    exportPath = str(os.path.expanduser("{0}") + "{1}").format("~", "/workspace/WebSphere/AppServer/files/EarFiles")
 
-    AdminApp.export(appName, exportPath + '/' + appName + '.ear')
+    debugLogger.log(logging.DEBUG, str(exportPath))
+
+    try:
+        os.makedirs(exportPath, exist_ok=True)
+
+        debugLogger.log(logging.DEBUG, str("Executing command AdminApp.export()..."))
+        debugLogger.log(logging.DEBUG, str("EXEC: AdminApp.export(str(\"{0}, {1}, {2}\").format(appName, str(\"{0}/{1}.ear\").format(exportPath, appName)))"))
+
+        AdminApp.export(str("{0}, {1}, {2}").format(appName, str("{0}/{1}.ear").format(exportPath, appName)))
+    except:
+        (exception, parms, tback) = sys.exc_info()
+
+        errorLogger.log(logging.ERROR, str("An error occurred exporting application {0}: {2} {3}").format(appName, str(exception), str(parms)))
+        consoleErrorLogger.log(logging.ERROR, str("An error occurred exporting application {0}. Please review logs.").format(appName))
+    #endtry
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#exportApp(appName)"))
 #enddef
 
-def remapApplication(appName, targetCluster, vhostName="default_host"):
-    moduleName = AdminApp.listModules('%s, -server').split('#')[1].split('+')[0] % (appName)
+def remapApplication(appName, targetCluster, vhostName = "default_host"):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#remapApplication(appName, targetCluster, vhostName = \"default_host\")"))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(targetCluster))
+    debugLogger.log(logging.DEBUG, str(vhostName))
+
+    debugLogger.log(logging.DEBUG, str("Executing command AdminApp.listModules()..."))
+    debugLogger.log(logging.DEBUG, str("EXEC: AdminApp.listModules(\"{0}, -server\").split(\"#\")[1].split(\"+\")[0].format(appName)"))
+
+    moduleName = AdminApp.listModules("{0}, -server").split("#")[1].split("+")[0].format(appName)
+
+    debugLogger.log(logging.DEBUG, str(moduleName))
 
     if (moduleName):
         try:
-            AdminApp.edit('%s, [ -MapModulesToServers [[ %s %s,WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster=%s %s]]]') % (appName, moduleName, targetCluster, vhostName)
+            debugLogger.log(logging.DEBUG, str("Executing command AdminApp.edit()..."))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminApp.edit(\"{0}, [-MapModulesToServers [[{1} {2}},WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster={3} {4}]]]\").format(appName, moduleName, targetCluster, vhostName)"))
+
+            AdminApp.edit('{0}, [-MapModulesToServers [[{1} {2}},WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster={3} {4}]]]').format(appName, moduleName, targetCluster, vhostName)
+
+            infoLogger.log(logging.INFO, str("Application {0} remapped to cluster {1}").format(appName, targetCluster))
+            consoleInfoLogger.log(logging.INFO, str("Application {0} remapped to cluster {1}").format(appName, targetCluster))
         except:
-            raise ("An error occurred while remapping the applicatin into target cluster %s") % (targetCluster)
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}: {2} {3}").format(appName, targetCluster, str(exception), str(parms)))
+            consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}. Please review logs.").format(appName, targetCluster))
         finally:
             saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
+            syncAllNodes(nodeList)
         #endtry
     else:
-        raise ("No module was located for the provided application.")
+        errorLogger.log(logging.ERROR, str("No module was found for application {0}").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No module was found for application {0}").format(appName))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#remapApplication(appName, targetCluster, vhostName = \"default_host\")"))
 #enddef
 
-def installSingleModule(appPath, clusterName, webserverNodeName, webserverName, vhostName="default_host"):
-    appFileName = getFileNameFromPath(appPath)
-    appName = getAppDisplayName(appPath)
-    appModuleName = removeExtraExtension(getAppModuleName(appPath), 4)
-    appWarName = getAppWarName(appPath)
-    appMappingOptions = (
-        '-MapModulesToServers [[ %s %s,WEB-INF/web.xml '
-        'WebSphere:cell=%s,cluster=%s+WebSphere:cell=%s,node=%s,server=%s %s]]'
-    ) % (appModuleName, appWarName, targetCell, clusterName, targetCell, webserverNodeName, webserverName, vhostName)
-    appInstallOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/%s/%s -distributeApp '
-        '-nouseMetaDataFromBinary -nodeployejb -appname %s -createMBeansForResources -noreloadEnabled -nodeployws '
-        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
-        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        '' + str(appMappingOptions).strip("()") + ']'
-    ) % (targetCell, appFileName, appName)
+def installSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = "default_host"):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#installSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = \"default_host\")"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName))
+    debugLogger.log(logging.DEBUG, str(webserverName))
+    debugLogger.log(logging.DEBUG, str(vhostName))
 
-    if (appInstallOptions):
-        try:
-            print("Installing application %s into cluster %s and webserver %s..") % (appName, clusterName, webserverName)
+    appFileName = getFileNameFromPath(str(appPath))
+    appName = getAppDisplayName(str(appPath))
+    appModuleName = removeExtraExtension(getAppModuleName(str(appPath)), 4)
+    appWarName = getAppWarName(str(appPath))
 
-            AdminApp.install(appPath, str(appInstallOptions).strip("()"))
-        except:
-            raise ("An error occurred performing the installation. Please review logs.")
-        finally:
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
-        #endtry
-    else:
-        raise ("No application installation options were found. Cannot install application.")
-    #endif
-#enddef
+    debugLogger.log(logging.DEBUG, str(appFileName))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appModuleName))
+    debugLogger.log(logging.DEBUG, str(appWarName))
 
-def updateSingleModule(appPath, clusterName, webserverNodeName, webserverName, vhostName="default_host"):
-    appFileName = getFileNameFromPath(appPath)
-    appName = getAppDisplayName(appPath)
-    appModuleName = getAppModuleName(appPath)
-    appWarName = getAppWarName(appPath)
-    appMappingOptions = (
-        '-MapModulesToServers [[ %s %s,WEB-INF/web.xml '
-        'WebSphere:cell=%s,cluster=%s+WebSphere:cell=%s,node=%s,server=%s]]'
-        '-MapWebModToVH [[ %s %s,WEB-INF/web.xml %s ]]'
-    ) % (appModuleName, appWarName, targetCell, clusterName, targetCell, webserverNodeName, webserverName, appModuleName, appWarName, vhostName)
-    appUpdateOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/%s/%s -distributeApp '
-        '-nouseMetaDataFromBinary -nodeployejb -appname %s -createMBeansForResources -noreloadEnabled -nodeployws '
-        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
-        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        '' + str(appMappingOptions).strip("()") + ']'
-    ) % (targetCell, appFileName, appName)
+    appMappingOptions = (str("-MapModulesToServers [[{0} {1},WEB-INF/web.xml "
+        "WebSphere:cell={2},cluster={3}+WebSphere:cell={2},node={4},server={5}]]"
+    ).format(appModuleName, appWarName, targetCell, clusterName, webserverNodeName, webserverName))
 
-    if (appUpdateOptions):
-        try:
-            print("Updating application %s in cluster %s and webserver %s..") % (appName, clusterName, webserverName)
+    debugLogger.log(logging.DEBUG, str(appMappingOptions))
 
-            AdminApp.update(appName, 'app', str(appInstallOptions).strip("()"))
-        except:
-            raise ("An error occurred performing the update. Please review logs.")
-        finally:
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
-        #endtry
-    else:
-        raise ("No application update options were found. Cannot install application.")
-    #endif
-#enddef
+    if (len(appMappingOptions != 0)):
+        appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+            "-nouseMetaDataFromBinary -nodeployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+            "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+            "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+        ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
 
-def installSingleEJBModule(appPath, clusterName):
-    appFileName = getFileNameFromPath(appPath)
-    appName = getAppDisplayName(appPath)
-    appModuleName = getAppModuleName(appPath)
-    appWarName = getAppWarName(appPath)
-    appMappingOptions = (
-        '-MapModulesToServers [[ %s %s,WEB-INF/web.xml '
-        'WebSphere:cell=%s,cluster=%s]]'
-    ) % (appModuleName, appWarName, targetCell, clusterName)
-    appInstallOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/%s/%s -distributeApp '
-        '-nouseMetaDataFromBinary -deployejb -appname %s -createMBeansForResources -noreloadEnabled -nodeployws '
-        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
-        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        '' + str(appMappingOptions).strip("()") + ']'
-    ) % (targetCell, appFileName, appName)
+        debugLogger.log(logging.DEBUG, str(appInstallOptions))
 
-    if (appInstallOptions):
-        try:
-            print("Installing EJB application %s in cluster %s..") % (appName, clusterName)
-
-            AdminApp.install(appPath, str(appInstallOptions).strip("()"))
-        except:
-            raise ("An error occurred performing the installation. Please review logs.")
-        finally:
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
-        #endtry
-    else:
-        raise ("No application installation options were found. Cannot install application.")
-    #endif
-#enddef
-
-def updateSingleEJBModule(appPath, clusterName):
-    appFileName = getFileNameFromPath(appPath)
-    appName = getAppDisplayName(appPath)
-    appModuleName = getAppModuleName(appPath)
-    appWarName = getAppWarName(appPath)
-    appMappingOptions = (
-        '-MapModulesToServers [[ %s %s,WEB-INF/web.xml '
-        'WebSphere:cell=%s,cluster=%s]]'
-    ) % (appModuleName, appWarName, targetCell, clusterName)
-    appUpdateOptions = (
-        '[ -nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/%s/%s -distributeApp '
-        '-nouseMetaDataFromBinary -deployejb -appname %s -createMBeansForResources -noreloadEnabled -nodeployws '
-        '-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude '
-        '-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema '
-        '' + str(appMappingOptions).strip("()") + ']'
-    ) % (targetCell, appFileName, appName)
-
-    if (appUpdateOptions):
-        try:
-            print("Updating EJB application %s in cluster %s..") % (appName, clusterName)
-
-            AdminApp.update(appName, 'app', str(appInstallOptions).strip("()"))
-        except:
-            raise ("An error occurred performing the update. Please review logs.")
-        finally:
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
-        #endtry
-    else:
-        raise ("No application update options were found. Cannot install application.")
-    #endif
-#enddef
-
-def modifyStartupWeightForApplication(appPath, startWeight=50):
-    appName = getAppDisplayName(appPath)
-    appDeployment = AdminConfig.getid("/Deployment:" + appName + "/")
-    appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
-
-    if (appDeploymentObject):
-        try:
-            print("Modifying startup weight for %s to %d..") % (appName, startWeight)
-
-            AdminConfig.modify(appDeploymentObject, [['startingWeight', '%d']]) % (startWeight)
-        except:
-            raise ("An error occurred while updating the start weight for application %s. Please review logs.") % (appName)
-        finally:
-            saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)
-        #endtry
-    else:
-        raise ("Unable to locate application deployment for %s.") % (appName)
-    #endif
-#enddef
-
-def changeApplicationStatus(appName, newStatus="true"):
-    appDeployment = AdminConfig.getid("/Deployment:" + appName + "/")
-    appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
-    targetMappings = AdminConfig.showAttribute(appDeploymentObject, 'targetMappings')
-
-    if (targetMappings):
-        for targetMapping in (targetMappings):
+        if (len(appInstallOptions) != 0):
             try:
-                print("Changing target application status for %s to %s ..") % (appName, newStatus)
+                debugLogger.log(logging.DEBUG, str("Executing command installApplicationModuleToCluster()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: installApplicationModuleToCluster(str(appInstallOptions).strip(\"()\"))"))
 
-                AdminConfig.modify(targetMapping, [['enable', '%s']]) % (newStatus)
+                installApplicationModuleToCluster(str(appInstallOptions).strip("()"))
+
+                infoLogger.log(logging.INFO, str("Installation of {0} to cluster {1} complete.").format(appName, clusterName))
+                consoleInfoLogger.log(logging.INFO, str("Installation of {0} to cluster {1} complete.").format(appName, clusterName))
             except:
-                raise ("An error occurred changing the status for application %s to %s") % (appName, newStatus)
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}: {1} {2}").format(appPath, clusterName, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList, targetCell)
+                syncAllNodes(nodeList)
             #endtry
-        #endfor
+        else:
+            errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
+            consoleErrorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
+        #endtry
     else:
-        raise ("No mappings were found for application %s") % (appName)
+        errorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot install application.").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot install application.").format(appName))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#installSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = \"default_host\")"))
+#enddef
+
+def installSingleModuleToMultipleHosts(appPath, clusterName, webserverNodeName1, webserverName1, webserverNodeName2, webserverName2, vhostName = "default_host"):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#installSingleModuleToMultipleHosts(appPath, clusterName, webserverNodeName1, webserverName1, webserverNodeName2, webserverName2, vhostName = \"default_host\")"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName1))
+    debugLogger.log(logging.DEBUG, str(webserverName1))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName2))
+    debugLogger.log(logging.DEBUG, str(webserverName2))
+    debugLogger.log(logging.DEBUG, str(vhostName))
+
+    appFileName = getFileNameFromPath(str(appPath))
+    appName = getAppDisplayName(str(appPath))
+    appModuleName = removeExtraExtension(getAppModuleName(str(appPath)), 4)
+    appWarName = getAppWarName(str(appPath))
+
+    debugLogger.log(logging.DEBUG, str(appFileName))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appModuleName))
+    debugLogger.log(logging.DEBUG, str(appWarName))
+
+    appMappingOptions = (str("-MapModulesToServers [[ {0} {1},WEB-INF/web.xml "
+        "WebSphere:cell={2},cluster={3}+WebSphere:cell={2},node={4},server={5}+WebSphere:cell={2},node={6},server={7}]]"
+    ).format(appModuleName, appWarName, targetCell, clusterName, webserverNodeName1, webserverName1, webserverNodeName2, webserverName2))
+
+    debugLogger.log(logging.DEBUG, str(appMappingOptions))
+
+    appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+        "-nouseMetaDataFromBinary -nodeployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+        "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+        "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+    ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
+
+    debugLogger.log(logging.DEBUG, str(appInstallOptions))
+
+    if (len(appMappingOptions != 0)):
+        appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+            "-nouseMetaDataFromBinary -nodeployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+            "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+            "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+        ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
+
+        debugLogger.log(logging.DEBUG, str(appInstallOptions))
+
+        if (len(appInstallOptions) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command installApplicationModuleToCluster()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: installApplicationModuleToCluster(str(appInstallOptions).strip(\"()\"))"))
+
+                installApplicationModuleToCluster(str(appInstallOptions).strip("()"))
+
+                infoLogger.log(logging.INFO, str("Installation of {0} to cluster {1} complete.").format(appName, clusterName))
+                consoleInfoLogger.log(logging.INFO, str("Installation of {0} to cluster {1} complete.").format(appName, clusterName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}: {1} {2}").format(appPath, clusterName, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
+            consoleErrorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot install application.").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot install application.").format(appName))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#installSingleModuleToMultipleHosts(appPath, clusterName, webserverNodeName1, webserverName1, webserverNodeName2, webserverName2, vhostName = \"default_host\")"))
+#enddef
+
+def updateSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = "default_host"):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#updateSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = \"default_host\")"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName))
+    debugLogger.log(logging.DEBUG, str(webserverName))
+    debugLogger.log(logging.DEBUG, str(vhostName))
+
+    appFileName = getFileNameFromPath(str(appPath))
+    appName = getAppDisplayName(str(appPath))
+    appModuleName = removeExtraExtension(getAppModuleName(str(appPath)), 4)
+    appWarName = getAppWarName(str(appPath))
+
+    debugLogger.log(logging.DEBUG, str(appFileName))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appModuleName))
+    debugLogger.log(logging.DEBUG, str(appWarName))
+
+    appMappingOptions = (str("-MapModulesToServers [[{0} {1},WEB-INF/web.xml "
+        "WebSphere:cell={2},cluster={3}+WebSphere:cell={2},node={4},server={5}]]"
+    ).format(appModuleName, appWarName, targetCell, clusterName, webserverNodeName, webserverName))
+
+    debugLogger.log(logging.DEBUG, str(appMappingOptions))
+
+    if (len(appMappingOptions != 0)):
+        appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+            "-nouseMetaDataFromBinary -nodeployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+            "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+            "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+        ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
+
+        debugLogger.log(logging.DEBUG, str(appInstallOptions))
+
+        if (len(appInstallOptions) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command updateApplicationModuleToCluster()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: updateApplicationModuleToCluster(str(appInstallOptions).strip(\"()\"))"))
+
+                updateApplicationModuleToCluster(str(appInstallOptions).strip("()"))
+
+                infoLogger.log(logging.INFO, str("Update of application {0} to cluster {1} complete.").format(appName, clusterName))
+                consoleInfoLogger.log(logging.INFO, str("Update of application {0} to cluster {1} complete.").format(appName, clusterName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}: {1} {2}").format(appPath, clusterName, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot update application.").format(appName))
+            consoleErrorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot update application.").format(appName))
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot update application.").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No application mapping options were found for application {0}. Cannot update application.").format(appName))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#updateSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webserverName, vhostName = \"default_host\")"))
+#enddef
+
+def installSingleEJBModuleToSingleHost(appPath, clusterName):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#installSingleEJBModuleToSingleHost(appPath, clusterName)"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName))
+    debugLogger.log(logging.DEBUG, str(webserverName))
+    debugLogger.log(logging.DEBUG, str(vhostName))
+
+    appFileName = getFileNameFromPath(str(appPath))
+    appName = getAppDisplayName(str(appPath))
+    appModuleName = removeExtraExtension(getAppModuleName(str(appPath)), 4)
+    appWarName = getAppWarName(str(appPath))
+
+    debugLogger.log(logging.DEBUG, str(appFileName))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appModuleName))
+    debugLogger.log(logging.DEBUG, str(appWarName))
+
+    appMappingOptions = (str("-MapModulesToServers [[{0} {1},WEB-INF/web.xml "
+        "WebSphere:cell={2},cluster={3}+WebSphere:cell={2},node={4},server={5}]]"
+    ).format(appModuleName, appWarName, targetCell, clusterName, webserverNodeName, webserverName))
+
+    debugLogger.log(logging.DEBUG, str(appMappingOptions))
+
+    if (len(appMappingOptions != 0)):
+        appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+            "-nouseMetaDataFromBinary -deployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+            "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+            "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+        ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
+
+        debugLogger.log(logging.DEBUG, str(appInstallOptions))
+
+        if (len(appInstallOptions) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command installEJBApplicationModuleToCluster()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: installEJBApplicationModuleToCluster(str(appInstallOptions).strip(\"()\"))"))
+
+                installEJBApplicationModuleToCluster(str(appInstallOptions).strip("()"))
+
+                infoLogger.log(logging.INFO, str("Installation of EJB application {0} to cluster {1} complete.").format(appName, clusterName))
+                consoleInfoLogger.log(logging.INFO, str("Installation of EJB application {0} to cluster {1} complete.").format(appName, clusterName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred installing EJB application {0} to cluster {1}: {1} {2}").format(appPath, clusterName, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred installing EJB application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot install application.").format(appName))
+            consoleErrorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot install application.").format(appName))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No application mapping options were found for EJB application {0}. Cannot install application.").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No application mapping options were found for EJB application {0}. Cannot install application.").format(appName))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#installSingleEJBModuleToSingleHost(appPath, clusterName"))
+#enddef
+
+def updateSingleEJBModuleToSingleHost(appPath, clusterName):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#updateSingleEJBModuleToSingleHost(appPath, clusterName)"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, str(webserverNodeName))
+    debugLogger.log(logging.DEBUG, str(webserverName))
+    debugLogger.log(logging.DEBUG, str(vhostName))
+
+    appFileName = getFileNameFromPath(str(appPath))
+    appName = getAppDisplayName(str(appPath))
+    appModuleName = removeExtraExtension(getAppModuleName(str(appPath)), 4)
+    appWarName = getAppWarName(str(appPath))
+
+    debugLogger.log(logging.DEBUG, str(appFileName))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appModuleName))
+    debugLogger.log(logging.DEBUG, str(appWarName))
+
+    appMappingOptions = (str("-MapModulesToServers [[{0} {1},WEB-INF/web.xml "
+        "WebSphere:cell={2},cluster={3}+WebSphere:cell={2},node={4},server={5}]]"
+    ).format(appModuleName, appWarName, targetCell, clusterName, webserverNodeName, webserverName))
+
+    debugLogger.log(logging.DEBUG, str(appMappingOptions))
+
+    if (len(appMappingOptions != 0)):
+        appInstallOptions = (str("[-nopreCompileJSPs -installed.ear.destination $(APP_INSTALL_ROOT)/{0}/{1} -distributeApp "
+            "-nouseMetaDataFromBinary -deployejb -appname {2} -createMBeansForResources -noreloadEnabled -nodeployws "
+            "-validateinstall warn -processEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude "
+            "-noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenableClientModule -clientMode isolated -novalidateSchema {4}]"
+        ).format(targetCell, appFileName, appName, str(appMappingOptions).strip("()")))
+
+        debugLogger.log(logging.DEBUG, str(appInstallOptions))
+
+        if (len(appInstallOptions) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command updateEJBApplicationModuleToCluster()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: updateEJBApplicationModuleToCluster(str(appInstallOptions).strip(\"()\"))"))
+
+                updateEJBApplicationModuleToCluster(str(appInstallOptions).strip("()"))
+
+                infoLogger.log(logging.INFO, str("Update of EJB application {0} to cluster {1} complete.").format(appName, clusterName))
+                consoleInfoLogger.log(logging.INFO, str("Update of EJB application {0} to cluster {1} complete.").format(appName, clusterName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred updating EJB application {0} to cluster {1}: {1} {2}").format(appPath, clusterName, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred updating EJB application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot update application.").format(appName))
+            consoleErrorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot update application.").format(appName))
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot update application.").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No application mapping options were found for EJB application {0}. Cannot update application.").format(appName))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#updateSingleEJBModuleToSingleHost(appPath, clusterName"))
+#enddef
+
+def modifyStartupWeightForApplication(appPath, startWeight = 50):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#modifyStartupWeightForApplication(appPath, startWeight)"))
+    debugLogger.log(logging.DEBUG, str(appPath))
+    debugLogger.log(logging.DEBUG, str(startWeight))
+
+    appName = getAppDisplayName(appPath)
+    appDeployment = AdminConfig.getid(str("/Deployment:{0}/").format(appName))
+
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appDeployment))
+
+    if (len(appDeployment) != 0):
+        appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
+
+        debugLogger.log(logging.DEBUG, str(appDeploymentObject))
+
+        if (len(appDeploymentObject != 0)):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command updateStartupWeightForApplication()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: updateStartupWeightForApplication(str(appDeploymentObject), startWeight)"))
+
+                updateStartupWeightForApplication(str(appDeploymentObject), startWeight)
+
+                infoLogger.log(logging.INFO, str("Update of application {0} complete. New startup weight: {2}").format(appName, startWeight))
+                consoleInfoLogger.log(logging.INFO, str("Update of application {0} complete. New startup weight: {2}.").format(appName, startWeight))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}: {1} {2}").format(appName, startWeight, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}. Please review logs.").format(appName, startWeight))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))
+            consoleErrorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))
+        consoleErrorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#modifyStartupWeightForApplication(appPath, startWeight"))
+#enddef
+
+def changeApplicationStatus(appName, newStatus = "true"):
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#changeApplicationStatus(appName, newStatus = \"true\")"))
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(newStatus))
+
+    appDeployment = AdminConfig.getid(str("/Deployment:{0}/").format(appName))
+    appDeploymentObject = AdminConfig.showAttribute(appDeployment, "deployedObject")
+
+    debugLogger.log(logging.DEBUG, str(appName))
+    debugLogger.log(logging.DEBUG, str(appDeployment))
+
+    if (len(appDeployment) != 0):
+        debugLogger.log(logging.DEBUG, str(appDeploymentObject))
+
+        if (len(appDeploymentObject != 0)):
+            try:
+                debugLogger.log(logging.DEBUG, str("Executing command updateStartupWeightForApplication()..."))
+                debugLogger.log(logging.DEBUG, str("EXEC: updateStartupWeightForApplication(str(appDeploymentObject), newStatus)"))
+
+                updateStartupWeightForApplication(str(appDeploymentObject), newStatus)
+
+                infoLogger.log(logging.INFO, str("Update of application {0} complete. New startup weight: {2}").format(appName, newStatus))
+                consoleInfoLogger.log(logging.INFO, str("Update of application {0} complete. New startup weight: {2}.").format(appName, newStatus))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}: {1} {2}").format(appName, newStatus, str(exception), str(parms)))
+                consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}. Please review logs.").format(appName, newStatus))
+            finally:
+                saveWorkspaceChanges()
+                syncAllNodes(nodeList)
+            #endtry
+        else:
+            errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
+            consoleErrorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))
+        consoleErrorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#modifyStartupWeightForApplication(appName, newStatus"))
 #enddef
 
 def performAppUninstall(appName):
-    print("Removing application " + appName + "..")
+    debugLogger.log(logging.DEBUG, str("ENTER: manageApplications#performAppUninstall(appName)"))
+    debugLogger.log(logging.DEBUG, str(appName))
 
-    if (appName):
+    appDeployment = AdminConfig.getid(str("/Deployment:{0}/").format(appName))
+
+    debugLogger.log(logging.DEBUG, str(appDeployment))
+
+    if (len(appDeployment) != 0):
         try:
-            print("Removing application %s..") % (appName)
+            debugLogger.log(logging.DEBUG, str("Executing command removeInstalledApplication()..."))
+            debugLogger.log(logging.DEBUG, str("EXEC: removeInstalledApplication(appName)"))
 
-            AdminApp.uninstall(appName)
+            removeInstalledApplication(appName)
+
+            infoLogger.log(logging.INFO, str("Removal of application {0} complete.").format(appName))
+            consoleInfoLogger.log(logging.INFO, str("Removal of application {0} complete.").format(appName))
         except:
-            raise ("An error occurred while removing application %s") % (appName)
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred removing application {0}: {1} {2}").format(appName, str(exception), str(parms)))
+            consoleErrorLogger.log(logging.ERROR, str("An error occurred removing application {0}. Please review logs.").format(appName))
         finally:
             saveWorkspaceChanges()
-            syncAllNodes(nodeList, targetCell)  
+            syncAllNodes(nodeList)
         #endtry
     else:
-        raise ("No application was provided to uninstall")
+        errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))
+        consoleErrorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: manageApplications#performAppUninstall(appName"))
 #enddef
 
 def printHelp():
