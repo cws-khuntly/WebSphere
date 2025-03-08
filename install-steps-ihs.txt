@@ -32,6 +32,13 @@ mkdir -pv /opt/IBM/backups;
 
 tar -C /opt/IBM -cvf - ./WebSphere ./HTTPServer | gzip > /backups/WebSphere/WebServices-full-backup-PostInstall-$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
 
+CONFIGURE IHS ADMIN
+/opt/IBM/HTTPServer/bin/gskcapicmd -keydb -create -db /opt/IBM/HTTPServer/conf.ssl.d/admin/admin.kdb -pw "***" -stash -strong
+
+/opt/IBM/HTTPServer/bin/gskcapicmd -cert -create -db /opt/IBM/HTTPServer/conf.ssl.d/admin/admin.kdb -stashed -size 4096 \
+    -dn "CN=admin.<fqdn>,O=CWS,OU=IBM HTTP Server,L=Buffalo,ST=NY,C=US" -label admin-server \
+    -san_dnsname "admin-server.<fqdn>admin-server" -san_ipaddr "<ip address>" -sigalg sha512
+
 CREATE IHS INSTANCE
 mkdir -pv /opt/IBM/HTTPServer/logs/WebServices /opt/IBM/HTTPServer/conf.d/WebServices /opt/IBM/WebSphere/Plugins/logs/WebServicesIHS /opt/IBM/WebSphere/Plugins/conf/WebServicesIHS
 cp /opt/installables/WebSphere/IHS/conf/WebServices/httpd.conf /opt/IBM/HTTPServer/conf/WebServices/httpd.conf

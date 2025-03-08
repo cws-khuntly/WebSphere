@@ -27,7 +27,7 @@ infoLogger = logging.getLogger(str("info-logger"))
 consoleInfoLogger = logging.getLogger(str("info-logger"))
 consoleErrorLogger = logging.getLogger(str("info-logger"))
 
-lineSplit = java.lang.System.getProperty('line.separator')
+lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
@@ -111,7 +111,7 @@ def remapApplication(appName, targetCluster, vhostName = "default_host"):
             consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}. Please review logs.").format(appName, targetCluster))
         finally:
             saveWorkspaceChanges()
-            syncAllNodes(nodeList)
+            syncAllNodes(nodeList, targetCell)
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No module was found for application {0}").format(appName))
@@ -170,7 +170,7 @@ def installSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, web
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
@@ -243,7 +243,7 @@ def installSingleModuleToMultipleHosts(appPath, clusterName, webserverNodeName1,
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred installing application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot install application.").format(appName))
@@ -306,7 +306,7 @@ def updateSingleModuleToSingleHost(appPath, clusterName, webserverNodeName, webs
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application installation options were found for application {0}. Cannot update application.").format(appName))
@@ -369,7 +369,7 @@ def installSingleEJBModuleToSingleHost(appPath, clusterName):
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred installing EJB application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot install application.").format(appName))
@@ -432,7 +432,7 @@ def updateSingleEJBModuleToSingleHost(appPath, clusterName):
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred updating EJB application {0} to cluster {1}. Please review logs.").format(appPath, clusterName))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application installation options were found for EJB application {0}. Cannot update application.").format(appName))
@@ -478,7 +478,7 @@ def modifyStartupWeightForApplication(appPath, startWeight = 50):
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}. Please review logs.").format(appName, startWeight))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))
@@ -522,7 +522,7 @@ def changeApplicationStatus(appName, newStatus = "true"):
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} with start weight of {1}. Please review logs.").format(appName, newStatus))
             finally:
                 saveWorkspaceChanges()
-                syncAllNodes(nodeList)
+                syncAllNodes(nodeList, targetCell)
             #endtry
         else:
             errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application.").format(appName, targetCell))
@@ -560,7 +560,7 @@ def performAppUninstall(appName):
             consoleErrorLogger.log(logging.ERROR, str("An error occurred removing application {0}. Please review logs.").format(appName))
         finally:
             saveWorkspaceChanges()
-            syncAllNodes(nodeList)
+            syncAllNodes(nodeList, targetCell)
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No application deployment was found for application {0} in cell {1}. Cannot update application").format(appName, targetCell))

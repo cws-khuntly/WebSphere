@@ -34,9 +34,12 @@ CREATE SERVER INSTANCE
     -hostName fedora-appserver -cellName fedora-appserverCell -nodeName 
     -profileName AppServices 
 
-
--create -profileName AppServices -profilePath /opt/IBM/WebSphere/profiles/AppServices \
-    -cellName fedora-appserverCell -nodeName fedora-appserverNode -federateLater -serverName AppServices
+/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh \
+    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/dmgr/ -isDefault \
+    -enableAdminSecurity true -adminUserName wasadm -adminPassword "***" \
+    -appServerNodeName dmgrNode -cellName dmgrCell -nodeName dmgrNode -hostName fedora-appserver \
+    -profileName dmgr -profilePath /opt/IBM/WebSphere/profiles/dmgr \
+    -serverName dmgr -serverType DEPLOYMENT_MANAGER -applyPerfTuningSetting standard -create
 
 vi /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props
 

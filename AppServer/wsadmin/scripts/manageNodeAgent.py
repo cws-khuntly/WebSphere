@@ -56,39 +56,6 @@ def configureNodeAgent(nodeName, runAsUser="", runAsGroup=""):
     #endif
 #enddef
 
-def setProcessExec(targetServer, runAsUser, runAsGroup):
-    if (targetServer):
-        processExec = AdminConfig.list("ProcessExecution", targetServer)
-
-	    if (processExec):
-        	if ((runAsUser) and (runAsGroup)):
-        	    AdminConfig.modify(processExec, '[[runAsUser %s] [runAsGroup %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser, runAsGroup)
-        	elif (runAsUser):
-        	    AdminConfig.modify(processExec, '[[runAsUser %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser)
-        	else:
-            	AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-            #endif
-        else:
-            raise ("Process execution configuration could not be found.")
-        #end if
-    else:
-        raise ("No server was provided to work against.")
-    #endif
-#enddef
-
-def setJVMProperties(serverName, nodeName, initialHeapSize=2048, maxHeapSize=2048):
-    genericJvmArgs = ("-Djava.io.tmpdir=${WAS_TEMP_DIR} -Xgcpolicy:gencon -Xnoagent -Dcom.ibm.cacheLocalHost=true "
-        "-Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 -Xshareclasses:none -Dcom.ibm.xml.xlxp.jaxb.opti.level=3 "
-        "-Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -Djava.awt.headless=true -Djava.compiler=NONE")
-
-    if ((serverName) and (nodeName)):
-        AdminTask.setJVMProperties('[-serverName %s -nodeName %s -verboseModeGarbageCollection false -initialHeapSize %s -maximumHeapSize + %s -debugMode false -genericJvmArguments %s]') \
-            % (serverName, nodeName, initialHeapSize, maxHeapSize)
-    else:
-        raise ("No server was found with the provided name: %s") % (serverName)
-    #endif
-#enddef
-
 def printHelp():
     print("This script configures a deployment manager for optimal settings.")
     print("Execution: wsadmin.sh -lang jython -f configureDeploymentManager.py <runAsUser> <runAsGroup>")
