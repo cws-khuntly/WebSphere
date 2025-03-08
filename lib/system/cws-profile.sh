@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+#==============================================================================
+#
+#          FILE:  /etc/profile.d/cws.sh
+#         USAGE:  . /etc/profile.d/cws.sh
+#   DESCRIPTION:  Sets application-wide functions
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#
+#==============================================================================
+
 #=====  FUNCTION  =============================================================
 #          NAME:  showHostInfo
 #   DESCRIPTION:  Re-loads existing dotfiles for use
@@ -8,14 +26,6 @@
 #==============================================================================
 function showHostInfo()
 (
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    cname="F01-userProfile";
-    function_name="${cname}#${FUNCNAME[0]}";
-    return_code=0;
-
     ## system information
     host_system_name="$(hostname -f | tr '[:upper:]' '[:lower:]')";
     host_ip_address=("$(ip addr show 2> /dev/null | grep "inet" | grep -E -v "(inet6|127.0.0.1)" | awk '{print $2}' | tr "\n" " ")");
@@ -66,42 +76,6 @@ function showHostInfo()
     [[ -n "${host_memory_size}" ]] && unset -v host_memory_size;
     [[ -n "${swap_memory_size}" ]] && unset -v swap_memory_size;
     [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    return "${return_code}";
 )
 
-#=====  FUNCTION  =============================================================
-#          NAME:  logoutUser
-#   DESCRIPTION:  Executes necessary commands during user logout
-#    PARAMETERS:  None
-#       RETURNS:  0 regardless of result
-#==============================================================================
-function logoutUser()
-(
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    cname="F01-userProfile";
-    function_name="${cname}#${FUNCNAME[0]}";
-    return_code=0;
-    error_count=0;
-
-    ## turn off ssh-agent and keychain
-    [[ -n "$(pidof ssh-agent)" ]] && pkill ssh-agent;
-    [[ -f "${HOME}/.ssh/ssh-agent.env" ]] && rm -f "${HOME}/.ssh/ssh-agent.env";
-
-    ## clear terminal scrollback
-    printf "\033c";
-
-    [[ -n "${error_count}" ]] && unset -v error_count;
-    [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    exit;
-)
+showHostInfo;
