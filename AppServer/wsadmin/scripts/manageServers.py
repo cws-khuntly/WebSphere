@@ -33,6 +33,8 @@ targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def configureDeploymentManager():
+    debugLogger.log(logging.DEBUG, str("ENTER: configureDeploymentManager()"))
+
     if (len(configFile) != 0):
         nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
         serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
@@ -212,6 +214,8 @@ def configureDeploymentManager():
         errorLogger.log(logging.ERROR, str("No configuration file was provided."))
         consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: configureDeploymentManager()"))
 #enddef
 
 def printHelp():
