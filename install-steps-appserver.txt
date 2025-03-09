@@ -30,16 +30,10 @@ tar -C /opt/IBM -cvf - ./WebSphere | gzip > /backups/WebSphere/WebSphere-full-ba
 CREATE SERVER INSTANCE
 
 /opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh \
-    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/default -isDefault -applyPerfTuningSetting standard \
-    -hostName fedora-appserver -cellName fedora-appserverCell -nodeName 
-    -profileName AppServices 
-
-/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh \
-    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/dmgr/ -isDefault \
-    -enableAdminSecurity true -adminUserName wasadm -adminPassword "***" \
-    -appServerNodeName dmgrNode -cellName dmgrCell -nodeName dmgrNode -hostName fedora-appserver \
-    -profileName dmgr -profilePath /opt/IBM/WebSphere/profiles/dmgr \
-    -serverName dmgr -serverType DEPLOYMENT_MANAGER -applyPerfTuningSetting standard -create
+    -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/default -isDefault \
+    -appServerNodeName dmgrNode -cellName fedora-appserverCell -nodeName fedora-appserverNode \
+    -hostName fedora-appserver -profileName AppServices -profilePath /opt/IBM/WebSphere/profiles/AppServices \
+    -serverName AppServices01 -applyPerfTuningSetting standard -create
 
 vi /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props; chmod 600 /opt/IBM/WebSphere/profiles/AppServices/properties/soap.client.props
 
@@ -55,13 +49,13 @@ Update /opt/IBM/WebSphere/AppServer/bin/wsadmin.sh
 set +o history
 /opt/IBM/WebSphere/profiles/AppServices/bin/addNode.sh \
     fedora-appserver 8879 -conntype SOAP -includeapps -includebuses \
-    -username wasadm -password *** -profileName AppServices
+    -username wasadm -password "_m.@B.CqW9QrToK2pTEJ" -profileName AppServices
 set -o history
 
 Cluster ->
 First Node:
 /opt/IBM/WebSphere/profiles/AppServices/bin/wsadmin.sh -lang jython -conntype SOAP -host fedora-appserver -port 8879
- - server = AdminConfig.getid('/Cell:dmgrCell01/Node:fedora-appserverNode/Server:AppServices/')
+ - server = AdminConfig.getid("/Cell:dmgrCell/Node:fedora-appserverNode/Server:AppServices01/")
  - AdminConfig.convertToCluster(server, 'AppServicesCluster')
  - AdminConfig.save()
  - AdminNodeManagement.syncActiveNodes()

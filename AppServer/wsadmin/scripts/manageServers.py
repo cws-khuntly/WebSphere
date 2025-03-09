@@ -43,7 +43,7 @@ def configureDeploymentManager():
         debugLogger.log(logging.DEBUG, str(serverName))
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
-            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
             debugLogger.log(logging.DEBUG, str(targetServer))
 

@@ -19,6 +19,7 @@
 #==============================================================================
 
 import sys
+import time
 import logging
 
 errorLogger = logging.getLogger(str("error-logger"))
@@ -27,199 +28,137 @@ infoLogger = logging.getLogger(str("info-logger"))
 
 lineSplit = java.lang.System.getProperty("line.separator")
 
-def configureAutoRestart(targetServer, autoRestart="STOPPED"):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
+def configureAutoRestart(targetMonitorPolicy, policyOption):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureAutoRestart(targetMonitorPolicy, policyOption)"))
+    debugLogger.log(logging.DEBUG, str(targetMonitorPolicy))
+    debugLogger.log(logging.DEBUG, str(policyOption))
 
-        monitorPolicy = AdminConfig.list("MonitoringPolicy", targetServer)
+    if ((len(targetMonitorPolicy) != 0) and (len(policyOption) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(monitorPolicy, str(\"[[maximumStartupAttempts \"3\"] [pingTimeout \"300\"] [pingInterval \"60\"] [autoRestart \"true\"] [nodeRestartState \"{0}\"]]\").format(policyOption))"))
 
-        if (monitorPolicy):
-            AdminConfig.modify(monitorPolicy, '[[maximumStartupAttempts "3"] [pingTimeout "300"] [pingInterval "60"] [autoRestart "true"] [nodeRestartState "%s"]]') % (autoRestart)
-        else:
-            raise ("Error configuring the monitoring policy for server %s.") % (targetServer)
-        #endif
+            AdminConfig.modify(targetMonitorPolicy, str("[[maximumStartupAttempts \"3\"] [pingTimeout \"300\"] [pingInterval \"60\"] [autoRestart \"true\"] [nodeRestartState \"{0}\"]]").format(policyOption))
+
+            infoLogger.log(logging.INFO, str("Completed configuration of monitoring policy {0}. New startup state: {1}").format(targetMonitorPolicy, policyOption))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}".format(targetMonitorPolicy, policyOption, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}".format(targetMonitorPolicy, policyOption, str(exception), str(parms))))
+        #endtry
     else:
-        raise ("No server was provided to configure.")
+        errorLogger.log(logging.ERROR, str("No monitor policy was provided or no policy option was provided."))
+
+        raise Exception(str("No monitor policy was provided or no policy option was provided."))
     #endif
-    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureAutoRestart(monitorPolicy, policyOption)"))
 #enddef
 
-def configureWebContainer(targetServer, defaultVhostName="default_host"):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
+def configureWebContainer(targetWebContainer, vhostName):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureWebContainer(targetWebContainer, vhostName)"))
+    debugLogger.log(logging.DEBUG, str(targetWebContainer))
+    debugLogger.log(logging.DEBUG, str(vhostName))
 
-        targetWebContainer = AdminConfig.list("WebContainer", targetServer)
+    if ((len(targetWebContainer) != 0) and (len(vhostName) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.create()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]\")"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]\")"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]\")"))
 
-        if (targetWebContainer):
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.extractHostHeaderPort"] [description ""] [value "true"] [required "false"]]')
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "trusthostheaderport"] [description ""] [value "true"] [required "false"]]')
-            AdminConfig.create('Property', targetWebContainer, '[[validationExpression ""] [name "com.ibm.ws.webcontainer.invokefilterscompatibility"] [description ""] [value "true"] [required "false"]]')
+            AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]")
+            AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]")
+            AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]")
 
-            AdminConfig.modify(targetWebContainer, '[[defaultVirtualHostName %s]]') % (defaultVhostName)
+            infoLogger.log(logging.INFO, str("Completed adding web container properties in web container {0} with default host {1}.").format(targetWebContainer, vhostName))
 
-            setServletCaching(targetServer)
-            setPortletCaching(targetServer)
-        else:
-            raise ("Error configuring the web container for server %s.") % (targetServer)
-        #endif
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, \"[[defaultVirtualHostName {0}]]\").format(setVirtualHost)"))
+
+            AdminConfig.modify(targetWebContainer, "[[defaultVirtualHostName {0}]]").format(vhostName)
+
+            infoLogger.log(logging.INFO, str("Completed configuration of web container {0} with default host {1}").format(targetWebContainer, vhostName))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+        #endtry
     else:
-        raise ("No server was provided to configure.")
+        errorLogger.log(logging.ERROR, str("No web container was provided or no virtual host was provided."))
+
+        raise Exception(str("No web container was provided or no virtual host was provided."))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureWebContainer(targetWebContainer, vhostName)"))
 #enddef
 
-def configureHAManager(targetServer):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
+def configureHAManager(targetHAManager, enableHA):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureHAManager(targetHAManager, enableHA)"))
+    debugLogger.log(logging.DEBUG, str(targetHAManager))
+    debugLogger.log(logging.DEBUG, str(enableHA))
 
-        haManager = AdminConfig.list("HAManagerService", targetServer)
+    if ((len(targetHAManager) != 0) and (len(enableHA) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(haManager, str(\"[[enable \"{0}\"] [activateEnabled \"{0}\"] [isAlivePeriodSec \"120\"] [transportBufferSize \"10\"]]\").format(isEnabled))"))
 
-        if (targetWebContainer):
-            AdminConfig.modify(haManager, '[[enable "false"] [activateEnabled "true"] [isAlivePeriodSec "120"] [transportBufferSize "10"] [activateEnabled "true"]]')
-        else:
-            raise ("Error configuring HAManager for server %s.") % (targetServer)
-        #endif
+            AdminConfig.modify(targetHAManager, str("[[enable \"{0}\"] [activateEnabled \"{0}\"] [isAlivePeriodSec \"120\"] [transportBufferSize \"10\"]]").format(enableHA))
+
+            infoLogger.log(logging.INFO, str("Completed HA Manager configuration {1}. New HAManager state: {1}").format(targetHAManager, enableHA))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}".format(targetHAManager, enableHA, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}".format(targetHAManager, enableHA, str(exception), str(parms))))
+        #endtry
     else:
-        raise ("No server was provided to configure.")
+        errorLogger.log(logging.ERROR, str("No HA Manager service was provided or no HA Manager state was provided."))
+
+        raise Exception(str("No HA Manager service was provided or no HA Manager state was provided."))
     #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureHAManager(targetHAManager, enableHA)"))
 #enddef
 
-def setServletCaching(targetServer, isServletCachingEnabled=False):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
-
-        targetWebContainer = AdminConfig.list("WebContainer", targetServer)
-
-        if (targetWebContainer):
-            AdminConfig.modify(targetWebContainer, '[[enableServletCaching %s]]') % (isServletCachingEnabled)
-        else:
-            raise ("Error configuring the web container for server %s.") % (targetServer)
-        #endif
-    else:
-        raise ("No server was provided to configure.")
-    #endif
-#enddef
-
-def setPortletCaching(targetServer, isPortletCachingEnabled=False):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
-
-        targetPortletContainer = AdminConfig.list("PortletContainer", targetServer)
-
-        if (targetPortletContainer):
-            AdminConfig.modify(targetPortletContainer, '[[enablePortletCaching %s]]') % (isPortletCachingEnabled)
-        else:
-            raise ("Error configuring portlet caching for server %s.") % (targetServer)
-        #endif
-    else:
-        raise ("No server was provided to configure.")
-    #endif
-#enddef
-
-def setServerTrace(targetServer, traceSpec="*=info", outputType="SPECIFIED_FILE", maxBackupFiles=50, rolloverSize=50, traceFilename='$' + ' {LOG_ROOT}/' + '$' + '{SERVER}/trace.log'):
-    if (targetServer):
-        print ("Starting configuration for server " + serverName + "...")
-
-        targetTraceService = AdminConfig.list("TraceService", targetServer)
-
-        if (targetTraceService):
-            AdminConfig.modify(targetTraceService, [['startupTraceSpecification', traceSpec]] )
-            AdminConfig.modify(targetTraceService, [['traceOutputType', outputType]] )
-            AdminConfig.modify(targetTraceService, [['traceLog', [['fileName', traceFilename], ['maxNumberOfBackupFiles', '%d' % maxBackupFiles], ['rolloverSize', '%d' % rolloverSize ]]]] )
-        else:
-            raise "Error configuring the web container for server " + serverName + "."
-        #endif
-    else:
-        raise "No server was found with the provided name: " + serverName + "."
-    #endif
-#enddef
-
-def setProcessExec(targetServer, runAsUser, runAsGroup):
-    if ((targetServer)):
-        processExec = AdminConfig.list("ProcessExecution", targetServer)
-
-        if ((runAsUser) and (runAsGroup)):
-            AdminConfig.modify(processExec, '[[runAsUser %s] [runAsGroup %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser, runAsGroup)
-        elif (runAsUser):
-            AdminConfig.modify(processExec, '[[runAsUser %s] [runInProcessGroup "0"] [processPriority "20"] [umask "022"]]') % (runAsUser)
-        else:
-            AdminConfig.modify(processExec, '[[runInProcessGroup "0"] [processPriority "20"] [umask "022"]]')
-        #end if
-    else:
-        raise "No server was found with the provided name: " + serverName + "."
-    #endif
-#enddef
-
-def setJVMProperties(serverName, nodeName, initialHeapSize=4096, maxHeapSize=4096):
-    genericJvmArgs = ("${WPS_JVM_ARGUMENTS_EXT} -Dibm.stream.nio=true -Djava.io.tmpdir=${WAS_TEMP_DIR} -Xdump:stack:events=allocation,filter=#10m -Xgcpolicy:gencon "
-        "-verbose:gc -Xverbosegclog:${SERVER_LOG_ROOT}/verbosegc.%Y%m%d.%H%M%S.%pid.txt,20,10000 -Dcom.ibm.websphere.alarmthreadmonitor.threshold.millis=40000 "
-        "-Xmns1536M -Xmnx1536M -XX:MaxDirectMemorySize=256000000 -Xshareclasses:none -Dsun.reflect.inflationThreshold=0 -Djava.security.egd=file:/dev/./urandom "
-        "-Dcom.sun.jndi.ldap.connect.pool.maxsize=200 -Dcom.sun.jndi.ldap.connect.pool.prefsize=200 -Dcom.sun.jndi.ldap.connect.pool.timeout=3000 "
-        "-Djava.net.preferIPv4Stack=true -Dsun.net.inetaddr.ttl=600 -DdisableWSAddressCaching=true -Djava.awt.headless=true -Dcom.ibm.cacheLocalHost=true"
-        "-Dcom.ibm.websphere.webservices.http.connectionKeepAlive=true -Dcom.ibm.websphere.webservices.http.maxConnection=1200 -Xnoagent "
-        "-Dcom.ibm.websphere.webservices.http.connectionIdleTimeout=6000 -Dcom.ibm.websphere.webservices.http.connectionPoolCleanUpTime=6000 "
-        "-Dcom.ibm.websphere.webservices.http.connectionTimeout=0 -Dlog4j2.formatMsgNoLookups=true -Xjit:iprofilerMemoryConsumptionLimit=67108864 "
-        "-Dephox.config.file=/opt/ephox/application.conf -Xrunjdwp=dt_socket,server=y,suspend=n,address=7792 -Dcom.ibm.xml.xlxp.jaxb.opti.level=3")
-
-    if ((serverName) and (nodeName)):
-        AdminTask.setJVMProperties('[-serverName %s -nodeName %s -verboseModeGarbageCollection true -initialHeapSize %s -maximumHeapSize + %s -debugMode false -genericJvmArguments %s]') \
-            % (serverName, nodeName, initialHeapSize, maxHeapSize)
-    else:
-        raise "No server was found with the provided name: " + serverName + "."
-    #endif
-#enddef
-
-def configureCookies(targetServer, cookieName = "JSESSIONID"):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureCookies(targetServer, cookieName = \"JSESSIONID\")"))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+def configureCookies(targetCookie, cookieName, cookiePath):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureCookies(targetCookie, cookieName, cookiePath)"))
+    debugLogger.log(logging.DEBUG, str(targetCookie))
     debugLogger.log(logging.DEBUG, str(cookieName))
+    debugLogger.log(logging.DEBUG, str(cookiePath))
 
-    if (len(targetServer) != 0):
-        debugLogger.log(logging.DEBUG, str(targetServer))
+    if ((len(targetCookie) != 0) and (len(cookieName) != 0) and (len(cookiePath) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetCookie, str(\"[[maximumAge \"-1\"] [name \"{0}\"] [domain \"\"] [secure \"true\"] [path \"{1}\"]]\").format(cookieName, cookiePath))"))
 
-        if (len(configFile) != 0):
-            serverCookieName = returnPropertyConfiguration(configFile, str("server-cookie-settings"), str("cookie-name")) or cookieName
-            targetCookie = AdminConfig.list("Cookie", targetServer)
+            AdminConfig.modify(targetCookie, str("[[maximumAge \"-1\"] [name \"{0}\"] [domain \"\"] [secure \"true\"] [path \"{1}\"]]").format(cookieName, cookiePath))
 
-            debugLogger.log(logging.DEBUG, str(serverCookieName))
-            debugLogger.log(logging.DEBUG, str(targetCookie))
+            infoLogger.log(logging.INFO, str("Completed configuration of server cookie configuration {0} with values {1} {2}.").format(targetCookie, cookieName, cookiePath))
+        except:
+            (exception, parms, tback) = sys.exc_info()
 
-            if (len(targetCookie) != 0):
-                try:
-                    debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetCookie, \"[[maximumAge \"-1\"] [name \"{0}\"] [domain \"\"] [secure \"true\"] [path \"/\"]]\").format(serverCookieName)"))
+            errorLogger.log(logging.ERROR, str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}".format(targetCookie, cookieName, cookiePath, str(exception), str(parms))))
 
-                    AdminConfig.modify(targetCookie, str("[[maximumAge \"-1\"] [name \"{0}\"] [domain \"\"] [secure \"true\"] [path \"/\"]]").format(serverCookieName))
-
-                    infoLogger.log(logging.INFO, str("Completed configuration of server cookie configuration {0}.").format(targetCookie))
-                except:
-                    (exception, parms, tback) = sys.exc_info()
-
-                    errorLogger.log(logging.ERROR, str("An error occurred updating cookie configuration {0} for server {1}: {2} {3}".format(targetCookie, targetServer, str(exception), str(parms))))
-
-                    raise Exception(str("An error occurred updating cookie configuration {0} for server {1}: {2} {3}".format(targetCookie, targetServer, str(exception), str(parms))))
-                #endtry
-            else:
-                errorLogger.log(logging.ERROR, str("No cookie configuration was found for the provided server."))
-
-                raise Exception(str("No cookie configuration was found for the provided server."))
-            #endif
-        else:
-            errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-
-            raise Exception(str("No configuration file was provided."))
-        #endif
+            raise Exception(str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}".format(targetCookie, cookieName, cookiePath, str(exception), str(parms))))
+        #endtry
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No cookie configuration was provided or no cookie name/cookie path was provided."))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No cookie configuration was provided or no cookie name/cookie path was provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureCookies(targetServer, cookieName = \"JSESSIONID\")"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureCookies(targetCookie, cookieName, cookiePath)"))
 #enddef
 
-def configuretargetThreadPools(targetServer, startMinThreads = 0, startMaxThreads = 10, webMinThreads = 20, webMaxThreads = 50, haMinThreads = 0, haMaxThreads = 5, targetPoolNames = ("server.startup", "WebContainer", "HAManagerService.Pool")):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configuretargetThreadPools(targetServer, startMinThreads = 0, startMaxThreads = 10, webMinThreads = 20, webMaxThreads = 50, haMinThreads = 0, haMaxThreads = 5, targetPoolNames = (\"server.startup\", \"WebContainer\", \"HAManagerService.Pool\""))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+def configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, targetPoolNames):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, targetPoolNames)"))
+    debugLogger.log(logging.DEBUG, str(targetThreadPools))
     debugLogger.log(logging.DEBUG, str(startMinThreads))
     debugLogger.log(logging.DEBUG, str(startMaxThreads))
     debugLogger.log(logging.DEBUG, str(webMinThreads))
@@ -228,582 +167,619 @@ def configuretargetThreadPools(targetServer, startMinThreads = 0, startMaxThread
     debugLogger.log(logging.DEBUG, str(haMaxThreads))
     debugLogger.log(logging.DEBUG, str(targetPoolNames))
 
-    if (len(targetServer) != 0):
-        targetThreadPools = AdminConfig.list("targetThreadPool", targetServer).split(lineSplit)
+    if (len(targetThreadPools) != 0):
+        for targetThreadPool in (targetThreadPools):
+            debugLogger.log(logging.DEBUG, str(targetThreadPool))
 
-        debugLogger.log(logging.DEBUG, str(targetThreadPools))
+            targetPoolName = targetThreadPool.split("(")[0]
 
-        if (len(targetThreadPools) != 0):
-            for targetThreadPool in (targetThreadPools):
-                debugLogger.log(logging.DEBUG, str(targetThreadPool))
+            debugLogger.log(logging.DEBUG, (str(targetPoolName)))
 
-                targetPoolName = targetThreadPool.split("(")[0]
+            if (len(targetPoolName) != 0):
+                try:
+                    debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
 
-                debugLogger.log(logging.DEBUG, (str(targetPoolName)))
+                    if ((targetPoolName == "server.startup") and (len(startMinThreads) != 0) and (len(startMaxThreads) != 0)):
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, str(\"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(startMinThreads, startMaxThreads, targetPoolName))"))
+                        
+                        AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(startMinThreads, startMaxThreads, targetPoolName))
 
-                if (len(targetPoolName) != 0):
-                    try:
-                        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                        infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
+                    elif ((targetPoolName == "WebContainer") and (len(webMinThreads) != 0) and (len(webMaxThreads) != 0)):
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, str(\"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(startupMinThreads, startupMaxThreads, targetPoolName))"))
 
-                        if (targetPoolName == "server.startup"):
-                            startupMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("startup-min-thread-size")) or startMinThreads
-                            startupMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("startup-max-thread-size")) or startMaxThreads
+                        AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(webMinThreads, webMaxThreads, targetPoolName))
 
-                            debugLogger.log(logging.DEBUG, str(startupMinThreads))
-                            debugLogger.log(logging.DEBUG, str(startupMaxThreads))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, \"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(startupMinThreads, startupMaxThreads, targetPoolName)"))
-                            
-                            AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(startupMinThreads, startupMaxThreads, targetPoolName))
+                        infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
+                    elif ((targetPoolName == "HAManagerService.Pool") and (len(haMinThreads) != 0) and (len(haMaxThreads) != 0)):
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, str(\"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(HAManagerMinThreads, HAManagerMaxThreads, targetPoolName))"))
 
-                            infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
-                        elif (targetPoolName == "WebContainer"):
-                            webContainerMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("webcontainer-min-thread-size")) or webMinThreads
-                            webContainerMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("webcontainer-max-thread-size")) or webMaxThreads
+                        AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(haMinThreads, haMaxThreads, targetPoolName))
 
-                            debugLogger.log(logging.DEBUG, str(webContainerMinThreads))
-                            debugLogger.log(logging.DEBUG, str(webContainerMaxThreads))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, \"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(startupMinThreads, startupMaxThreads, targetPoolName)"))
+                        infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
+                    #endif
+                except:
+                    (exception, parms, tback) = sys.exc_info()
 
-                            AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(webContainerMinThreads, webContainerMaxThreads, targetPoolName))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}".format(targetPoolName, targetThreadPool, str(exception), str(parms))))
 
-                            infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
-                        elif (targetPoolName == "HAManagerService.Pool"):
-                            HAManagerMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("hamanager-min-thread-size")) or haMinThreads
-                            HAManagerMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("hamanager-max-thread-size")) or haMaxThreads
-
-                            debugLogger.log(logging.DEBUG, str(HAManagerMinThreads))
-                            debugLogger.log(logging.DEBUG, str(HAManagerMaxThreads))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetThreadPool, \"[[minimumSize \"20\"] [maximumSize \"10\"] [name \"{0}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]\").format(HAManagerMinThreads, HAManagerMaxThreads, targetPoolName)"))
-
-                            AdminConfig.modify(targetThreadPool, str("[[minimumSize \"{0}\"] [maximumSize \"{1}\"] [name \"{2}\"] [inactivityTimeout \"30000\"] [description \"\"] [isGrowable \"false\"]]").format(HAManagerMinThreads, HAManagerMaxThreads, targetPoolName))
-
-                            infoLogger.log(logging.INFO, str("Completed configuration of thread pool name {0} in thread pool {1}.").format(targetPoolName, targetThreadPool))
-                        #endif
-                    except:
-                        (exception, parms, tback) = sys.exc_info()
-
-                        errorLogger.log(logging.ERROR, str("An error occurred updating thread pool name {0} in thread pool {1} for server {2}: {3} {4}".format(targetPoolName, targetThreadPool, targetServer, str(exception), str(parms))))
-
-                        raise Exception(str("An error occurred updating thread pool name {0} in thread pool {1} for server {2}: {3} {4}".format(targetPoolName, targetThreadPool, targetServer, str(exception), str(parms))))
-                    #endtry
-                #endif
-             #endfor
-        else:
-            errorLogger.log(logging.ERROR, str("No thread pools were found for server {0}.").format(targetServer))
-
-            raise Exception(str("No thread pools were found for server {0}.").format(targetServer))
-        #endif
+                    raise Exception(str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}".format(targetPoolName, targetThreadPool, str(exception), str(parms))))
+                #endtry
+            #endif
+            #endfor
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No thread pools were provided to configure."))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No thread pools were provided to configure."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configuretargetThreadPools(targetServer, startMinThreads = 0, startMaxThreads = 10, webMinThreads = 20, webMaxThreads = 50, haMinThreads = 0, haMaxThreads = 5, targetPoolNames = (\"server.startup\", \"WebContainer\", \"HAManagerService.Pool\""))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, targetPoolNames)"))
 #enddef
 
-def configureTCPChannels(targetServer, maxConnections = 50):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureTCPChannels(targetServer, maxConnections = 50"))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+def configureTCPChannels(targetTCPChannels, maxConnections):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureTCPChannels(targetTCPChannels, maxConnections)"))
+    debugLogger.log(logging.DEBUG, str(targetTCPChannels))
     debugLogger.log(logging.DEBUG, str(maxConnections))
 
-    if (len(targetServer) != 0):
-        targetTCPChannels = AdminConfig.list("TCPInboundChannel", targetServer).split(lineSplit)
+    if ((len(targetTCPChannels) != 0) and (len(maxConnections) != 0)):
+        for targetTCPChannel in (targetTCPChannels):
+            debugLogger.log(logging.DEBUG, str(targetTCPChannel))
 
-        debugLogger.log(logging.DEBUG, str(targetTCPChannels))
+            tcpChannelName = targetTCPChannel.split("(")[0]
 
-        if (len(targetTCPChannels) != 0):
-            for targetTCPChannel in (targetTCPChannels):
-                debugLogger.log(logging.DEBUG, str(targetTCPChannel))
+            debugLogger.log(logging.DEBUG, (str(tcpChannelName)))
 
-                tcpChannelName = targetTCPChannel.split("(")[0]
+            if (len(tcpChannelName) != 0):
+                try:
+                    debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
 
-                debugLogger.log(logging.DEBUG, (str(tcpChannelName)))
+                    if (tcpChannelName == "TCP_2"):
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(tcpChannelName, str(\"[[maxOpenConnections \"{0}\"]]\").format(maxConnections)"))
+                        
+                        AdminConfig.modify(tcpChannelName, str("[[maxOpenConnections \"{0}\"]]").format(maxConnections))
 
-                if (len(tcpChannelName) != 0):
-                    try:
-                        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                        infoLogger.log(logging.INFO, str("Completed configuration of TCP channel {0} in TCP channels {1}.").format(tcpChannelName, targetTCPChannel))
+                    #endif
+                except:
+                    (exception, parms, tback) = sys.exc_info()
 
-                        if (tcpChannelName == "TCP_2"):
-                            tcpChannelMaxOpenConnections = returnPropertyConfiguration(configFile, str("server-tcp-channels"), str("max-open-connections")) or maxConnections
+                    errorLogger.log(logging.ERROR, str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}".format(tcpChannelName, targetTCPChannel, str(exception), str(parms))))
 
-                            debugLogger.log(logging.DEBUG, str(tcpChannelMaxOpenConnections))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(tcpChannelName, str(\"[[maxOpenConnections \"{0}\"]]\").format(tcpChannelMaxOpenConnections)"))
-                            
-                            AdminConfig.modify(tcpChannelName, str("[[maxOpenConnections \"{0}\"]]").format(tcpChannelMaxOpenConnections))
-
-                            infoLogger.log(logging.INFO, str("Completed configuration of TCP channel {0} in TCP channels {1}.").format(tcpChannelName, targetTCPChannel))
-                        #endif
-                    except:
-                        (exception, parms, tback) = sys.exc_info()
-
-                        errorLogger.log(logging.ERROR, str("An error occurred updating TCP channel name {0} in TCP channel {1} for server {2}: {3} {4}".format(tcpChannelName, targetTCPChannel, targetServer, str(exception), str(parms))))
-
-                        raise Exception(str("An error occurred updating TCP channel name {0} in TCP channel {1} for server {2}: {3} {4}".format(tcpChannelName, targetTCPChannel, targetServer, str(exception), str(parms))))
-                    #endtry
-                #endif
-             #endfor
-        else:
-            errorLogger.log(logging.ERROR, str("No TCP channels were found for server {0}.").format(targetServer))
-
-            raise Exception(str("No TCP channels were found for server {0}.").format(targetServer))
-        #endif
+                    raise Exception(str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}".format(tcpChannelName, targetTCPChannel, str(exception), str(parms))))
+                #endtry
+            #endif
+            #endfor
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No TCP channels were provided or no max connections were provided."))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No TCP channels were provided or no max connections were provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureTCPChannels(targetServer, maxConnections = 50"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureTCPChannels(targetTCPChannels, maxConnections)"))
 #enddef
 
-def configureHTTPChannels(targetServer, maxConnections = 10):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureHTTPChannels(targetServer, maxConnections = 10"))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+# TODO
+def configureHTTPChannels(targetHTTPChannels, maxConnections = 50):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureHTTPChannels(targetHTTPChannels, maxConnections)"))
+    debugLogger.log(logging.DEBUG, str(targetHTTPChannels))
     debugLogger.log(logging.DEBUG, str(maxConnections))
 
-    if (len(targetServer) != 0):
-        targetHTTPChannels = AdminConfig.list("HTTPInboundChannel", targetServer).split(lineSplit)
+    if (len(targetHTTPChannels) != 0):
+        for targetHTTPChannel in (targetHTTPChannels):
+            debugLogger.log(logging.DEBUG, str(targetHTTPChannel))
 
-        debugLogger.log(logging.DEBUG, str(targetHTTPChannels))
+            httpChannelName = targetHTTPChannel.split("(")[0]
 
-        if (len(targetHTTPChannels) != 0):
-            for targetHTTPChannel in (targetHTTPChannels):
-                debugLogger.log(logging.DEBUG, str(targetHTTPChannel))
+            debugLogger.log(logging.DEBUG, (str(httpChannelName)))
 
-                httpChannelName = targetHTTPChannel.split("(")[0]
+            if (len(httpChannelName) != 0):
+                try:
+                    debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
 
-                debugLogger.log(logging.DEBUG, (str(httpChannelName)))
+                    if (httpChannelName == "HTTP_2"):
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(httpChannel, str(\"[[maximumPersistentRequests \"-1\"] [persistentTimeout \"300\"] [enableLogging \"true\"]]\"))"))
 
-                if (len(httpChannelName) != 0):
-                    try:
-                        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                        AdminConfig.modify(targetHTTPChannel, str("[[maximumPersistentRequests \"-1\"] [persistentTimeout \"300\"] [enableLogging \"true\"]]"))
 
-                        if (httpChannelName == "HTTP_2"):
-                            httpChannelMaxOpenConnections = returnPropertyConfiguration(configFile, str("server-http-channels"), str("max-open-connections")) or maxConnections
+                        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.create()"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", httpChannel, str(\"[[validationExpression \"\"] [name \"RemoveServerHeader\"] [description \"\"] [value \"true\"] [required \"false\"]]\"))"))
 
-                            debugLogger.log(logging.DEBUG, str("httpChannelMaxOpenConnections"))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(httpChannel, str(\"[[maximumPersistentRequests \"-1\"] [persistentTimeout \"300\"] [enableLogging \"true\"]]\"))"))
+                        AdminConfig.create("Property", targetHTTPChannel, str("[[validationExpression \"\"] [name \"RemoveServerHeader\"] [description \"\"] [value \"true\"] [required \"false\"]]"))
 
-                            AdminConfig.modify(targetHTTPChannel, str("[[maximumPersistentRequests \"-1\"] [persistentTimeout \"300\"] [enableLogging \"true\"]]"))
+                        infoLogger.log(logging.INFO, str("Completed configuration of HTTP channel {0} in HTTP channels {1}.").format(httpChannelName, targetHTTPChannels))
+                    #endif
+                except:
+                    (exception, parms, tback) = sys.exc_info()
 
-                            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.create()"))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", httpChannel, str(\"[[validationExpression \"\"] [name \"RemoveServerHeader\"] [description \"\"] [value \"true\"] [required \"false\"]]\"))"))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}".format(httpChannelName, targetHTTPChannel, str(exception), str(parms))))
 
-                            AdminConfig.create("Property", targetHTTPChannel, str("[[validationExpression \"\"] [name \"RemoveServerHeader\"] [description \"\"] [value \"true\"] [required \"false\"]]"))
-
-                            infoLogger.log(logging.INFO, str("Completed configuration of HTTP channel {0} in HTTP channels {1}.").format(httpChannelName, targetHTTPChannels))
-                        #endif
-                    except:
-                        (exception, parms, tback) = sys.exc_info()
-
-                        errorLogger.log(logging.ERROR, str("An error occurred updating HTTP channel name {0} in HTTP channel {1} for server {2}: {3} {4}".format(httpChannelName, targetHTTPChannel, targetServer, str(exception), str(parms))))
-
-                        raise Exception(str("An error occurred updating HTTP channel name {0} in HTTP channel {1} for server {2}: {3} {4}".format(httpChannelName, targetHTTPChannel, targetServer, str(exception), str(parms))))
-                    #endtry
-                #endif
-             #endfor
-        else:
-            errorLogger.log(logging.ERROR, str("No HTTP channels were found for server {0}.").format(targetServer))
-
-            raise Exception(str("No HTTP channels were found for server {0}.").format(targetServer))
-        #endif
+                    raise Exception(str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}".format(httpChannelName, targetHTTPChannel, str(exception), str(parms))))
+                #endtry
+            #endif
+            #endfor
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No HTTP channels were provided to configure."))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No HTTP channels were provided to configure."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureHTTPChannels(targetServer, maxConnections = 10"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureHTTPChannels(targetServer, maxConnections = 50"))
 #enddef
 
-def configureContainerChains(targetServer, chainsToSkip = ("WCInboundDefault", "WCInboundDefaultSecure", "WCInboundAdminSecure")):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureContainerChains(targetServer, chainsToSkip = (\"WCInboundDefault\", \"WCInboundDefaultSecure\", \"WCInboundAdminSecure\""))
+def configureContainerChains(targetContainerChains, chainsToSkip):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureContainerChains(targetContainerChains, chainsToSkip)"))
+    debugLogger.log(logging.DEBUG, str(targetContainerChains))
     debugLogger.log(logging.DEBUG, str(chainsToSkip))
 
-    if (len(targetServer) != 0):
-        targetTransport = AdminConfig.list("TransportChannelService", targetServer)
+    if (len(targetContainerChains) != 0):
+        for targetContainerChain in (targetContainerChains):
+            debugLogger.log(logging.DEBUG, str(targetContainerChain))
 
-        debugLogger.log(logging.DEBUG, str(targetTransport))
+            targetContainerChainName = targetContainerChain.split("(")[0]
 
-        if (len(targetTransport) != 0):
-            targetChainsToSkip = returnPropertyConfiguration(configFile, str("server-container-chains"), str("skip-chains")) or chainsToSkip
-            targetContainerChains = AdminTask.listChains(targetTransport, str("[-acceptorFilter WebContainerInboundChannel]")).split(lineSplit)
+            debugLogger.log(logging.DEBUG, (str(targetContainerChainName)))
 
-            debugLogger.log(logging.DEBUG, str(targetChainsToSkip))
-            debugLogger.log(logging.DEBUG, str(targetContainerChains))
+            if (len(targetContainerChainName) != 0):
+                try:
+                    if (targetContainerChainName in chainsToSkip):
+                        debugLogger.log(logging.DEBUG, str("targetContainerChainName {0} found in chainsToSkip").format(targetContainerChainName))
 
-            for targetContainerChain in (targetContainerChains):
-                debugLogger.log(logging.DEBUG, str(targetContainerChain))
+                        continue
+                    else:    
+                        debugLogger.log(logging.DEBUG, str("Calling AdminTask.deleteChain()"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: AdminTask.deleteChain(chain, str(\"[-deleteChannels \"true\"]\"))"))
 
-                targetContainerChainName = targetContainerChain.split("(")[0]
+                        AdminTask.deleteChain(targetContainerChain, str("[-deleteChannels \"true\"]"))
 
-                debugLogger.log(logging.DEBUG, (str(targetContainerChainName)))
+                        infoLogger.log(logging.INFO, str("Completed configuration of container chain {0} in container chain {1}.").format(targetContainerChainName, targetContainerChain))
+                    #endif
+                except:
+                    (exception, parms, tback) = sys.exc_info()
 
-                if (len(targetContainerChainName) != 0):
-                    try:
-                        if (targetContainerChainName in chainsToSkip):
-                            debugLogger.log(logging.DEBUG, str("targetContainerChainName {0} found in chainsToSkip").format(targetContainerChainName))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}".format(targetContainerChainName, targetContainerChain, str(exception), str(parms))))
 
-                            continue
-                        else:    
-                            debugLogger.log(logging.DEBUG, str("Calling AdminTask.deleteChain()"))
-                            debugLogger.log(logging.DEBUG, str("EXEC: AdminTask.deleteChain(chain, str(\"[-deleteChannels \"true\"]\"))"))
-
-                            AdminTask.deleteChain(targetContainerChain, str("[-deleteChannels \"true\"]"))
-
-                            infoLogger.log(logging.INFO, str("Completed configuration of container chain {0} in container chain {1}.").format(targetContainerChainName, targetContainerChain))
-                        #endif
-                    except:
-                        (exception, parms, tback) = sys.exc_info()
-
-                        errorLogger.log(logging.ERROR, str("An error occurred updating container chain name {0} in container chain {1} for server {2}: {3} {4}".format(targetContainerChainName, targetContainerChain, targetServer, str(exception), str(parms))))
-
-                        raise Exception(str("An error occurred updating container chain name {0} in container chain {1} for server {2}: {3} {4}".format(targetContainerChainName, targetContainerChain, targetServer, str(exception), str(parms))))
-                    #endtry
-             #endfor
-        else:
-            errorLogger.log(logging.ERROR, str("No container chains were found for server {0}.").format(targetServer))
-
-            raise Exception(str("No container chains were found for server {0}.").format(targetServer))
-        #endif
+                    raise Exception(str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}".format(targetContainerChainName, targetContainerChain, str(exception), str(parms))))
+                #endtry
+            #endfor
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No container chains were provided to configure."))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No container chains were provided to configure."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureContainerChains(targetServer, chainsToSkip = (\"WCInboundDefault\", \"WCInboundDefaultSecure\", \"WCInboundAdminSecure\""))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureContainerChains(targetContainerChains, chainsToSkip)"))
 #enddef
 
-def configureTuningParams(targetServer, writeContent = "ONLY_UPDATED_ATTRIBUTES", writeFrequency = "END_OF_SERVLET_SERVICE"):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureTuningParams(targetServer, writeContent = \"ONLY_UPDATED_ATTRIBUTES\", writeFrequency = \"END_OF_SERVLET_SERVICE\""))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+def configureTuningParams(targetTuningParams, writeContent, writeFrequency):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency)"))
+    debugLogger.log(logging.DEBUG, str(targetTuningParams))
     debugLogger.log(logging.DEBUG, str(writeContent))
     debugLogger.log(logging.DEBUG, str(writeFrequency))
 
-    if (len(targetServer) != 0):
-        targetWriteContents = returnPropertyConfiguration(configFile, str("server-tuning-params"), str("write-content")) or writeContent
-        targetWriteFrequency = returnPropertyConfiguration(configFile, str("server-tuning-params"), str("write-frequency")) or writeFrequency
-        targetTuningParams = AdminConfig.list("TuningParams", targetServer)
+    if ((len(targetTuningParams) != 0) and (len(writeContent) != 0) and (len(writeFrequency) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetTuning, str(\"[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]\").format(targetWriteContents, targetWriteFrequency))"))
+    
+            AdminConfig.modify(targetTuningParams, str("[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]").format(writeContent, writeFrequency))
 
-        debugLogger.log(logging.DEBUG, str(targetTuningParams))
+            infoLogger.log(logging.INFO, str("Completed configuration of tuning parameters {0} with values {1} {2}.").format(targetTuningParams, writeContent, writeFrequency))
+        except:
+            (exception, parms, tback) = sys.exc_info()
 
-        if (len(targetTuningParams) != 0):
-            try:
-                debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify"))
-                debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetTuning, str(\"[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]\").format(targetWriteContents, targetWriteFrequency))"))
-        
-                AdminConfig.modify(targetTuning, str("[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]").format(targetWriteContents, targetWriteFrequency))
+            errorLogger.log(logging.ERROR, str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}".format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms))))
 
-                infoLogger.log(logging.INFO, str("Completed configuration of tuning parameters {0} on server {1}.").format(targetTuningParams, targetServer))
-            except:
-                (exception, parms, tback) = sys.exc_info()
-
-                errorLogger.log(logging.ERROR, str("An error occurred updating tuning parameters {0} for server {1}: {2} {3}".format(targetTuningParams, targetServer, str(exception), str(parms))))
-
-                raise Exception(str("An error occurred updating tuning parameters {0} for server {1}: {2} {3}".format(targetTuningParams, targetServer, str(exception), str(parms))))
-            #endtry
-        else:
-            errorLogger.log(logging.ERROR, str("No tuning parameters were found for server {0}.").format(targetServer))
-
-            raise Exception(str("No tuning parameters were found for server {0}.").format(targetServer))
-        #endif
+            raise Exception(str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}".format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms))))
+        #endtry
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No tuning parameters were provided or no write content/write frequency was provided"))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No tuning parameters were provided or no write content/write frequency was provided"))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureTuningParams(targetServer, writeContent = \"ONLY_UPDATED_ATTRIBUTES\", writeFrequency = \"END_OF_SERVLET_SERVICE\""))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency)"))
 #enddef
 
-def configureSessionManager(targetServer):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureSessionManager(targetServer)"))
-    debugLogger.log(logging.DEBUG, str(targetServer))
+# TODO
+def configureSessionManager(targetSessionManager):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureSessionManager(targetSessionManager)"))
+    debugLogger.log(logging.DEBUG, str(targetSessionManager))
 
-    if (len(targetServer) != 0):
-        targetSessionManager = AdminConfig.list("SessionManager", targetServer)
+    if (len(targetSessionManager) != 0):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetSessionManager, str(\"[[enableSecurityIntegration \"true\"] [maxWaitTime \"5\"] [allowSerializedSesssionAccess \"false\"] [enableUrlRewriting \"false\"] [enable \"true\"] [accessSessionOnTimeout \"true\"] [enableSSLTracking \"true\"] [enableCookies \"true\"]]\"))"))
+    
+            AdminConfig.modify(targetSessionManager, str("[[enableSecurityIntegration \"true\"] [maxWaitTime \"5\"] [allowSerializedSesssionAccess \"false\"] [enableUrlRewriting \"false\"] [enable \"true\"] [accessSessionOnTimeout \"true\"] [enableSSLTracking \"true\"] [enableCookies \"true\"]]"))
 
-        debugLogger.log(logging.DEBUG, str(targetSessionManager))
+            infoLogger.log(logging.INFO, str("Completed configuration of session manager {0}.").format(targetSessionManager))
+        except:
+            (exception, parms, tback) = sys.exc_info()
 
-        if (len(targetSessionManager) != 0):
-            try:
-                debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify"))
-                debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetSessionManager, str(\"[[enableSecurityIntegration \"true\"] [maxWaitTime \"5\"] [allowSerializedSesssionAccess \"false\"] [enableUrlRewriting \"false\"] [enable \"true\"] [accessSessionOnTimeout \"true\"] [enableSSLTracking \"true\"] [enableCookies \"true\"]]\"))"))
-        
-                AdminConfig.modify(targetSessionManager, str("[[enableSecurityIntegration \"true\"] [maxWaitTime \"5\"] [allowSerializedSesssionAccess \"false\"] [enableUrlRewriting \"false\"] [enable \"true\"] [accessSessionOnTimeout \"true\"] [enableSSLTracking \"true\"] [enableCookies \"true\"]]"))
+            errorLogger.log(logging.ERROR, str("An error occurred updating session manager {0}: {1} {2}".format(targetSessionManager, str(exception), str(parms))))
 
-                infoLogger.log(logging.INFO, str("Completed configuration of session manager {0} on server {1}.").format(targetSessionManager, targetServer))
-            except:
-                (exception, parms, tback) = sys.exc_info()
-
-                errorLogger.log(logging.ERROR, str("An error occurred updating session manager {0} for server {1}: {2} {3}".format(targetSessionManager, targetServer, str(exception), str(parms))))
-
-                raise Exception(str("An error occurred updating session manager {0} for server {1}: {2} {3}".format(targetSessionManager, targetServer, str(exception), str(parms))))
-            #endtry
-        else:
-            errorLogger.log(logging.ERROR, str("No session manager was found for server {0}.").format(targetServer))
-
-            raise Exception(str("No session manager was found for server {0}.").format(targetServer))
-        #endif
+            raise Exception(str("An error occurred updating session manager {0}: {1} {2}".format(targetSessionManager, str(exception), str(parms))))
+        #endtry
     else:
-        errorLogger.log(logging.ERROR, str("No server was provided to configure."))
+        errorLogger.log(logging.ERROR, str("No session manager was provided to configure"))
 
-        raise Exception(str("No server was provided to configure."))
+        raise Exception(str("No session manager was provided to configure"))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureSessionManager(targetServer)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureSessionManager(targetSessionManager)"))
 #enddef
 
-def serverStatus():
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#serverStatus()"))
+def setServletCaching(targetWebContainer, isEnabled):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setServletCaching(targetWebContainer, isEnabled)"))
+    debugLogger.log(logging.DEBUG, str(targetWebContainer))
+    debugLogger.log(logging.DEBUG, str(isEnabled))
+
+    if ((len(targetWebContainer) != 0) and (len(isEnabled) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enableServletCaching \"{0}\"]]\").format(isEnabled))"))
+
+            AdminConfig.modify(targetWebContainer, str("[[enableServletCaching \"{0}\"]]").format(isEnabled))
+
+            infoLogger.log(logging.INFO, str("Completed servlet caching configurationin web container {0}. New caching state: {1}").format(targetWebContainer, isEnabled))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No web container was provided to configure or no caching state was provided."))
+
+        raise Exception(str("No web container was provided to configure or no caching state was provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setServletCaching(targetWebContainer, isEnabled)"))
+#enddef
+
+def setPortletCaching(targetWebContainer, isEnabled):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setPortletCaching(targetWebContainer, isEnabled)"))
+    debugLogger.log(logging.DEBUG, str(targetWebContainer))
+    debugLogger.log(logging.DEBUG, str(isEnabled))
+
+    if ((len(targetWebContainer) != 0) and (len(isEnabled) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enablePortletCaching \"{0}\"]]\").format(isEnabled))"))
+
+            AdminConfig.modify(targetWebContainer, str("[[enablePortletCaching \"{0}\"]]").format(isEnabled))
+
+            infoLogger.log(logging.INFO, str("Completed portlet caching configurationin web container {0}. New caching state: {1}").format(targetWebContainer, isEnabled))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No web container was provided to configure or no caching state was provided."))
+
+        raise Exception(str("No web container was provided to configure or no caching state was provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setPortletCaching(targetWebContainer, isEnabled)"))
+#enddef
+
+def setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename)"))
+    debugLogger.log(logging.DEBUG, str(targetTraceService))
+    debugLogger.log(logging.DEBUG, str(traceSpec))
+    debugLogger.log(logging.DEBUG, str(outputType))
+    debugLogger.log(logging.DEBUG, str(maxBackupFiles))
+    debugLogger.log(logging.DEBUG, str(rolloverSize))
+    debugLogger.log(logging.DEBUG, str(traceFilename))
+
+    if ((len(targetTraceService) != 0) and (len(traceSpec) != 0) and (len(outputType) != 0)
+        and (len(maxBackupFiles) != 0) and (len(rolloverSize) != 0) and (len(traceFilename) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetTraceService, str(\"[[\"startupTraceSpecification\", \"{0}\"]]\").format(traceSpec))"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetTraceService, str(\"[[\"traceOutputType\", \"{0}\"]]\").format(outputType))"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetTraceService, str(\"[[\"traceLog\", [[\"fileName\", \"{0}\"], [\"maxNumberOfBackupFiles\", \"{1}\"], [\"rolloverSize\", \"{2}\"]]\").format(traceFilename, maxBackupFiles, rolloverSize))"))
+
+            AdminConfig.modify(targetTraceService, str("[[\"startupTraceSpecification\", \"{0}\"]]").format(traceSpec))
+            AdminConfig.modify(targetTraceService, str("[[\"traceOutputType\", \"{0}\"]]").format(outputType))
+            AdminConfig.modify(targetTraceService, str("[[\"traceLog\", [[\"fileName\", \"{0}\"], [\"maxNumberOfBackupFiles\", \"{1}\"], [\"rolloverSize\", \"{2}\"]]]]").format(traceFilename, maxBackupFiles, rolloverSize))
+
+            infoLogger.log(logging.INFO, str("Completed configuration of trace service {0}.").format(targetTraceService))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}".format(targetTraceService, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}".format(targetTraceService, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No trace service was provided or no trace service configuration values were provided."))
+
+        raise Exception(str("No trace service was provided or no trace service configuration values were provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename)"))
+#enddef
+
+def setProcessExec(targetProcessExec, runAsUser, runAsGroup):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+    debugLogger.log(logging.DEBUG, str(targetProcessExec))
+    debugLogger.log(logging.DEBUG, str(runAsUser))
+    debugLogger.log(logging.DEBUG, str(runAsGroup))
+
+    if ((len(targetProcessExec) != 0) and (len(runAsUser) != 0) and (len(runAsGroup) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetProcessExec, str(\"[[runAsUser \"{0}\"] [runAsGroup \"{1}\"] [runInProcessGroup \"0\"] [processPriority \"20\"] [umask \"022\"]]\").format(runAsUser, runAsGroup))"))
+
+            AdminConfig.modify(targetProcessExec, str("[[runAsUser \"{0}\"] [runAsGroup \"{1}\"] [runInProcessGroup \"0\"] [processPriority \"20\"] [umask \"022\"]]").format(runAsUser, runAsGroup))
+
+            infoLogger.log(logging.INFO, str("Completed configuration of process execution {0} with runtime user {1} and runtime group {2}.").format(targetProcessExec, runAsUser, runAsGroup))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}".format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}".format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No process execution was provided or no runtime user/group information was provided."))
+
+        raise Exception(str("No process execution was provided or no runtime user/group information was provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+#enddef
+
+def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs)"))
+    debugLogger.log(logging.DEBUG, str(serverName))
+    debugLogger.log(logging.DEBUG, str(nodeName))
+    debugLogger.log(logging.DEBUG, str(initialHeapSize))
+    debugLogger.log(logging.DEBUG, str(maxHeapSize))
+    debugLogger.log(logging.DEBUG, str(jvmArgs))
+    debugLogger.log(logging.DEBUG, str(hprofArgs))
+
+    if ((len(nodeName) != 0) and (len(serverName) != 0)
+        and (len(initialHeapSize) != 0) and (len(maxHeapSize) != 0)
+        and (len(jvmArgs) != 0) and (len(hprofArgs) != 0)):
+        setJVMOptions = (str("[-nodeName {0} -serverName {1} -initialHeapSize {2} -maximumHeapSize {3} -runHProf true -hprofArguments {4} "
+            "-genericJvmArguments \"{5}\"]").format(nodeName, serverName, initialHeapSize, maxHeapSize, hprofArgs, jvmArgs))
+
+        debugLogger.log(logging.DEBUG, str(setJVMOptions))
+
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminTask.setJVMProperties()"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminTask.setJVMProperties(setJVMOptions)"))
+
+            AdminTask.setJVMProperties(setJVMOptions)
+
+            infoLogger.log(logging.INFO, str("Completed configuration of JVM properties for server {0} on node {1}.").format(serverName, nodeName))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}".format(serverName, nodeName, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}".format(serverName, nodeName, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No server/node information was provided or no JVM properties were provided."))
+
+        raise Exception(str("No server/node information was provided or no JVM properties were provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs)"))
+#enddef
+
+def serverStatus(serverName, nodeName):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#serverStatus(serverName, nodeName)"))
+    debugLogger.log(logging.DEBUG, str(serverName))
+    debugLogger.log(logging.DEBUG, str(nodeName))
+
     serverState = "UNKNOWN"
 
     debugLogger.log(logging.DEBUG, str(serverState))
 
-    if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+    if ((len(nodeName) != 0) and (len(serverName) != 0)):
+        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, str(targetServer))
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
-            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+        if (len(targetServer) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Calling AdminControl.getAttribute()"))
+                debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.getAttribute(targetServer, \"state\")"))
 
-            debugLogger.log(logging.DEBUG, str(targetServer))
+                serverState = AdminControl.getAttribute(targetServer, str("state"))
 
-            if (len(targetServer) != 0):
-                try:
-                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.getAttribute()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.getAttribute(targetServer, \"state\")"))
+                debugLogger.debug(logging.DEBUG, serverState)
+                infoLogger.log(logging.INFO, str("Current server state of {0} on node {1} is: {2}.").format(serverName, nodeName, serverState))
+            except:
+                (exception, parms, tback) = sys.exc_info()
 
-                    serverState = AdminControl.getAttribute(targetServer, str("state"))
-
-                    debugLogger.debug(logging.DEBUG, serverState)
-                    infoLogger.log(logging.INFO, str("Current server state of {0} on node {1} is: {2}.").format(serverName, nodeName, serverState))
-                except:
-                    (exception, parms, tback) = sys.exc_info()
-
-                    errorLogger.log(logging.ERROR, str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                    raise Exception(str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                #endtry
-            else:
-                errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-                raise Exception(str(("No server named {0} was found on node {1}.").format(serverName, nodeName)))
-            #endif
+                errorLogger.log(logging.ERROR, str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+                raise Exception(str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+            #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            raise Exception(str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
+            raise Exception(str(("No server named {0} was found on node {1}.").format(serverName, nodeName)))
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        raise Exception(str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+        raise Exception(str("No node/server information was found in the provided configuration file."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#serverStatus()"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#serverStatus(serverName, nodeName)"))
 
     return serverState
 #enddef
 
-def startServer(startWaitTime = 10):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#startServer(startWaitTime = 10)"))
+def startServer(serverName, nodeName, startWaitTime = 10):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#startServer(serverName, nodeName, startWaitTime = 10)"))
+    debugLogger.log(logging.DEBUG, str(serverName))
+    debugLogger.log(logging.DEBUG, str(nodeName))
     debugLogger.log(logging.DEBUG, str(startWaitTime))
 
-    if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+    if ((len(nodeName) != 0) and (len(serverName) != 0) and (len(startWaitTime) != 0)):
+        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, str(targetServer))
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
-            startupWaitTime = returnPropertyConfiguration(configFile, str("server-start-options"), str("start-wait-time")) or startWaitTime
-            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+        if (len(targetServer) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Calling AdminControl.getAttribute()"))
+                debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.startServer(nodeName, serverName, startupWaitTime)"))
 
-            debugLogger.log(logging.DEBUG, str(startupWaitTime))
-            debugLogger.log(logging.DEBUG, str(targetServer))
+                AdminControl.startServer(nodeName, serverName, startWaitTime)
 
-            if (len(targetServer) != 0):
-                try:
-                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.getAttribute()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.startServer(nodeName, serverName, startupWaitTime)"))
+                infoLogger.log(logging.INFO, str("Startup for server {0} on node {1} has been initiated.").format(serverName, nodeName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
 
-                    AdminControl.startServer(nodeName, serverName, startupWaitTime)
-
-                    infoLogger.log(logging.INFO, str("Startup for server {0} on node {1} has been initiated.").format(serverName, nodeName))
-                except:
-                    (exception, parms, tback) = sys.exc_info()
-
-                    errorLogger.log(logging.ERROR, str("An error occurred trying start server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                    raise Exception(str("An error occurred trying start server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                #endtry
-            else:
-                errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-                raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-            #endif
+                errorLogger.log(logging.ERROR, str("An error occurred trying start server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+                raise Exception(str("An error occurred trying start server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+            #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            raise Exception(str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
+            raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        raise Exception(str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, str("No node/server information was provided."))
+        raise Exception(str("No node/server information was provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#startServer(startWaitTime = 10)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#startServer(serverName, nodeName, startWaitTime = 10)"))
 #enddef
 
-def stopServer(immediate = False, terminate = False):
-    debugLogger.log(logging.DEBUG, str("ENTER: stopServer(immediate = False, terminate = False):"))
+def stopServer(serverName, nodeName, immediate = False, terminate = False):
+    debugLogger.log(logging.DEBUG, str("ENTER: stopServer(serverName, nodeName, immediate = False, terminate = False)"))
+    debugLogger.debug(logging.DEBUG, str(serverName))
+    debugLogger.debug(logging.DEBUG, str(nodeName))
     debugLogger.debug(logging.DEBUG, str(immediate))
     debugLogger.debug(logging.DEBUG, str(terminate))
 
-    if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+    if ((len(nodeName) != 0) and (len(serverName) != 0)):
+        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, str(targetServer))
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
-            isImmediateStop = returnPropertyConfiguration(configFile, str("server-stop-options"), str("immediate-stop")) or immediate
-            isTerminateStop = returnPropertyConfiguration(configFile, str("server-stop-options"), str("terminate-stop")) or terminate
-            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+        if (len(targetServer) != 0):
+            debugLogger.log(logging.DEBUG, str("Calling AdminControl.stopServer()"))
 
-            debugLogger.log(logging.DEBUG, str(isImmediateStop))
-            debugLogger.log(logging.DEBUG, str(isTerminateStop))
-            debugLogger.log(logging.DEBUG, str(targetServer))
+            try:
+                if (immediate):
+                    debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName, str(\"immediate\"))"))
 
-            if (len(targetServer) != 0):
-                debugLogger.log(logging.DEBUG, str("Calling AdminControl.stopServer()"))
+                    AdminControl.stopServer(nodeName, serverName, str("immediate"))
+                elif (terminate):
+                    debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName, str(\"terminate\"))"))
 
-                try:
-                    if (isImmediateStop):
-                        debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName, str(\"immediate\"))"))
+                    AdminControl.stopServer(nodeName, serverName, str("terminate"))
+                else:
+                    debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName)"))
 
-                        AdminControl.stopServer(nodeName, serverName, str("immediate"))
-                    elif (isTerminateStop):
-                        debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName, str(\"terminate\"))"))
+                    AdminControl.stopServer(nodeName, serverName)
+                #endif
 
-                        AdminControl.stopServer(nodeName, serverName, str("terminate"))
-                    else:
-                        debugLogger.debug(logging.DEBUG, str("EXEC: AdminControl.stopServer(nodeName, serverName)"))
+                infoLogger.log(logging.INFO, str("Shutdown of server {0} on node {1} has been initiated.").format(serverName, nodeName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
 
-                        AdminControl.stopServer(nodeName, serverName)
-                    #endif
-
-                    infoLogger.log(logging.INFO, str("Shutdown of server {0} on node {1} has been initiated.").format(serverName, nodeName))
-                except:
-                    (exception, parms, tback) = sys.exc_info()
-
-                    errorLogger.log(logging.ERROR, str("An error occurred trying stop server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                    raise Exception(str("An error occurred trying stop server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                #endtry
-            else:
-                errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-                raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-            #endif
+                errorLogger.log(logging.ERROR, str("An error occurred trying stop server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+                raise Exception(str("An error occurred trying stop server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+            #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            raise Exception(str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
+            raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        raise Exception(str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, str("No node/server information was provided."))
+        raise Exception(str("No node/server information was provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: stopServer(immediate = False, terminate = False):"))
+    debugLogger.log(logging.DEBUG, str("EXIT: stopServer(serverName, nodeName, immediate = False, terminate = False):"))
 #enddef
 
-def restartServer(restartTimeout = 300):
-    debugLogger.log(logging.DEBUG, str("ENTER: restartServer(restartTimeout = 300)"))
+def restartServer(serverName, nodeName, restartTimeout = 600):
+    debugLogger.log(logging.DEBUG, str("ENTER: restartServer(serverName, nodeName, restartTimeout = 600)"))
+    debugLogger.debug(logging.DEBUG, str(serverName))
+    debugLogger.debug(logging.DEBUG, str(nodeName))
+    debugLogger.debug(logging.DEBUG, str(restartTimeout))
+
     isRunning = "UNKNOWN"
 
-    debugLogger.debug(logging.DEBUG, str(restartTimeout))
     debugLogger.debug(logging.DEBUG, str(isRunning))
 
-    if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+    if ((len(nodeName) != 0) and (len(serverName) != 0)):
+        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, str(targetServer))
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
-            restartTimeoutSecs = returnPropertyConfiguration(configFile, str("server-restart-options"), str("restart-timeout")) or restartTimeout
-            targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+        if (len(targetServer) != 0):
+            debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
 
-            debugLogger.log(logging.DEBUG, str(restartTimeoutSecs))
-            debugLogger.log(logging.DEBUG, str(targetServer))
+            try:
+                AdminControl.invoke(targetServer, str("restart"))
 
-            if (len(targetServer) != 0):
-                debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
+                elapsedTime = 0
 
-                try:
-                    AdminControl.invoke(targetServer, str("restart"))
+                debugLogger.log(elapsedTime)
 
-                    elapsedTime = 0
-
-                    debugLogger.log(elapsedTime)
-
-                    if (restartTimeoutSecs > 0):
-                        sleepTime = 5
-                        isRunning = serverStatus(nodeName, serverName)
-
-                        debugLogger.log(logging.DEBUG, str(sleepTime))
-                        debugLogger.log(logging.DEBUG, str(isRunning))
-
-                        while ((isRunning) and (elapsedTimeSeconds < restartTimeout)):
-                            debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for {0}..").format(sleepTime))
-
-                            time.sleep(sleepTime)
-
-                            elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
-                            isRunning = serverStatus(nodeName, serverName)
-
-                            debugLogger.log(logging.DEBUG, str(elapsedTimeSeconds))
-                            debugLogger.log(logging.DEBUG, str(isRunning))
-                        #endwhile
-
-                        while ((not isRunning) and (elapsedTimeSeconds < restartTimeoutSecs)):
-                            debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for %d..").format(sleepTime))
-                            infoLogger.log(logging.INFO, str("Waiting {0} of {1} seconds for {2} to restart. isRunning = {3}").format(elapsedTimeSeconds, restartTimeoutSecs, serverName, isRunning))
-                            consoleInfoLogger.log(logging.INFO, str("Waiting {0} of {1} seconds for {2} to restart. isRunning = {3}").format(elapsedTimeSeconds, restartTimeoutSecs, serverName, isRunning))
-
-                            time.sleep(sleepTime)
-
-                            elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
-                            isRunning = serverStatus(nodeName, serverName)
-
-                            debugLogger.log(logging.DEBUG, str(elapsedTimeSeconds))
-                            debugLogger.log(logging.DEBUG, str(isRunning))
-                        #endwhile
-                    #endif
-
+                if (restartTimeout > 0):
+                    sleepTime = 5
                     isRunning = serverStatus(nodeName, serverName)
 
+                    debugLogger.log(logging.DEBUG, str(sleepTime))
                     debugLogger.log(logging.DEBUG, str(isRunning))
-                    infoLogger.log(logging.INFO, str("Restart completed for server {0} on node {1}. Elapsed time: {2}.").format(serverName, nodeName, elapsedTimeSeconds))
-                except:
-                    (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                    raise Exception(str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                #endtry
-            else:
-                errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-                raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-            #endif
+                    while ((isRunning) and (elapsedTimeSeconds < restartTimeout)):
+                        debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for {0}..").format(sleepTime))
+
+                        time.sleep(sleepTime)
+
+                        elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
+                        isRunning = serverStatus(nodeName, serverName)
+
+                        debugLogger.log(logging.DEBUG, str(elapsedTimeSeconds))
+                        debugLogger.log(logging.DEBUG, str(isRunning))
+                    #endwhile
+
+                    while ((not isRunning) and (elapsedTimeSeconds < restartTimeout)):
+                        debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for %d..").format(sleepTime))
+                        infoLogger.log(logging.INFO, str("Waiting {0} of {1} seconds for {2} to restart. isRunning = {3}").format(elapsedTimeSeconds, restartTimeout, serverName, isRunning))
+
+                        time.sleep(sleepTime)
+
+                        elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
+                        isRunning = serverStatus(nodeName, serverName)
+
+                        debugLogger.log(logging.DEBUG, str(elapsedTimeSeconds))
+                        debugLogger.log(logging.DEBUG, str(isRunning))
+                    #endwhile
+                #endif
+
+                isRunning = serverStatus(nodeName, serverName)
+
+                debugLogger.log(logging.DEBUG, str(isRunning))
+                infoLogger.log(logging.INFO, str("Restart completed for server {0} on node {1}. Elapsed time: {2}.").format(serverName, nodeName, elapsedTimeSeconds))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+                raise Exception(str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
+            #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            raise Exception(str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
+            raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        raise Exception(str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, str("No node/server information provided."))
+        raise Exception(str("No node/server information provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: restartServer(restartTimeout = 300)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: restartServer(serverName, nodeName, restartTimeout = 600)"))
 #enddef
