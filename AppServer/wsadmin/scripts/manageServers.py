@@ -28,8 +28,6 @@ infoLogger = logging.getLogger(str("info-logger"))
 consoleInfoLogger = logging.getLogger(str("info-logger"))
 consoleErrorLogger = logging.getLogger(str("info-logger"))
 
-global configFile
-
 lineSplit = java.lang.System.getProperty(str("line.separator"))
 targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
@@ -48,83 +46,160 @@ def configureDeploymentManager():
             debugLogger.log(logging.DEBUG, str(targetServer))
 
             if (len(targetServer) != 0):
-                try:
-                    infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
-                    consoleInfoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
+                infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
+                consoleInfoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
 
+                #
+                # Enable/disable HAManager
+                #
+                isEnabled = returnPropertyConfiguration(configFile, str("server-hamanager"), str("enabled"))
+                targetHAManager = AdminConfig.list("HAManagerService", targetServer)
+
+                debugLogger.log(logging.DEBUG, str(isEnabled))
+                debugLogger.log(logging.DEBUG, str(targetHAManager))
+
+                if ((len(targetHAManager) != 0) and (len(isEnabled) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureWebContainer()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureWebContainer(targetServer)"))
+                        debugLogger.log(logging.DEBUG, str("Calling configureHAManager()"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: configureHAManager(targetHAManager, isEnabled)"))
 
-                        configureWebContainer(targetServer)
+                        configureHAManager(targetHAManager, isEnabled)
 
-                        debugLogger.log(logging.DEBUG, str("Web Container configuration complete."))
+                        infoLogger.log(logging.INFO, str("Completed configuration of HAManager service {0} on server {1}").format(targetHAManager, serverName))
+                        consoleInfoLogger.log(logging.INFO, str("Completed configuration of HAManager service on server {0}").format(serverName))
                     except:
                         (exception, parms, tback) = sys.exc_info()
 
-                        errorLogger.log(logging.ERROR, str("An error occurred configuring the web container on server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
-                        consoleErrorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager {0}. Please review logs.").format(serverName))
+                        errorLogger.log(logging.ERROR, str("An error occurred configuring HAManager service {0} on server {1}: {2} {3}").format(targetHAManager, targetServer, str(exception), str(parms)))
+                        consoleErrorLogger.log(logging.ERROR, str("An error occurred configuring the HAManager service on server {0}. Please review logs.").format(serverName))
                     #endtry
+                #endif
 
+                #
+                # Configure trace service
+                #
+                traceSpec = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-spec"))
+                outputType = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("output-type"))
+                maxBackupFiles = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-backup-files"))
+                maxFileSize = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-file-size"))
+                traceFileName = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-file-name"))
+                targetTraceService = AdminConfig.list("TraceService", targetServer)
+
+                debugLogger.log(logging.DEBUG, str(traceSpec))
+                debugLogger.log(logging.DEBUG, str(outputType))
+                debugLogger.log(logging.DEBUG, str(maxBackupFiles))
+                debugLogger.log(logging.DEBUG, str(maxFileSize))
+                debugLogger.log(logging.DEBUG, str(traceFileName))
+                debugLogger.log(logging.DEBUG, str(outputType))
+                debugLogger.log(logging.DEBUG, str(targetTraceService))
+
+                if ((len(targetTraceService) != 0) and (len(traceSpec) != 0) and (len(outputType) != 0)
+                    and (len(maxBackupFiles) != 0) and (len(maxFileSize) != 0) and (len(traceFileName) != 0)):
                     try:
                         debugLogger.log(logging.DEBUG, str("Calling setServerTrace()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setServerTrace(targetServer)"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)"))
 
-                        setServerTrace(targetServer)
+                        setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)
 
-                        debugLogger.log(logging.DEBUG, str("Server Trace configuration complete."))
+                        infoLogger.log(logging.INFO, str("Completed configuration of trace service {0} on server {1}").format(targetTraceService, serverName))
+                        consoleInfoLogger.log(logging.INFO, str("Completed configuration of trace service on server {0}").format(serverName))
                     except:
                         (exception, parms, tback) = sys.exc_info()
 
-                        errorLogger.log(logging.ERROR, str("An error occurred configuring the trace options on server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
-                        consoleErrorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager {0}. Please review logs.").format(serverName))
+                        errorLogger.log(logging.ERROR, str("An error occurred configuring trace service {0} on server {1}: {2} {3}").format(targetTraceService, targetServer, str(exception), str(parms)))
+                        consoleErrorLogger.log(logging.ERROR, str("An error occurred configuring the trace service on server {0}. Please review logs.").format(serverName))
                     #endtry
+                #endif
 
+                #
+                # Configure process execution
+                #
+                runAsUser = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-user"))
+                runAsGroup = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-group"))
+                targetProcessExec = AdminConfig.list("ProcessExecution", targetServer)
+
+                debugLogger.log(logging.DEBUG, str(runAsUser))
+                debugLogger.log(logging.DEBUG, str(runAsGroup))
+                debugLogger.log(logging.DEBUG, str(targetProcessExec))
+
+                if ((len(targetProcessExec) != 0) and (len(runAsGroup) != 0) and (len(runAsGroup) != 0)):
                     try:
                         debugLogger.log(logging.DEBUG, str("Calling setProcessExec()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setProcessExec(targetServer)"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
 
-                        setProcessExec(targetServer)
+                        setProcessExec(targetProcessExec, runAsUser, runAsGroup)
 
-                        debugLogger.log(logging.DEBUG, str("Process Exec configuration complete."))
-                        (targetServer)
+                        infoLogger.log(logging.INFO, str("Completed configuration of process execution {0} on server {1}").format(targetTraceService, serverName))
+                        consoleInfoLogger.log(logging.INFO, str("Completed configuration of process execution on server {0}").format(serverName))
                     except:
                         (exception, parms, tback) = sys.exc_info()
 
-                        errorLogger.log(logging.ERROR, str("An error occurred configuring process execution on server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
-                        consoleErrorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager {0}. Please review logs.").format(serverName))
+                        errorLogger.log(logging.ERROR, str("An error occurred configuring process execution {0} on server {1}: {2} {3}").format(targetProcessExec, targetServer, str(exception), str(parms)))
+                        consoleErrorLogger.log(logging.ERROR, str("An error occurred configuring the process execution on server {0}. Please review logs.").format(serverName))
                     #endtry
+                #endif
 
+                #
+                # Configure JVM properties
+                #
+                initialHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("initial-heap-size"))
+                maxHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("max-heap-size"))
+                genericJVMArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("jvm-arguments"))
+
+                debugLogger.log(logging.DEBUG, str(initialHeapSize))
+                debugLogger.log(logging.DEBUG, str(maxHeapSize))
+                debugLogger.log(logging.DEBUG, str(genericJVMArguments))
+
+                if ((len(initialHeapSize) != 0) and (len(maxHeapSize) != 0) and (len(genericJVMArguments) != 0)):
                     try:
                         debugLogger.log(logging.DEBUG, str("Calling setJVMProperties()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setJVMProperties()"))
+                        debugLogger.log(logging.DEBUG, str("EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments)"))
 
-                        setJVMProperties()
+                        setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments)
 
-                        debugLogger.log(logging.DEBUG, str("JVM properties configuration complete."))
+                        infoLogger.log(logging.INFO, str("Completed configuration of JVM properties on server {0}").format(serverName))
+                        consoleInfoLogger.log(logging.INFO, str("Completed configuration of JVM properties on server {0}").format(serverName))
                     except:
                         (exception, parms, tback) = sys.exc_info()
 
                         errorLogger.log(logging.ERROR, str("An error occurred configuring JVM properties on server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
-                        consoleErrorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager {0}. Please review logs.").format(serverName))
+                        consoleErrorLogger.log(logging.ERROR, str("An error occurred configuring the process execution on server {0}. Please review logs.").format(serverName))
                     #endtry
+                #endif
 
-                    infoLogger.log(logging.INFO, str("Completed configuration for deployment manager {0}.").format(serverName))
-                    consoleInfoLogger.log(logging.INFO, str("Completed configuration for deployment manager {0}.").format(serverName))
+                #
+                # Save workspace changes
+                #
+                try:
+                    debugLogger.log(logging.DEBUG, str("Calling saveWorkspaceChanges()"))
+                    debugLogger.log(logging.DEBUG, str("EXEC: saveWorkspaceChanges()"))
+
+                    saveWorkspaceChanges()
+
+                    debugLogger.log(logging.DEBUG, str("All workspace changes saved to master repository."))
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager: {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
-                    consoleErrorLogger.log(logging.ERROR, str("An error occurred performing configuration steps for deployment manager {0}. Please review logs.").format(serverName))
-                finally:
-                    debugLogger.log(logging.DEBUG, str("Saving workspace changes and synchronizing the cell.."))
+                    errorLogger.log(logging.ERROR, str("An error occurred saving configuration changes to the master repository: {0} {1}").format(str(exception), str(parms)))
+                    consoleErrorLogger.log(logging.ERROR, str("An error occurred saving configuration changes to the master repository. Please review logs."))
+                #endtry
 
-                    saveWorkspaceChanges()
-                    syncAllNodes(nodeList, targetCell)
+                #
+                # Synchronize nodes
+                #
+                try:
+                    debugLogger.log(logging.DEBUG, str("Calling syncNodes()"))
+                    debugLogger.log(logging.DEBUG, str("EXEC: syncNodes(nodeList, targetCell)"))
 
-                    infoLogger.log(logging.INFO, str("Workspace changes have been saved and the cell has been synchronized."))
-                    consoleInfoLogger.log(logging.INFO, str("Workspace changes have been saved and the cell has been synchronized."))
-                #endfor
+                    syncNodes(nodeList, targetCell)
+
+                    debugLogger.log(logging.DEBUG, str("Node synchronization complete for cell {0}.").format(targetCell))
+                except:
+                    (exception, parms, tback) = sys.exc_info()
+
+                    errorLogger.log(logging.ERROR, str("An error occurred synchronizing changes to cell {0}: {1} {2}").format(targetCell, str(exception), str(parms)))
+                    consoleErrorLogger.log(logging.ERROR, str("An error occurred synchronizing changes to cell {0}. Please review logs.").format(targetCell))
+                #endtry
             else:
                 errorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))
                 consoleErrorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))

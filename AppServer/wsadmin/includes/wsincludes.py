@@ -85,8 +85,8 @@ def saveWorkspaceChanges():
     debugLogger.log(logging.DEBUG, str("EXIT: saveWorkspaceChanges():"))
 #enddef
 
-def syncAllNodes(nodeList, cellName):
-    debugLogger.log(logging.DEBUG, str("ENTER: syncAllNodes(nodeList, cellName)"))
+def syncNodes(nodeList, cellName):
+    debugLogger.log(logging.DEBUG, str("ENTER: syncNodes(nodeList, cellName)"))
     debugLogger.log(logging.DEBUG, str(nodeList))
     debugLogger.log(logging.DEBUG, str(cellName))
 
@@ -147,5 +147,5 @@ def syncAllNodes(nodeList, cellName):
         raise Exception(str("No nodes were found in the cell {0}").format(cellName))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: syncAllNodes(nodeList, cellName)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: syncNodes(nodeList, cellName)"))
 #enddef

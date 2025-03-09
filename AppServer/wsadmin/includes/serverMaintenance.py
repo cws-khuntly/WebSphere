@@ -409,6 +409,35 @@ def configureSessionManager(targetSessionManager):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureSessionManager(targetSessionManager)"))
 #enddef
 
+def configureServerHostname(targetServer, hostName):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureServerHostname(targetServer, hostName)"))
+    debugLogger.log(logging.DEBUG, str(targetServer))
+    debugLogger.log(logging.DEBUG, str(hostName))
+
+    if ((len(targetServer) != 0) and (len(hostName) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify"))
+            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetServer, str(\"[[hostName \"{0}\"]]\").format(hostName))"))
+
+            AdminConfig.modify(targetServer, str("[[hostName \"{0}\"]]").format(hostName))
+
+            infoLogger.log(logging.INFO, str("Successfully modified hostname for server {0} to {1}.").format(targetServer, hostName))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}".format(targetServer, hostName, str(exception), str(parms))))
+
+            raise Exception(str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}".format(targetServer, hostName, str(exception), str(parms))))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No server was provided to modify or no new hostname was provided."))
+
+        raise Exception(str("No server was provided to modify or no new hostname was provided."))
+    #endif
+
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureServerHostname(targetServer, hostName)"))
+#enddef
+
 def setServletCaching(targetWebContainer, isEnabled):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setServletCaching(targetWebContainer, isEnabled)"))
     debugLogger.log(logging.DEBUG, str(targetWebContainer))
@@ -505,13 +534,13 @@ def setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, ro
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename)"))
 #enddef
 
-def setProcessExec(targetProcessExec, runAsUser, runAsGroup):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+def setProcessExec(targetProcessExec, runAsUser = "", runAsGroup = ""):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setProcessExec(targetProcessExec, runAsUser = \"\", runAsGroup = \"\")"))
     debugLogger.log(logging.DEBUG, str(targetProcessExec))
     debugLogger.log(logging.DEBUG, str(runAsUser))
     debugLogger.log(logging.DEBUG, str(runAsGroup))
 
-    if ((len(targetProcessExec) != 0) and (len(runAsUser) != 0) and (len(runAsGroup) != 0)):
+    if (len(targetProcessExec) != 0):
         try:
             debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
             debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetProcessExec, str(\"[[runAsUser \"{0}\"] [runAsGroup \"{1}\"] [runInProcessGroup \"0\"] [processPriority \"20\"] [umask \"022\"]]\").format(runAsUser, runAsGroup))"))
@@ -532,11 +561,11 @@ def setProcessExec(targetProcessExec, runAsUser, runAsGroup):
         raise Exception(str("No process execution was provided or no runtime user/group information was provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setProcessExec(targetProcessExec, runAsUser = \"\", runAsGroup = \"\")"))
 #enddef
 
-def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs)"))
+def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = ""):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = \"\")"))
     debugLogger.log(logging.DEBUG, str(serverName))
     debugLogger.log(logging.DEBUG, str(nodeName))
     debugLogger.log(logging.DEBUG, str(initialHeapSize))
@@ -546,9 +575,14 @@ def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs
 
     if ((len(nodeName) != 0) and (len(serverName) != 0)
         and (len(initialHeapSize) != 0) and (len(maxHeapSize) != 0)
-        and (len(jvmArgs) != 0) and (len(hprofArgs) != 0)):
-        setJVMOptions = (str("[-nodeName {0} -serverName {1} -initialHeapSize {2} -maximumHeapSize {3} -runHProf true -hprofArguments {4} "
-            "-genericJvmArguments \"{5}\"]").format(nodeName, serverName, initialHeapSize, maxHeapSize, hprofArgs, jvmArgs))
+        and (len(jvmArgs) != 0)):
+
+        if (len(hprofArgs) != 0):
+            setJVMOptions = (str("[-nodeName {0} -serverName {1} -initialHeapSize {2} -maximumHeapSize {3} -runHProf true -hprofArguments {4} "
+                "-genericJvmArguments \"{5}\"]").format(nodeName, serverName, initialHeapSize, maxHeapSize, hprofArgs, jvmArgs))
+        else:
+            setJVMOptions = (str("[-nodeName {0} -serverName {1} -initialHeapSize {2} -maximumHeapSize {3} -genericJvmArguments \"{5}\"]").format(nodeName, serverName, initialHeapSize, maxHeapSize, jvmArgs))
+        #endif
 
         debugLogger.log(logging.DEBUG, str(setJVMOptions))
 
@@ -572,7 +606,7 @@ def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs
         raise Exception(str("No server/node information was provided or no JVM properties were provided."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = \"\")"))
 #enddef
 
 def serverStatus(serverName, nodeName):
