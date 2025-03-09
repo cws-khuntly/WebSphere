@@ -57,12 +57,15 @@ def configureAutoRestart(targetMonitorPolicy, policyOption):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureAutoRestart(monitorPolicy, policyOption)"))
 #enddef
 
-def configureWebContainer(targetWebContainer, vhostName):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureWebContainer(targetWebContainer, vhostName)"))
+def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled):
+    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled)"))
     debugLogger.log(logging.DEBUG, str(targetWebContainer))
     debugLogger.log(logging.DEBUG, str(vhostName))
+    debugLogger.log(logging.DEBUG, str(servletCachingEnabled))
+    debugLogger.log(logging.DEBUG, str(isPortalServer))
+    debugLogger.log(logging.DEBUG, str(portletCachingEnabled))
 
-    if ((len(targetWebContainer) != 0) and (len(vhostName) != 0)):
+    if (len(targetWebContainer) != 0):
         try:
             debugLogger.log(logging.DEBUG, str("Calling AdminConfig.create()"))
             debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]\")"))
@@ -73,28 +76,72 @@ def configureWebContainer(targetWebContainer, vhostName):
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]")
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]")
 
-            infoLogger.log(logging.INFO, str("Completed adding web container properties in web container {0} with default host {1}.").format(targetWebContainer, vhostName))
-
-            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
-            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, \"[[defaultVirtualHostName {0}]]\").format(setVirtualHost)"))
-
-            AdminConfig.modify(targetWebContainer, "[[defaultVirtualHostName {0}]]").format(vhostName)
-
-            infoLogger.log(logging.INFO, str("Completed configuration of web container {0} with default host {1}").format(targetWebContainer, vhostName))
+            infoLogger.log(logging.INFO, str("Completed adding web container properties in web container {0}.").format(targetWebContainer))
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating web container configuration {0}: {1} {2}".format(targetWebContainer, str(exception), str(parms))))
 
-            raise Exception(str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating web container configuration {0}: {1} {2}".format(targetWebContainer, str(exception), str(parms))))
         #endtry
-    else:
-        errorLogger.log(logging.ERROR, str("No web container was provided or no virtual host was provided."))
 
-        raise Exception(str("No web container was provided or no virtual host was provided."))
+        if (len(vhostName) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[defaultVirtualHostName {0}]]\").format(setVirtualHost))"))
+
+                AdminConfig.modify(targetWebContainer, str("[[defaultVirtualHostName {0}]]").format(vhostName))
+
+                infoLogger.log(logging.INFO, str("Completed setting default virtual host for web container {0} with default host {1}").format(targetWebContainer, vhostName))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+
+                raise Exception(str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+            #endtry
+        #endif
+
+        if (len(servletCachingEnabled) != 0):
+            try:
+                debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enableServletCaching \"{0}\"]]\").format(servletCachingEnabled))"))
+
+                AdminConfig.modify(targetWebContainer, str("[[enableServletCaching \"{0}\"]]").format(servletCachingEnabled))
+
+                infoLogger.log(logging.INFO, str("Completed servlet caching configuration web container {0}. New caching state: {1}").format(targetWebContainer, servletCachingEnabled))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, servletCachingEnabled, str(exception), str(parms))))
+
+                raise Exception(str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, servletCachingEnabled, str(exception), str(parms))))
+            #endtry
+        #endif
+
+        if ((len(isPortalServer) != 0) and (str(isPortalServer) == "true") and (len(portletCachingEnabled) != 0)):
+            try:
+                debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
+                debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enablePortletCaching \"{0}\"]]\").format(portletCachingEnabled))"))
+
+                AdminConfig.modify(targetWebContainer, str("[[enablePortletCaching \"{0}\"]]").format(portletCachingEnabled))
+
+                infoLogger.log(logging.INFO, str("Completed portlet caching configuration web container {0}. New caching state: {1}").format(targetWebContainer, portletCachingEnabled))
+            except:
+                (exception, parms, tback) = sys.exc_info()
+
+                errorLogger.log(logging.ERROR, str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, portletCachingEnabled, str(exception), str(parms))))
+
+                raise Exception(str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, portletCachingEnabled, str(exception), str(parms))))
+            #endtry
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("No web container was provided to configure."))
+
+        raise Exception(str("No web container was provided to configure."))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureWebContainer(targetWebContainer, vhostName)"))
+    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled)"))
 #enddef
 
 def configureHAManager(targetHAManager, enableHA):
@@ -259,7 +306,7 @@ def configureTCPChannels(targetTCPChannels, maxConnections):
 #enddef
 
 # TODO
-def configureHTTPChannels(targetHTTPChannels, maxConnections = 50):
+def configureHTTPChannels(targetHTTPChannels, maxConnections):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureHTTPChannels(targetHTTPChannels, maxConnections)"))
     debugLogger.log(logging.DEBUG, str(targetHTTPChannels))
     debugLogger.log(logging.DEBUG, str(maxConnections))
@@ -438,64 +485,6 @@ def configureServerHostname(targetServer, hostName):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureServerHostname(targetServer, hostName)"))
 #enddef
 
-def setServletCaching(targetWebContainer, isEnabled):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setServletCaching(targetWebContainer, isEnabled)"))
-    debugLogger.log(logging.DEBUG, str(targetWebContainer))
-    debugLogger.log(logging.DEBUG, str(isEnabled))
-
-    if ((len(targetWebContainer) != 0) and (len(isEnabled) != 0)):
-        try:
-            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
-            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enableServletCaching \"{0}\"]]\").format(isEnabled))"))
-
-            AdminConfig.modify(targetWebContainer, str("[[enableServletCaching \"{0}\"]]").format(isEnabled))
-
-            infoLogger.log(logging.INFO, str("Completed servlet caching configurationin web container {0}. New caching state: {1}").format(targetWebContainer, isEnabled))
-        except:
-            (exception, parms, tback) = sys.exc_info()
-
-            errorLogger.log(logging.ERROR, str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
-
-            raise Exception(str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
-        #endtry
-    else:
-        errorLogger.log(logging.ERROR, str("No web container was provided to configure or no caching state was provided."))
-
-        raise Exception(str("No web container was provided to configure or no caching state was provided."))
-    #endif
-
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setServletCaching(targetWebContainer, isEnabled)"))
-#enddef
-
-def setPortletCaching(targetWebContainer, isEnabled):
-    debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setPortletCaching(targetWebContainer, isEnabled)"))
-    debugLogger.log(logging.DEBUG, str(targetWebContainer))
-    debugLogger.log(logging.DEBUG, str(isEnabled))
-
-    if ((len(targetWebContainer) != 0) and (len(isEnabled) != 0)):
-        try:
-            debugLogger.log(logging.DEBUG, str("Calling AdminConfig.modify()"))
-            debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.modify(targetWebContainer, str(\"[[enablePortletCaching \"{0}\"]]\").format(isEnabled))"))
-
-            AdminConfig.modify(targetWebContainer, str("[[enablePortletCaching \"{0}\"]]").format(isEnabled))
-
-            infoLogger.log(logging.INFO, str("Completed portlet caching configurationin web container {0}. New caching state: {1}").format(targetWebContainer, isEnabled))
-        except:
-            (exception, parms, tback) = sys.exc_info()
-
-            errorLogger.log(logging.ERROR, str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
-
-            raise Exception(str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, isEnabled, str(exception), str(parms))))
-        #endtry
-    else:
-        errorLogger.log(logging.ERROR, str("No web container was provided to configure or no caching state was provided."))
-
-        raise Exception(str("No web container was provided to configure or no caching state was provided."))
-    #endif
-
-    debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setPortletCaching(targetWebContainer, isEnabled)"))
-#enddef
-
 def setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename)"))
     debugLogger.log(logging.DEBUG, str(targetTraceService))
@@ -534,7 +523,7 @@ def setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, ro
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, rolloverSize, traceFilename)"))
 #enddef
 
-def setProcessExec(targetProcessExec, runAsUser = "", runAsGroup = ""):
+def setProcessExec(targetProcessExec, runAsUser, runAsGroup):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setProcessExec(targetProcessExec, runAsUser = \"\", runAsGroup = \"\")"))
     debugLogger.log(logging.DEBUG, str(targetProcessExec))
     debugLogger.log(logging.DEBUG, str(runAsUser))
@@ -564,7 +553,7 @@ def setProcessExec(targetProcessExec, runAsUser = "", runAsGroup = ""):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#setProcessExec(targetProcessExec, runAsUser = \"\", runAsGroup = \"\")"))
 #enddef
 
-def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = ""):
+def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = \"\")"))
     debugLogger.log(logging.DEBUG, str(serverName))
     debugLogger.log(logging.DEBUG, str(nodeName))
@@ -652,7 +641,7 @@ def serverStatus(serverName, nodeName):
     return serverState
 #enddef
 
-def startServer(serverName, nodeName, startWaitTime = 10):
+def startServer(serverName, nodeName, startWaitTime):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#startServer(serverName, nodeName, startWaitTime = 10)"))
     debugLogger.log(logging.DEBUG, str(serverName))
     debugLogger.log(logging.DEBUG, str(nodeName))
@@ -689,7 +678,7 @@ def startServer(serverName, nodeName, startWaitTime = 10):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#startServer(serverName, nodeName, startWaitTime = 10)"))
 #enddef
 
-def stopServer(serverName, nodeName, immediate = False, terminate = False):
+def stopServer(serverName, nodeName, immediate, terminate):
     debugLogger.log(logging.DEBUG, str("ENTER: stopServer(serverName, nodeName, immediate = False, terminate = False)"))
     debugLogger.debug(logging.DEBUG, str(serverName))
     debugLogger.debug(logging.DEBUG, str(nodeName))
@@ -738,7 +727,7 @@ def stopServer(serverName, nodeName, immediate = False, terminate = False):
     debugLogger.log(logging.DEBUG, str("EXIT: stopServer(serverName, nodeName, immediate = False, terminate = False):"))
 #enddef
 
-def restartServer(serverName, nodeName, restartTimeout = 600):
+def restartServer(serverName, nodeName, restartTimeout):
     debugLogger.log(logging.DEBUG, str("ENTER: restartServer(serverName, nodeName, restartTimeout = 600)"))
     debugLogger.debug(logging.DEBUG, str(serverName))
     debugLogger.debug(logging.DEBUG, str(nodeName))
