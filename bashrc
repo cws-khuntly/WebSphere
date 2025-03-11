@@ -31,6 +31,7 @@ source "${HOME}/.alias";
 source "${HOME}/.functions";
 
 showHostInfo;
+runLoginCommands;
 
 ## trap logout
 trap 'logoutUser; exit' EXIT;
