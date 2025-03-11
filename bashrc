@@ -20,11 +20,11 @@
 
 [[ "$-" != *i* ]] || [ -z "${PS1}" ] && return;
 
+[[ -f ${HOME}/.profile ]] && source ${HOME}/.profile;
+
 ## load the logger
 if [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "${HOME}/lib/system/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntryToFile")" ]]; then printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2; declare LOGGING_LOADED="${_FALSE}"; fi;
-
-declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${HOME}/bin";
 
 source "${HOME}/.profiles";
 source "${HOME}/.alias";
