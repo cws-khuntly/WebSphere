@@ -29,10 +29,9 @@ LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
 CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 ## load the logger
-set -x
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
 if [[ -z "$(command -v "writeLogEntry" 2>/dev/null)" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; LOGGING_LOADED="${_FALSE}"; fi;
-set +x
+
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -424,7 +423,7 @@ function main()
                 fi
             fi
             ;;
-        [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
+        [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: buildPackage";
             fi
@@ -485,7 +484,7 @@ function main()
                         fi
                     else
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installFiles ${INSTALL_LOCATION_LOCAL}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshFiles ${INSTALL_LOCATION_LOCAL}";
                         fi
 
                         [[ -n "${CNAME}" ]] && unset -v CNAME;
@@ -511,7 +510,69 @@ function main()
                         else
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File reload complete.";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: tput reset && source ${RELOAD_DOTFILE}";
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Cleaning up existing functions/aliases...";
+                            fi
+
+                            ## clean up existing aliases and functions so when they reload we get the new ones
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating function listing...";
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A function";
+                            fi
+
+                            ## unset the functions
+                            mapfile -t function_list < <( compgen -A function);
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
+                            fi
+
+                            for func_entry in "${function_list[@]}"; do
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "func_entry -> ${func_entry}";
+                                fi
+
+                                [[ -z "${func_entry}" ]] && continue;
+                                [[ "${func_entry}" == "writeLogEntry" ]] && continue;
+
+                                unset -f "${func_entry}";
+
+                                [[ -n "${func_entry}" ]] && unset -v func_entry;
+                            done
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating alias listing...";
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A alias";
+                            fi
+
+                            ## unset the aliases
+                            mapfile -t alias_list < <( compgen -A alias);
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
+                            fi
+
+                            for alias_entry in "${function_list[@]}"; do
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "alias_entry -> ${alias_entry}";
+                                fi
+
+                                [[ -z "${alias_entry}" ]] && continue;
+
+                                unalias "${alias_entry}";
+
+                                [[ -n "${alias_entry}" ]] && unset -v alias_entry;
+                            done
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting isReloadRequest to ${_TRUE}...";
+                            fi
+
+                            isReloadRequest="${_TRUE}";
+
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "isReloadRequest -> ${isReloadRequest}";
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Reloading dotfiles...";
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: tput reset && source ${RELOAD_DOTFILE}";
                             fi
 
                             tput reset && source "${RELOAD_DOTFILE}";
@@ -552,7 +613,7 @@ function main()
                         [[ -n "${function_name}" ]] && unset -v function_name;
                         [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                        reloadFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                        refreshFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
                         ret_code="${?}";
 
                         CNAME="$(basename "${BASH_SOURCE[0]}")";

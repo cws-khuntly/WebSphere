@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #=====  FUNCTION  =============================================================
-#          NAME:  installFiles
+#          NAME:  refreshFiles
 #   DESCRIPTION:  Re-loads existing dotfiles for use
 #    PARAMETERS:  None
 #       RETURNS:  0 if success, non-zero otherwise
@@ -86,7 +86,7 @@ function refreshFiles()
                 returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
                 ret_code="${?}";
 
-                cname="installutils.sh";
+                cname="refreshutils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -120,7 +120,7 @@ function refreshFiles()
                 refreshRemoteFiles "${returned_hostname}" "${returned_port:-${SSH_PORT_NUMBER}}" "${target_user}";
                 ret_code="${?}";
 
-                cname="transferutils.sh";
+                cname="refreshutils.sh";
                 function_name="${cname}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -208,55 +208,6 @@ function refreshLocalFiles()
     fi
 
     if [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
-        ## clean up existing aliases and functions so when they reload we get the new ones
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating function listing...";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A function";
-        fi
-
-        ## unset the functions
-        mapfile -t function_list < <( compgen -A function);
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
-        fi
-
-        for func_entry in "${function_list[@]}"; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "func_entry -> ${func_entry}";
-            fi
-
-            [[ -z "${func_entry}" ]] && continue;
-
-            unset -f "${func_entry}";
-
-            [[ -n "${func_entry}" ]] && unset -v func_entry;
-        done
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating alias listing...";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A alias";
-        fi
-
-        ## unset the aliases
-        mapfile -t alias_list < <( compgen -A alias);
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
-        fi
-
-        for alias_entry in "${function_list[@]}"; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "alias_entry -> ${alias_entry}";
-            fi
-
-            [[ -z "${alias_entry}" ]] && continue;
-
-            unalias "${alias_entry}";
-
-            [[ -n "${alias_entry}" ]] && unset -v alias_entry;
-        done
-
         ## extract the archive to the appropriate place
         cd "${DOTFILES_INSTALL_PATH}" || (( error_count += 1 ));
 
@@ -287,11 +238,13 @@ function refreshLocalFiles()
                         entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
                         entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
                         entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
+                        entry_permissions="$(cut -d "|" -f 4 <<< "${entry}")";
 
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_command -> ${entry_command}";
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_source -> ${entry_source}";
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_target -> ${entry_target}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_permissions -> ${entry_permissions}";
                         fi
 
                         if [[ -z "${entry_command}" ]]; then

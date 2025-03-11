@@ -245,11 +245,15 @@ function installLocalFiles()
                         entry_command="$(cut -d "|" -f 1 <<< "${entry}")";
                         entry_source="$(cut -d "|" -f 2 <<< "${entry}")";
                         entry_target="$(cut -d "|" -f 3 <<< "${entry}")";
+                        entry_permissions="$(cut -d "|" -f 4 <<< "${entry}")";
+                        recurse_permissions="$(cut -d "|" -f 4 <<< "${entry}")";
 
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_command -> ${entry_command}";
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_source -> ${entry_source}";
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_target -> ${entry_target}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_permissions -> ${entry_permissions}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "recurse_permissions -> ${recurse_permissions}";
                         fi
 
                         if [[ -z "${entry_command}" ]]; then
@@ -303,6 +307,12 @@ function installLocalFiles()
                                     continue;
                                 fi
 
+                                if [[ -n "${recurse_permissions}" ]] && [[ "${recurse_permissions}" == "${_TRUE}" ]]; then
+                                    chmod -R "${entry_permissions}" "${entry_target}";
+                                else
+                                    chmod "${entry_permissions}" "${entry_target}";
+                                fi
+
                                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${entry_target} created";
                                 fi
@@ -341,6 +351,32 @@ function installLocalFiles()
                                     writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Symbolic link ${entry_source} -> ${entry_target} created.";
                                 fi
                                 ;;
+                            "cp")
+                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Copying file ${entry_source} to ${entry_target}";
+                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cp -p ${entry_source} ${entry_target}";
+                                fi
+
+                                cp -p "$(eval printf "%s" "${entry_source}")" "$(eval printf "%s" "${entry_target}")";
+                                ret_code="${?}";
+
+                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
+                                then
+                                    (( error_count += 1 ));
+
+                                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to copy file ${entry_source} to ${entry_target}.";
+                                    fi
+
+                                    continue;
+                                fi
+
+                                chmod "${entry_permissions}" "${entry_target}"
+
+                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                    writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "File ${entry_source} copied to ${entry_target}.";
+                                fi
+                                ;;
                             *)
                                 (( error_count += 1 ));
 
@@ -361,21 +397,6 @@ function installLocalFiles()
 
                     ## restore the original ifs
                     IFS="${CURRENT_IFS}";
-
-                    ## set appropriate permissions
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type d -exec chmod 755 {} \;";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: find \"${DOTFILES_INSTALL_PATH}\" -type f -exec chmod 644 {} \;";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: chmod 755 \"${DOTFILES_INSTALL_PATH}\"/bin/*;";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: chmod 700 \"${HOME}\"/.ssh \"${HOME}\"/.gnupg";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: chmod 600 \"${DOTFILES_INSTALL_PATH}\"/ldaprc \"${DOTFILES_INSTALL_PATH}\"/curlrc \"${DOTFILES_INSTALL_PATH}\"/netrc \"${HOME}\"/.dotfiles/wgetrc;";
-                    fi
-
-                    find "${DOTFILES_INSTALL_PATH}" -type d -exec chmod 755 {} \; ;
-                    find "${DOTFILES_INSTALL_PATH}" -type f -exec chmod 644 {} \; ;
-                    chmod 755 "${DOTFILES_INSTALL_PATH}"/bin/*;
-                    chmod 700 "${HOME}"/.ssh "${HOME}"/.gnupg;
-                    chmod 600 "${DOTFILES_INSTALL_PATH}"/ldaprc "${DOTFILES_INSTALL_PATH}"/curlrc "${DOTFILES_INSTALL_PATH}"/netrc "${HOME}"/.dotfiles/wgetrc;
 
                     ## generate SSH keys if not already present
                     if [[ -n "${GENERATE_SSH_KEYS}" ]] && [[ "${GENERATE_SSH_KEYS}" == "${_TRUE}" ]]; then
@@ -497,6 +518,7 @@ function installLocalFiles()
     [[ -n "${entry_command}" ]] && unset -v entry_command;
     [[ -n "${entry_source}" ]] && unset -v entry_source;
     [[ -n "${entry_target}" ]] && unset -v entry_target;
+    [[ -n "${entry_permissions}" ]] && unset -v entry_permissions;
     [[ -n "${entry}" ]] && unset -v entry;
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then

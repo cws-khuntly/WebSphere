@@ -30,7 +30,7 @@ source "${HOME}/.profiles";
 source "${HOME}/.alias";
 source "${HOME}/.functions";
 
-if [[ -z "${haveIChanged}" ]] || [[ "${haveIChanged}" == "${_FALSE}" ]]; then
+if [[ -z "${isReloadRequest}" ]] || [[ "${isReloadRequest}" == "${_FALSE}" ]]; then
     showHostInfo;
     runLoginCommands;
 fi
