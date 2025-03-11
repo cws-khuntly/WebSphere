@@ -32,8 +32,3 @@ source "${HOME}/.functions";
 
 showHostInfo;
 
-## trap logout
-trap 'logoutUser; exit' 0;
-
-## make the umask sane
-umask 022;
