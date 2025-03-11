@@ -30,8 +30,10 @@ source "${HOME}/.profiles";
 source "${HOME}/.alias";
 source "${HOME}/.functions";
 
-showHostInfo;
-runLoginCommands;
+if [[ -z "${haveIChanged}"]] || [[ "${haveIChanged}" == "${_FALSE}" ]]; then
+    showHostInfo;
+    runLoginCommands;
+fi
 
 ## trap logout
 trap 'logoutUser; exit' EXIT;
