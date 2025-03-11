@@ -26,7 +26,7 @@ if [[ -z "$(command -v "writeLogEntryToFile")" ]]; then printf "\e[00;31m%s\033[
 
 declare -x PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:${HOME}/bin";
 
-source "${HOME}/.profile";
+source "${HOME}/.profiles";
 source "${HOME}/.alias";
 source "${HOME}/.functions";
 
