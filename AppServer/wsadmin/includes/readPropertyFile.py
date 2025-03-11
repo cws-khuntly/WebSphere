@@ -19,6 +19,7 @@
 import logging
 import ConfigParser
 
+configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
 errorLogger = logging.getLogger("error-logger")
 debugLogger = logging.getLogger("debug-logger")
 

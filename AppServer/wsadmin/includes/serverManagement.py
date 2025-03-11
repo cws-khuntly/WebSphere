@@ -1,4 +1,3 @@
-
 #==============================================================================
 #
 #          FILE:  serverMaintenance.py
@@ -22,6 +21,7 @@ import sys
 import time
 import logging
 
+configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
 errorLogger = logging.getLogger(str("error-logger"))
 debugLogger = logging.getLogger(str("debug-logger"))
 infoLogger = logging.getLogger(str("info-logger"))
@@ -44,9 +44,9 @@ def configureAutoRestart(targetMonitorPolicy, policyOption):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}".format(targetMonitorPolicy, policyOption, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}").format(targetMonitorPolicy, policyOption, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}".format(targetMonitorPolicy, policyOption, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating monitoring policy {0} with option {1}: {2} {3}").format(targetMonitorPolicy, policyOption, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No monitor policy was provided or no policy option was provided."))
@@ -80,9 +80,9 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating web container configuration {0}: {1} {2}".format(targetWebContainer, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating web container configuration {0}: {1} {2}").format(targetWebContainer, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating web container configuration {0}: {1} {2}".format(targetWebContainer, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating web container configuration {0}: {1} {2}").format(targetWebContainer, str(exception), str(parms)))
         #endtry
 
         if (len(vhostName) != 0):
@@ -96,9 +96,9 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
             except:
                 (exception, parms, tback) = sys.exc_info()
 
-                errorLogger.log(logging.ERROR, str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+                errorLogger.log(logging.ERROR, str("An error occurred updating web container {0} with default host {1}: {2} {3}").format(targetWebContainer, vhostName, str(exception), str(parms)))
 
-                raise Exception(str("An error occurred updating web container {0} with default host {1}: {2} {3}".format(targetWebContainer, vhostName, str(exception), str(parms))))
+                raise Exception(str("An error occurred updating web container {0} with default host {1}: {2} {3}").format(targetWebContainer, vhostName, str(exception), str(parms)))
             #endtry
         #endif
 
@@ -113,9 +113,9 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
             except:
                 (exception, parms, tback) = sys.exc_info()
 
-                errorLogger.log(logging.ERROR, str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, servletCachingEnabled, str(exception), str(parms))))
+                errorLogger.log(logging.ERROR, str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}").format(targetWebContainer, servletCachingEnabled, str(exception), str(parms)))
 
-                raise Exception(str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, servletCachingEnabled, str(exception), str(parms))))
+                raise Exception(str("An error occurred modifying the servlet caching state for web container {0} with value {1}: {2} {3}").format(targetWebContainer, servletCachingEnabled, str(exception), str(parms)))
             #endtry
         #endif
 
@@ -130,9 +130,9 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
             except:
                 (exception, parms, tback) = sys.exc_info()
 
-                errorLogger.log(logging.ERROR, str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, portletCachingEnabled, str(exception), str(parms))))
+                errorLogger.log(logging.ERROR, str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}").format(targetWebContainer, portletCachingEnabled, str(exception), str(parms)))
 
-                raise Exception(str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}".format(targetWebContainer, portletCachingEnabled, str(exception), str(parms))))
+                raise Exception(str("An error occurred modifying the portlet caching state for web container {0} with value {1}: {2} {3}").format(targetWebContainer, portletCachingEnabled, str(exception), str(parms)))
             #endtry
         #endif
     else:
@@ -160,9 +160,9 @@ def configureHAManager(targetHAManager, enableHA):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}".format(targetHAManager, enableHA, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}").format(targetHAManager, enableHA, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}".format(targetHAManager, enableHA, str(exception), str(parms))))
+            raise Exception(str("An error occurred modifying the HA Manager service {0} to value {1}: {2} {3}").format(targetHAManager, enableHA, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No HA Manager service was provided or no HA Manager state was provided."))
@@ -190,9 +190,9 @@ def configureCookies(targetCookie, cookieName, cookiePath):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}".format(targetCookie, cookieName, cookiePath, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}").format(targetCookie, cookieName, cookiePath, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}".format(targetCookie, cookieName, cookiePath, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating cookie configuration {0} with values {1} {2}: {3} {4}").format(targetCookie, cookieName, cookiePath, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No cookie configuration was provided or no cookie name/cookie path was provided."))
@@ -248,9 +248,9 @@ def configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThrea
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}".format(targetPoolName, targetThreadPool, str(exception), str(parms))))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}").format(targetPoolName, targetThreadPool, str(exception), str(parms)))
 
-                    raise Exception(str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}".format(targetPoolName, targetThreadPool, str(exception), str(parms))))
+                    raise Exception(str("An error occurred updating thread pool name {0} in thread pool {1}: {2} {3}").format(targetPoolName, targetThreadPool, str(exception), str(parms)))
                 #endtry
             #endif
             #endfor
@@ -290,9 +290,9 @@ def configureTCPChannels(targetTCPChannels, maxConnections):
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}".format(tcpChannelName, targetTCPChannel, str(exception), str(parms))))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}").format(tcpChannelName, targetTCPChannel, str(exception), str(parms)))
 
-                    raise Exception(str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}".format(tcpChannelName, targetTCPChannel, str(exception), str(parms))))
+                    raise Exception(str("An error occurred updating TCP channel name {0} in TCP channel {1}: {2} {3}").format(tcpChannelName, targetTCPChannel, str(exception), str(parms)))
                 #endtry
             #endif
             #endfor
@@ -338,9 +338,9 @@ def configureHTTPChannels(targetHTTPChannels, maxConnections):
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}".format(httpChannelName, targetHTTPChannel, str(exception), str(parms))))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}").format(httpChannelName, targetHTTPChannel, str(exception), str(parms)))
 
-                    raise Exception(str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}".format(httpChannelName, targetHTTPChannel, str(exception), str(parms))))
+                    raise Exception(str("An error occurred updating HTTP channel name {0} in HTTP channel {1}: {2} {3}").format(httpChannelName, targetHTTPChannel, str(exception), str(parms)))
                 #endtry
             #endif
             #endfor
@@ -383,9 +383,9 @@ def configureContainerChains(targetContainerChains, chainsToSkip):
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
-                    errorLogger.log(logging.ERROR, str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}".format(targetContainerChainName, targetContainerChain, str(exception), str(parms))))
+                    errorLogger.log(logging.ERROR, str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}").format(targetContainerChainName, targetContainerChain, str(exception), str(parms)))
 
-                    raise Exception(str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}".format(targetContainerChainName, targetContainerChain, str(exception), str(parms))))
+                    raise Exception(str("An error occurred updating container chain name {0} in container chain {1}: {3} {4}").format(targetContainerChainName, targetContainerChain, str(exception), str(parms)))
                 #endtry
             #endfor
     else:
@@ -414,9 +414,9 @@ def configureTuningParams(targetTuningParams, writeContent, writeFrequency):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}".format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}").format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}".format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating tuning parameters {0} with values {1} {2}: {3} {4}").format(targetTuningParams, writeContent, writeFrequency, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No tuning parameters were provided or no write content/write frequency was provided"))
@@ -427,7 +427,6 @@ def configureTuningParams(targetTuningParams, writeContent, writeFrequency):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency)"))
 #enddef
 
-# TODO
 def configureSessionManager(targetSessionManager):
     debugLogger.log(logging.DEBUG, str("ENTER: serverMaintenance#configureSessionManager(targetSessionManager)"))
     debugLogger.log(logging.DEBUG, str(targetSessionManager))
@@ -443,9 +442,9 @@ def configureSessionManager(targetSessionManager):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating session manager {0}: {1} {2}".format(targetSessionManager, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating session manager {0}: {1} {2}").format(targetSessionManager, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating session manager {0}: {1} {2}".format(targetSessionManager, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating session manager {0}: {1} {2}").format(targetSessionManager, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No session manager was provided to configure"))
@@ -472,9 +471,9 @@ def configureServerHostname(targetServer, hostName):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}".format(targetServer, hostName, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}").format(targetServer, hostName, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}".format(targetServer, hostName, str(exception), str(parms))))
+            raise Exception(str("An error occurred while modifying the hostname for server {0} to {1}: {2} {3}").format(targetServer, hostName, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No server was provided to modify or no new hostname was provided."))
@@ -510,9 +509,9 @@ def setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, ro
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}".format(targetTraceService, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}").format(targetTraceService, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}".format(targetTraceService, str(exception), str(parms))))
+            raise Exception(str("An error occurred modifying the trace service configuration for trace service {0}: {1} {2}").format(targetTraceService, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No trace service was provided or no trace service configuration values were provided."))
@@ -540,9 +539,9 @@ def setProcessExec(targetProcessExec, runAsUser, runAsGroup):
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}".format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}").format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}".format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms))))
+            raise Exception(str("An error occurred updating process execution {0} with runtime user {1} and runtime group {2}: {2} {3}").format(targetProcessExec, runAsUser, runAsGroup, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No process execution was provided or no runtime user/group information was provided."))
@@ -585,9 +584,9 @@ def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs
         except:
             (exception, parms, tback) = sys.exc_info()
 
-            errorLogger.log(logging.ERROR, str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}".format(serverName, nodeName, str(exception), str(parms))))
+            errorLogger.log(logging.ERROR, str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}").format(serverName, nodeName, str(exception), str(parms)))
 
-            raise Exception(str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}".format(serverName, nodeName, str(exception), str(parms))))
+            raise Exception(str("An error occurred setting JVM properties for server {0} on node {2}: {3} {4}").format(serverName, nodeName, str(exception), str(parms)))
         #endtry
     else:
         errorLogger.log(logging.ERROR, str("No server/node information was provided or no JVM properties were provided."))
