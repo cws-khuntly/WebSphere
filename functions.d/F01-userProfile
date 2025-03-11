@@ -74,6 +74,57 @@ function showHostInfo()
 )
 
 #=====  FUNCTION  =============================================================
+#          NAME:  runLoginCommands
+#   DESCRIPTION:  Executes necessary commands during user logout
+#    PARAMETERS:  None
+#       RETURNS:  0 regardless of result
+#==============================================================================
+function runLoginCommands()
+(
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F01-userProfile";
+    function_name="${cname}#${FUNCNAME[0]}";
+    return_code=0;
+    error_count=0;
+
+    #
+    # read the commands file and execute each
+    if [[ -s ${HOME}/etc/logincmds.properties ]]; then
+        for cmd_entry in $(<${HOME}/etc/logincmds.properties); do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry -> ${entry}";
+            fi
+
+            [[ -z "${cmd_entry}" ]] && continue;
+            [[ "${cmd_entry}" =~ ^\# ]] && continue;
+
+            cmnd_binary="$(cut -d "|" -f 1 <<< "${cmd_entry}")";
+            cmnd_args="$(cut -d "|" -f 2 <<< "${cmd_entry}")";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmnd_binary -> ${cmnd_binary}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmnd_args -> ${cmnd_args}";
+            fi
+
+            if [[ -n "$(command -v ${cmnd_binary})" ]]; then
+                "${cmd_binary}" "${cmnd_args}"
+                ret_code=${?}
+            fi
+        done
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    exit;
+)
+
+#=====  FUNCTION  =============================================================
 #          NAME:  logoutUser
 #   DESCRIPTION:  Executes necessary commands during user logout
 #    PARAMETERS:  None
