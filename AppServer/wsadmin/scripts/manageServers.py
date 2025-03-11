@@ -21,31 +21,31 @@ import os
 import sys
 import logging
 
-configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
-errorLogger = logging.getLogger(str("error-logger"))
-debugLogger = logging.getLogger(str("debug-logger"))
-infoLogger = logging.getLogger(str("info-logger"))
-consoleInfoLogger = logging.getLogger(str("info-logger"))
-consoleErrorLogger = logging.getLogger(str("info-logger"))
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
+errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
+infoLogger = logging.getLogger("info-logger")
+consoleInfoLogger = logging.getLogger("info-logger")
+consoleErrorLogger = logging.getLogger("info-logger")
 
-lineSplit = java.lang.System.getProperty(str("line.separator"))
+lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def configureDeploymentManager():
-    debugLogger.log(logging.DEBUG, str("ENTER: configureDeploymentManager()"))
+    debugLogger.log(logging.DEBUG, "ENTER: configureDeploymentManager()")
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-            debugLogger.log(logging.DEBUG, str(targetServer))
+            debugLogger.log(logging.DEBUG, targetServer)
 
             if (len(targetServer) != 0):
                 infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
@@ -54,16 +54,16 @@ def configureDeploymentManager():
                 #
                 # Enable/disable HAManager
                 #
-                isEnabled = returnPropertyConfiguration(configFile, str("server-hamanager"), str("enabled"))
+                isEnabled = returnPropertyConfiguration(configFile, "server-hamanager", "enabled")
                 targetHAManager = AdminConfig.list("HAManagerService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(isEnabled))
-                debugLogger.log(logging.DEBUG, str(targetHAManager))
+                debugLogger.log(logging.DEBUG, isEnabled)
+                debugLogger.log(logging.DEBUG, targetHAManager)
 
                 if ((len(targetHAManager) != 0) and (len(isEnabled) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureHAManager()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureHAManager(targetHAManager, isEnabled)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureHAManager()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureHAManager(targetHAManager, isEnabled)")
 
                         configureHAManager(targetHAManager, isEnabled)
 
@@ -80,26 +80,26 @@ def configureDeploymentManager():
                 #
                 # Configure trace service
                 #
-                traceSpec = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-spec"))
-                outputType = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("output-type"))
-                maxBackupFiles = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-backup-files"))
-                maxFileSize = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-file-size"))
-                traceFileName = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-file-name"))
+                traceSpec = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-spec")
+                outputType = returnPropertyConfiguration(configFile, "server-trace-settings", "output-type")
+                maxBackupFiles = returnPropertyConfiguration(configFile, "server-trace-settings", "max-backup-files")
+                maxFileSize = returnPropertyConfiguration(configFile, "server-trace-settings", "max-file-size")
+                traceFileName = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-file-name")
                 targetTraceService = AdminConfig.list("TraceService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(traceSpec))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(maxBackupFiles))
-                debugLogger.log(logging.DEBUG, str(maxFileSize))
-                debugLogger.log(logging.DEBUG, str(traceFileName))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(targetTraceService))
+                debugLogger.log(logging.DEBUG, traceSpec)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, maxBackupFiles)
+                debugLogger.log(logging.DEBUG, maxFileSize)
+                debugLogger.log(logging.DEBUG, traceFileName)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, targetTraceService)
 
                 if ((len(targetTraceService) != 0) and (len(traceSpec) != 0) and (len(outputType) != 0)
                     and (len(maxBackupFiles) != 0) and (len(maxFileSize) != 0) and (len(traceFileName) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setServerTrace()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)"))
+                        debugLogger.log(logging.DEBUG, "Calling setServerTrace()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)")
 
                         setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)
 
@@ -116,18 +116,18 @@ def configureDeploymentManager():
                 #
                 # Configure process execution
                 #
-                runAsUser = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-user"))
-                runAsGroup = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-group"))
+                runAsUser = returnPropertyConfiguration(configFile, "server-process-settings", "run-user")
+                runAsGroup = returnPropertyConfiguration(configFile, "server-process-settings", "run-group")
                 targetProcessExec = AdminConfig.list("ProcessExecution", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(runAsUser))
-                debugLogger.log(logging.DEBUG, str(runAsGroup))
-                debugLogger.log(logging.DEBUG, str(targetProcessExec))
+                debugLogger.log(logging.DEBUG, runAsUser)
+                debugLogger.log(logging.DEBUG, runAsGroup)
+                debugLogger.log(logging.DEBUG, targetProcessExec)
 
                 if ((len(targetProcessExec) != 0) and (len(runAsGroup) != 0) and (len(runAsGroup) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setProcessExec()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+                        debugLogger.log(logging.DEBUG, "Calling setProcessExec()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)")
 
                         setProcessExec(targetProcessExec, runAsUser, runAsGroup)
 
@@ -144,10 +144,10 @@ def configureDeploymentManager():
                 #
                 # Configure JVM properties
                 #
-                initialHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("initial-heap-size")) or 1024
-                maxHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("max-heap-size")) or 1024
-                genericJVMArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("jvm-arguments")) or ""
-                hprofArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("hprof-arguments")) or ""
+                initialHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "initial-heap-size") or 1024
+                maxHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "max-heap-size") or 1024
+                genericJVMArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "jvm-arguments") or ""
+                hprofArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "hprof-arguments") or ""
 
                 debugLogger.log(logging.DEBUG, str(initialHeapSize))
                 debugLogger.log(logging.DEBUG, str(maxHeapSize))
@@ -156,8 +156,8 @@ def configureDeploymentManager():
 
                 if ((len(initialHeapSize) != 0) and (len(maxHeapSize) != 0) and (len(genericJVMArguments) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setJVMProperties()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)"))
+                        debugLogger.log(logging.DEBUG, "Calling setJVMProperties()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)")
 
                         setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)
 
@@ -175,12 +175,12 @@ def configureDeploymentManager():
                 # Save workspace changes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling saveWorkspaceChanges()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: saveWorkspaceChanges()"))
+                    debugLogger.log(logging.DEBUG, "Calling saveWorkspaceChanges()")
+                    debugLogger.log(logging.DEBUG, "EXEC: saveWorkspaceChanges()")
 
                     saveWorkspaceChanges()
 
-                    debugLogger.log(logging.DEBUG, str("All workspace changes saved to master repository."))
+                    debugLogger.log(logging.DEBUG, "All workspace changes saved to master repository.")
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
@@ -192,8 +192,8 @@ def configureDeploymentManager():
                 # Synchronize nodes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling syncNodes()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: syncNodes(nodeList, targetCell)"))
+                    debugLogger.log(logging.DEBUG, "Calling syncNodes()")
+                    debugLogger.log(logging.DEBUG, "EXEC: syncNodes(nodeList, targetCell)")
 
                     syncNodes(nodeList, targetCell)
 
@@ -209,31 +209,31 @@ def configureDeploymentManager():
                 consoleErrorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))
             #endif
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: configureDeploymentManager()"))
+    debugLogger.log(logging.DEBUG, "EXIT: configureDeploymentManager()")
 #enddef
 
 def configureNodeAgent():
     debugLogger.log(logging.DEBUG, str("ENTER: configureNodeAgent()"))
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-            debugLogger.log(logging.DEBUG, str(targetServer))
+            debugLogger.log(logging.DEBUG, targetServer)
 
             if (len(targetServer) != 0):
                 infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
@@ -242,16 +242,16 @@ def configureNodeAgent():
                 #
                 # Enable/disable HAManager
                 #
-                isEnabled = returnPropertyConfiguration(configFile, str("server-hamanager"), str("enabled"))
+                isEnabled = returnPropertyConfiguration(configFile, "server-hamanager", "enabled")
                 targetHAManager = AdminConfig.list("HAManagerService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(isEnabled))
-                debugLogger.log(logging.DEBUG, str(targetHAManager))
+                debugLogger.log(logging.DEBUG, isEnabled)
+                debugLogger.log(logging.DEBUG, targetHAManager)
 
                 if ((len(targetHAManager) != 0) and (len(isEnabled) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureHAManager()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureHAManager(targetHAManager, isEnabled)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureHAManager()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureHAManager(targetHAManager, isEnabled)")
 
                         configureHAManager(targetHAManager, isEnabled)
 
@@ -268,26 +268,26 @@ def configureNodeAgent():
                 #
                 # Configure trace service
                 #
-                traceSpec = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-spec"))
-                outputType = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("output-type"))
-                maxBackupFiles = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-backup-files"))
-                maxFileSize = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-file-size"))
-                traceFileName = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-file-name"))
+                traceSpec = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-spec")
+                outputType = returnPropertyConfiguration(configFile, "server-trace-settings", "output-type")
+                maxBackupFiles = returnPropertyConfiguration(configFile, "server-trace-settings", "max-backup-files")
+                maxFileSize = returnPropertyConfiguration(configFile, "server-trace-settings", "max-file-size")
+                traceFileName = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-file-name")
                 targetTraceService = AdminConfig.list("TraceService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(traceSpec))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(maxBackupFiles))
-                debugLogger.log(logging.DEBUG, str(maxFileSize))
-                debugLogger.log(logging.DEBUG, str(traceFileName))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(targetTraceService))
+                debugLogger.log(logging.DEBUG, traceSpec)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, maxBackupFiles)
+                debugLogger.log(logging.DEBUG, maxFileSize)
+                debugLogger.log(logging.DEBUG, traceFileName)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, targetTraceService)
 
                 if ((len(targetTraceService) != 0) and (len(traceSpec) != 0) and (len(outputType) != 0)
                     and (len(maxBackupFiles) != 0) and (len(maxFileSize) != 0) and (len(traceFileName) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setServerTrace()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)"))
+                        debugLogger.log(logging.DEBUG, "Calling setServerTrace()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)")
 
                         setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)
 
@@ -304,18 +304,18 @@ def configureNodeAgent():
                 #
                 # Configure process execution
                 #
-                runAsUser = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-user"))
-                runAsGroup = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-group"))
+                runAsUser = returnPropertyConfiguration(configFile, "server-process-settings", "run-user")
+                runAsGroup = returnPropertyConfiguration(configFile, "server-process-settings", "run-group")
                 targetProcessExec = AdminConfig.list("ProcessExecution", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(runAsUser))
-                debugLogger.log(logging.DEBUG, str(runAsGroup))
-                debugLogger.log(logging.DEBUG, str(targetProcessExec))
+                debugLogger.log(logging.DEBUG, runAsUser)
+                debugLogger.log(logging.DEBUG, runAsGroup)
+                debugLogger.log(logging.DEBUG, targetProcessExec)
 
                 if ((len(targetProcessExec) != 0) and (len(runAsGroup) != 0) and (len(runAsGroup) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setProcessExec()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+                        debugLogger.log(logging.DEBUG, "Calling setProcessExec()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)")
 
                         setProcessExec(targetProcessExec, runAsUser, runAsGroup)
 
@@ -332,20 +332,20 @@ def configureNodeAgent():
                 #
                 # Configure JVM properties
                 #
-                initialHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("initial-heap-size")) or 512
-                maxHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("max-heap-size")) or 512
-                genericJVMArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("jvm-arguments")) or ""
-                hprofArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("hprof-arguments")) or ""
+                initialHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "initial-heap-size") or 512
+                maxHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "max-heap-size") or 512
+                genericJVMArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "jvm-arguments") or ""
+                hprofArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "hprof-arguments") or ""
 
-                debugLogger.log(logging.DEBUG, str(initialHeapSize))
-                debugLogger.log(logging.DEBUG, str(maxHeapSize))
-                debugLogger.log(logging.DEBUG, str(genericJVMArguments))
-                debugLogger.log(logging.DEBUG, str(hprofArguments))
+                debugLogger.log(logging.DEBUG, initialHeapSize)
+                debugLogger.log(logging.DEBUG, maxHeapSize)
+                debugLogger.log(logging.DEBUG, genericJVMArguments)
+                debugLogger.log(logging.DEBUG, hprofArguments)
 
                 if ((len(initialHeapSize) != 0) and (len(maxHeapSize) != 0) and (len(genericJVMArguments) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setJVMProperties()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)"))
+                        debugLogger.log(logging.DEBUG, "Calling setJVMProperties()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)")
 
                         setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)
 
@@ -363,12 +363,12 @@ def configureNodeAgent():
                 # Save workspace changes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling saveWorkspaceChanges()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: saveWorkspaceChanges()"))
+                    debugLogger.log(logging.DEBUG, "Calling saveWorkspaceChanges()")
+                    debugLogger.log(logging.DEBUG, "EXEC: saveWorkspaceChanges()")
 
                     saveWorkspaceChanges()
 
-                    debugLogger.log(logging.DEBUG, str("All workspace changes saved to master repository."))
+                    debugLogger.log(logging.DEBUG, "All workspace changes saved to master repository.")
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
@@ -380,8 +380,8 @@ def configureNodeAgent():
                 # Synchronize nodes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling syncNodes()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: syncNodes(nodeList, targetCell)"))
+                    debugLogger.log(logging.DEBUG, "Calling syncNodes()")
+                    debugLogger.log(logging.DEBUG, "EXEC: syncNodes(nodeList, targetCell)")
 
                     syncNodes(nodeList, targetCell)
 
@@ -397,33 +397,33 @@ def configureNodeAgent():
                 consoleErrorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))
             #endif
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: configureNodeAgent()"))
+    debugLogger.log(logging.DEBUG, "EXIT: configureNodeAgent()")
 #enddef
 
 def configureApplicationServer():
-    debugLogger.log(logging.DEBUG, str("ENTER: configureApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "ENTER: configureApplicationServer()")
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
-        isPortalServer = returnPropertyConfiguration(configFile, str("server-information"), str("is-portal-server"))
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
+        isPortalServer = returnPropertyConfiguration(configFile, "server-information", "is-portal-server")
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
-        debugLogger.log(logging.DEBUG, str(isPortalServer))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
+        debugLogger.log(logging.DEBUG, isPortalServer)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
-            debugLogger.log(logging.DEBUG, str(targetServer))
+            debugLogger.log(logging.DEBUG, targetServer)
 
             if (len(targetServer) != 0):
                 infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
@@ -432,16 +432,16 @@ def configureApplicationServer():
                 #
                 # Enable/disable HAManager
                 #
-                isEnabled = returnPropertyConfiguration(configFile, str("server-hamanager"), str("enabled"))
+                isEnabled = returnPropertyConfiguration(configFile, "server-hamanager", "enabled")
                 targetHAManager = AdminConfig.list("HAManagerService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(isEnabled))
-                debugLogger.log(logging.DEBUG, str(targetHAManager))
+                debugLogger.log(logging.DEBUG, isEnabled)
+                debugLogger.log(logging.DEBUG, targetHAManager)
 
                 if ((len(targetHAManager) != 0) and (len(isEnabled) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureHAManager()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureHAManager(targetHAManager, isEnabled)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureHAManager()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureHAManager(targetHAManager, isEnabled)")
 
                         configureHAManager(targetHAManager, isEnabled)
 
@@ -458,26 +458,26 @@ def configureApplicationServer():
                 #
                 # Configure trace service
                 #
-                traceSpec = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-spec")) or "*=info"
-                outputType = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("output-type")) or "SPECIFIED_FILE"
-                maxBackupFiles = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-backup-files")) or "10"
-                maxFileSize = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("max-file-size")) or "50"
-                traceFileName = returnPropertyConfiguration(configFile, str("server-trace-settings"), str("trace-file-name")) or "${SERVER_LOG_ROOT}/trace.log"
+                traceSpec = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-spec") or "*=info"
+                outputType = returnPropertyConfiguration(configFile, "server-trace-settings", "output-type") or "SPECIFIED_FILE"
+                maxBackupFiles = returnPropertyConfiguration(configFile, "server-trace-settings", "max-backup-files") or "10"
+                maxFileSize = returnPropertyConfiguration(configFile, "server-trace-settings", "max-file-size") or "50"
+                traceFileName = returnPropertyConfiguration(configFile, "server-trace-settings", "trace-file-name") or "${SERVER_LOG_ROOT}/trace.log"
                 targetTraceService = AdminConfig.list("TraceService", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(traceSpec))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(maxBackupFiles))
-                debugLogger.log(logging.DEBUG, str(maxFileSize))
-                debugLogger.log(logging.DEBUG, str(traceFileName))
-                debugLogger.log(logging.DEBUG, str(outputType))
-                debugLogger.log(logging.DEBUG, str(targetTraceService))
+                debugLogger.log(logging.DEBUG, traceSpec)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, maxBackupFiles)
+                debugLogger.log(logging.DEBUG, maxFileSize)
+                debugLogger.log(logging.DEBUG, traceFileName)
+                debugLogger.log(logging.DEBUG, outputType)
+                debugLogger.log(logging.DEBUG, targetTraceService)
 
                 if ((len(targetTraceService) != 0) and (len(traceSpec) != 0) and (len(outputType) != 0)
                     and (len(maxBackupFiles) != 0) and (len(maxFileSize) != 0) and (len(traceFileName) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setServerTrace()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)"))
+                        debugLogger.log(logging.DEBUG, "Calling setServerTrace()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)")
 
                         setServerTrace(targetTraceService, traceSpec, outputType, maxBackupFiles, maxFileSize, traceFileName)
 
@@ -494,18 +494,18 @@ def configureApplicationServer():
                 #
                 # Configure process execution
                 #
-                runAsUser = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-user"))
-                runAsGroup = returnPropertyConfiguration(configFile, str("server-process-settings"), str("run-group"))
+                runAsUser = returnPropertyConfiguration(configFile, "server-process-settings", "run-user")
+                runAsGroup = returnPropertyConfiguration(configFile, "server-process-settings", "run-group")
                 targetProcessExec = AdminConfig.list("ProcessExecution", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(runAsUser))
-                debugLogger.log(logging.DEBUG, str(runAsGroup))
-                debugLogger.log(logging.DEBUG, str(targetProcessExec))
+                debugLogger.log(logging.DEBUG, runAsUser)
+                debugLogger.log(logging.DEBUG, runAsGroup)
+                debugLogger.log(logging.DEBUG, targetProcessExec)
 
                 if ((len(targetProcessExec) != 0) and (len(runAsGroup) != 0) and (len(runAsGroup) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setProcessExec()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)"))
+                        debugLogger.log(logging.DEBUG, "Calling setProcessExec()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setProcessExec(targetProcessExec, runAsUser, runAsGroup)")
 
                         setProcessExec(targetProcessExec, runAsUser, runAsGroup)
 
@@ -522,20 +522,20 @@ def configureApplicationServer():
                 #
                 # Configure JVM properties
                 #
-                initialHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("initial-heap-size")) or 2048
-                maxHeapSize = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("max-heap-size")) or 2048
-                genericJVMArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("jvm-arguments")) or ""
-                hprofArguments = returnPropertyConfiguration(configFile, str("server-jvm-settings"), str("hprof-arguments")) or ""
+                initialHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "initial-heap-size") or 2048
+                maxHeapSize = returnPropertyConfiguration(configFile, "server-jvm-settings", "max-heap-size") or 2048
+                genericJVMArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "jvm-arguments") or ""
+                hprofArguments = returnPropertyConfiguration(configFile, "server-jvm-settings", "hprof-arguments") or ""
 
-                debugLogger.log(logging.DEBUG, str(initialHeapSize))
-                debugLogger.log(logging.DEBUG, str(maxHeapSize))
-                debugLogger.log(logging.DEBUG, str(genericJVMArguments))
-                debugLogger.log(logging.DEBUG, str(hprofArguments))
+                debugLogger.log(logging.DEBUG, initialHeapSize)
+                debugLogger.log(logging.DEBUG, maxHeapSize)
+                debugLogger.log(logging.DEBUG, genericJVMArguments)
+                debugLogger.log(logging.DEBUG, hprofArguments)
 
                 if ((len(initialHeapSize) != 0) and (len(maxHeapSize) != 0) and (len(genericJVMArguments) != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling setJVMProperties()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)"))
+                        debugLogger.log(logging.DEBUG, "Calling setJVMProperties()")
+                        debugLogger.log(logging.DEBUG, "EXEC: setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)")
 
                         setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, genericJVMArguments, hprofArguments)
 
@@ -552,16 +552,16 @@ def configureApplicationServer():
                 #
                 # Configure auto restart policy
                 #
-                enableAutoRestart = returnPropertyConfiguration(configFile, str("server-auto-restart"), str("restart-policy")) or "STOPPED"
+                enableAutoRestart = returnPropertyConfiguration(configFile, "server-auto-restart", "restart-policy") or "STOPPED"
                 targetMonitorPolicy = AdminConfig.list("MonitoringPolicy", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(enableAutoRestart))
-                debugLogger.log(logging.DEBUG, str(targetMonitorPolicy))
+                debugLogger.log(logging.DEBUG, enableAutoRestart)
+                debugLogger.log(logging.DEBUG, targetMonitorPolicy)
 
                 if (len(targetMonitorPolicy) != 0):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureAutoRestart()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureAutoRestart(targetMonitorPolicy, enableAutoRestart)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureAutoRestart()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureAutoRestart(targetMonitorPolicy, enableAutoRestart)")
 
                         configureAutoRestart(targetMonitorPolicy, enableAutoRestart)
 
@@ -578,20 +578,20 @@ def configureApplicationServer():
                 #
                 # Configure web container
                 #
-                virtualHost = returnPropertyConfiguration(configFile, str("server-web-container"), str("virtual-host")) or "default_host"
-                enableServletCaching = returnPropertyConfiguration(configFile, str("server-web-container"), str("servlet-caching-enabled")) or "true"
-                enablePortletCaching = returnPropertyConfiguration(configFile, str("server-web-container"), str("portlet-caching-enabled")) or "true"
+                virtualHost = returnPropertyConfiguration(configFile, "server-web-container", "virtual-host") or "default_host"
+                enableServletCaching = returnPropertyConfiguration(configFile, "server-web-container", "servlet-caching-enabled") or "true"
+                enablePortletCaching = returnPropertyConfiguration(configFile, "server-web-container", "portlet-caching-enabled") or "true"
                 targetWebContainer = AdminConfig.list("WebContainer", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(virtualHost))
-                debugLogger.log(logging.DEBUG, str(enableServletCaching))
-                debugLogger.log(logging.DEBUG, str(enablePortletCaching))
-                debugLogger.log(logging.DEBUG, str(targetWebContainer))
+                debugLogger.log(logging.DEBUG, virtualHost)
+                debugLogger.log(logging.DEBUG, enableServletCaching)
+                debugLogger.log(logging.DEBUG, enablePortletCaching)
+                debugLogger.log(logging.DEBUG, targetWebContainer)
 
                 if (len(targetWebContainer) != 0):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureWebContainer()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureWebContainer(targetWebContainer, virtualHost, enableServletCaching, isPortalServer, enablePortletCaching)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureWebContainer()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureWebContainer(targetWebContainer, virtualHost, enableServletCaching, isPortalServer, enablePortletCaching)")
 
                         configureWebContainer(targetWebContainer, virtualHost, enableServletCaching, isPortalServer, enablePortletCaching)
 
@@ -608,18 +608,18 @@ def configureApplicationServer():
                 #
                 # Configure server cookies
                 #
-                cookieName = returnPropertyConfiguration(configFile, str("server-cookie-settings"), str("cookie-name")) or "JSESSIONID"
-                cookiePath = returnPropertyConfiguration(configFile, str("server-web-container"), str("cookie-path")) or "/"
+                cookieName = returnPropertyConfiguration(configFile, "server-cookie-settings", "cookie-name") or "JSESSIONID"
+                cookiePath = returnPropertyConfiguration(configFile, "server-web-container", "cookie-path") or "/"
                 targetCookie = AdminConfig.list("Cookie", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(cookieName))
-                debugLogger.log(logging.DEBUG, str(cookiePath))
-                debugLogger.log(logging.DEBUG, str(targetCookie))
+                debugLogger.log(logging.DEBUG, cookieName)
+                debugLogger.log(logging.DEBUG, cookiePath)
+                debugLogger.log(logging.DEBUG, targetCookie)
 
                 if (len(targetCookie) != 0):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureCookies()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureCookies(targetCookie, cookieName, cookiePath)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureCookies()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureCookies(targetCookie, cookieName, cookiePath)")
 
                         configureCookies(targetCookie, cookieName, cookiePath)
 
@@ -636,27 +636,27 @@ def configureApplicationServer():
                 #
                 # Configure thread pools
                 #
-                startMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("startup-min-thread-size"))
-                startMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("startup-max-thread-size"))
-                webMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("webcontainer-min-thread-size"))
-                webMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("webcontainer-max-thread-size"))
-                haMinThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("hamanager-min-thread-size"))
-                haMaxThreads = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("hamanager-max-thread-size"))
-                threadPools = returnPropertyConfiguration(configFile, str("server-thread-pools"), str("pool-names"))
+                startMinThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "startup-min-thread-size")
+                startMaxThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "startup-max-thread-size")
+                webMinThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "webcontainer-min-thread-size")
+                webMaxThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "webcontainer-max-thread-size")
+                haMinThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "hamanager-min-thread-size")
+                haMaxThreads = returnPropertyConfiguration(configFile, "server-thread-pools", "hamanager-max-thread-size")
+                threadPools = returnPropertyConfiguration(configFile, "server-thread-pools", "pool-names")
                 targetThreadPools = AdminConfig.list("ThreadPool", targetServer).split(lineSplit)
 
-                debugLogger.log(logging.DEBUG, str(startMinThreads))
-                debugLogger.log(logging.DEBUG, str(startMaxThreads))
-                debugLogger.log(logging.DEBUG, str(webMinThreads))
-                debugLogger.log(logging.DEBUG, str(webMaxThreads))
-                debugLogger.log(logging.DEBUG, str(haMinThreads))
-                debugLogger.log(logging.DEBUG, str(haMaxThreads))
-                debugLogger.log(logging.DEBUG, str(targetThreadPools))
+                debugLogger.log(logging.DEBUG, startMinThreads)
+                debugLogger.log(logging.DEBUG, startMaxThreads)
+                debugLogger.log(logging.DEBUG, webMinThreads)
+                debugLogger.log(logging.DEBUG, webMaxThreads)
+                debugLogger.log(logging.DEBUG, haMinThreads)
+                debugLogger.log(logging.DEBUG, haMaxThreads)
+                debugLogger.log(logging.DEBUG, targetThreadPools)
 
                 if (len(targetThreadPools) != 0):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configuretargetThreadPools()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, threadPools)"))
+                        debugLogger.log(logging.DEBUG, "Calling configuretargetThreadPools()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, threadPools)")
 
                         configuretargetThreadPools(targetThreadPools, startMinThreads, startMaxThreads, webMinThreads, webMaxThreads, haMinThreads, haMaxThreads, threadPools)
 
@@ -673,16 +673,16 @@ def configureApplicationServer():
                 #
                 # Configure TCP channels
                 #
-                tcpMaxOpenConnections = returnPropertyConfiguration(configFile, str("server-tcp-channels"), str("max-open-connections"))
+                tcpMaxOpenConnections = returnPropertyConfiguration(configFile, "server-tcp-channels", "max-open-connections")
                 targetTCPChannels = AdminConfig.list("TCPInboundChannel", targetServer).split(lineSplit)
 
-                debugLogger.log(logging.DEBUG, str(tcpMaxOpenConnections))
-                debugLogger.log(logging.DEBUG, str(targetTCPChannels))
+                debugLogger.log(logging.DEBUG, tcpMaxOpenConnections)
+                debugLogger.log(logging.DEBUG, targetTCPChannels)
 
                 if (len(targetTCPChannels) != 0):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureTCPChannels()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureTCPChannels(targetTCPChannels, tcpMaxOpenConnections)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureTCPChannels()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureTCPChannels(targetTCPChannels, tcpMaxOpenConnections)")
 
                         configureTCPChannels(targetTCPChannels, tcpMaxOpenConnections)
 
@@ -699,16 +699,16 @@ def configureApplicationServer():
                 #
                 # Configure HTTP channels
                 #
-                httpMaxOpenConnections = returnPropertyConfiguration(configFile, str("server-http-channels"), str("max-open-connections"))
+                httpMaxOpenConnections = returnPropertyConfiguration(configFile, "server-http-channels", "max-open-connections")
                 targetHTTPChannels = AdminConfig.list("HTTPInboundChannel", targetServer).split(lineSplit)
 
-                debugLogger.log(logging.DEBUG, str(tcpMaxOpenConnections))
-                debugLogger.log(logging.DEBUG, str(targetHTTPChannels))
+                debugLogger.log(logging.DEBUG, httpMaxOpenConnections)
+                debugLogger.log(logging.DEBUG, targetHTTPChannels)
 
                 if (len(targetHTTPChannels != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureHTTPChannels()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureHTTPChannels(targetHTTPChannels, httpMaxOpenConnections)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureHTTPChannels()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureHTTPChannels(targetHTTPChannels, httpMaxOpenConnections)")
 
                         configureHTTPChannels(targetHTTPChannels, httpMaxOpenConnections)
 
@@ -725,16 +725,16 @@ def configureApplicationServer():
                 #
                 # Configure container chains
                 #
-                chainsToSkip = returnPropertyConfiguration(configFile, str("server-container-chains"), str("skip-chains"))
+                chainsToSkip = returnPropertyConfiguration(configFile, "server-container-chains", "skip-chains")
                 targetContainerChains = AdminTask.listChains(targetTransport, "[-acceptorFilter WebContainerInboundChannel]").split(lineSplit)
 
-                debugLogger.log(logging.DEBUG, str(chainsToSkip))
-                debugLogger.log(logging.DEBUG, str(targetContainerChains))
+                debugLogger.log(logging.DEBUG, chainsToSkip)
+                debugLogger.log(logging.DEBUG, targetContainerChains)
 
                 if (len(targetContainerChains != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureContainerChains()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureContainerChains(targetContainerChains, chainsToSkip)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureContainerChains()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureContainerChains(targetContainerChains, chainsToSkip)")
 
                         configureContainerChains(targetContainerChains, chainsToSkip)
 
@@ -751,18 +751,18 @@ def configureApplicationServer():
                 #
                 # Configure tuning parameters
                 #
-                writeContent = returnPropertyConfiguration(configFile, str("server-tuning-params"), str("write-content")) or "ONLY_UPDATED_ATTRIBUTES"
-                writeFrequency = returnPropertyConfiguration(configFile, str("server-tuning-params"), str("write-frequency")) or "END_OF_SERVLET_SERVICE"
+                writeContent = returnPropertyConfiguration(configFile, "server-tuning-params", "write-content") or "ONLY_UPDATED_ATTRIBUTES"
+                writeFrequency = returnPropertyConfiguration(configFile, "server-tuning-params", "write-frequency") or "END_OF_SERVLET_SERVICE"
                 targetTuningParams = AdminConfig.list("TuningParams", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(writeContent))
-                debugLogger.log(logging.DEBUG, str(writeFrequency))
-                debugLogger.log(logging.DEBUG, str(targetTuningParams))
+                debugLogger.log(logging.DEBUG, writeContent)
+                debugLogger.log(logging.DEBUG, writeFrequency)
+                debugLogger.log(logging.DEBUG, targetTuningParams)
 
                 if (len(targetTuningParams != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureTuningParams()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureTuningParams(targetTuningParams, writeContent, writeFrequency)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureTuningParams()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureTuningParams(targetTuningParams, writeContent, writeFrequency)")
 
                         configureTuningParams(targetTuningParams, writeContent, writeFrequency)
 
@@ -782,12 +782,12 @@ def configureApplicationServer():
                 #
                 targetSessionManager = AdminConfig.list("TuningParams", targetServer)
 
-                debugLogger.log(logging.DEBUG, str(targetSessionManager))
+                debugLogger.log(logging.DEBUG, targetSessionManager)
 
                 if (len(targetSessionManager != 0)):
                     try:
-                        debugLogger.log(logging.DEBUG, str("Calling configureSessionManager()"))
-                        debugLogger.log(logging.DEBUG, str("EXEC: configureSessionManager(targetSessionManager)"))
+                        debugLogger.log(logging.DEBUG, "Calling configureSessionManager()")
+                        debugLogger.log(logging.DEBUG, "EXEC: configureSessionManager(targetSessionManager)")
 
                         configureSessionManager(targetSessionManager)
 
@@ -805,12 +805,12 @@ def configureApplicationServer():
                 # Save workspace changes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling saveWorkspaceChanges()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: saveWorkspaceChanges()"))
+                    debugLogger.log(logging.DEBUG, "Calling saveWorkspaceChanges()")
+                    debugLogger.log(logging.DEBUG, "EXEC: saveWorkspaceChanges()")
 
                     saveWorkspaceChanges()
 
-                    debugLogger.log(logging.DEBUG, str("All workspace changes saved to master repository."))
+                    debugLogger.log(logging.DEBUG, "All workspace changes saved to master repository.")
                 except:
                     (exception, parms, tback) = sys.exc_info()
 
@@ -822,8 +822,8 @@ def configureApplicationServer():
                 # Synchronize nodes
                 #
                 try:
-                    debugLogger.log(logging.DEBUG, str("Calling syncNodes()"))
-                    debugLogger.log(logging.DEBUG, str("EXEC: syncNodes(nodeList, targetCell)"))
+                    debugLogger.log(logging.DEBUG, "Calling syncNodes()")
+                    debugLogger.log(logging.DEBUG, "EXEC: syncNodes(nodeList, targetCell)")
 
                     syncNodes(nodeList, targetCell)
 
@@ -835,38 +835,38 @@ def configureApplicationServer():
                     consoleErrorLogger.log(logging.ERROR, str("An error occurred synchronizing changes to cell {0}. Please review logs.").format(targetCell))
                 #endtry
             else:
-                errorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))
-                consoleErrorLogger.log(logging.ERROR, str("No deployment manager was found with node name {0} and server name {1}.").format(nodeName, serverName))
+                errorLogger.log(logging.ERROR, str("No application server was found with node name {0} and server name {1}.").format(nodeName, serverName))
+                consoleErrorLogger.log(logging.ERROR, str("No application server was found with node name {0} and server name {1}.").format(nodeName, serverName))
             #endif
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: configureApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "EXIT: configureApplicationServer()")
 #enddef
 
 def getServerStatus():
-    debugLogger.log(logging.DEBUG, str("ENTER: getServerStatus()"))
+    debugLogger.log(logging.DEBUG, "ENTER: getServerStatus()")
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             #
             # Get the current status of the server
             #
             try:
-                debugLogger.log(logging.DEBUG, str("Calling serverStatus()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: serverStatus(serverName, nodeName)"))
+                debugLogger.log(logging.DEBUG, "Calling serverStatus()")
+                debugLogger.log(logging.DEBUG, "EXEC: serverStatus(serverName, nodeName)")
 
                 serverStatus = serverStatus(serverName, nodeName)
 
@@ -880,36 +880,36 @@ def getServerStatus():
                 consoleErrorLogger.log(logging.ERROR, str("An error occurred retrieving the current state of server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
             #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: getServerStatus()"))
+    debugLogger.log(logging.DEBUG, "EXIT: getServerStatus()")
 #enddef
 
 def startApplicationServer():
-    debugLogger.log(logging.DEBUG, str("ENTER: startApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "ENTER: startApplicationServer()")
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
-        startWaitTime = returnPropertyConfiguration(configFile, str("server-start-options"), str("start-wait-time")) or "10"
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
+        startWaitTime = returnPropertyConfiguration(configFile, "server-start-options", "start-wait-time") or "10"
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
-        debugLogger.log(logging.DEBUG, str(startWaitTime))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
+        debugLogger.log(logging.DEBUG, startWaitTime)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             #
             # Start the application server
             #
             try:
-                debugLogger.log(logging.DEBUG, str("Calling startServer()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: startServer(serverName, nodeName, startWaitTime)"))
+                debugLogger.log(logging.DEBUG, "Calling startServer()")
+                debugLogger.log(logging.DEBUG, "EXEC: startServer(serverName, nodeName, startWaitTime)")
 
                 startServer(serverName, nodeName, startWaitTime)
 
@@ -923,38 +923,38 @@ def startApplicationServer():
                 consoleErrorLogger.log(logging.ERROR, str("An error occurredtrying to start server server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
             #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: startApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "EXIT: startApplicationServer()")
 #enddef
 
 def stopApplicationServer():
     debugLogger.log(logging.DEBUG, str("ENTER: stopApplicationServer()"))
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
-        stopServerImmediate = returnPropertyConfiguration(configFile, str("server-stop-options"), str("immediate-stop")) or False
-        stopServerTerminate = returnPropertyConfiguration(configFile, str("server-stop-options"), str("terminate-stop")) or False
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
+        stopServerImmediate = returnPropertyConfiguration(configFile, "server-stop-options", "immediate-stop") or False
+        stopServerTerminate = returnPropertyConfiguration(configFile, "server-stop-options", "terminate-stop") or False
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
-        debugLogger.log(logging.DEBUG, str(stopServerImmediate))
-        debugLogger.log(logging.DEBUG, str(stopServerTerminate))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
+        debugLogger.log(logging.DEBUG, stopServerImmediate)
+        debugLogger.log(logging.DEBUG, stopServerTerminate)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             #
             # Start the application server
             #
             try:
-                debugLogger.log(logging.DEBUG, str("Calling stopServer()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: stopServer(serverName, nodeName, stopServerImmediate, stopServerImmediate)"))
+                debugLogger.log(logging.DEBUG, "Calling stopServer()")
+                debugLogger.log(logging.DEBUG, "EXEC: stopServer(serverName, nodeName, stopServerImmediate, stopServerImmediate)")
 
                 stopServer(serverName, nodeName, stopServerImmediate, stopServerImmediate)
 
@@ -968,36 +968,36 @@ def stopApplicationServer():
                 consoleErrorLogger.log(logging.ERROR, str("An error occurredtrying to stop server server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
             #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: stopApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "EXIT: stopApplicationServer()")
 #enddef
 
 def restartApplicationServer():
-    debugLogger.log(logging.DEBUG, str("ENTER: restartApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "ENTER: restartApplicationServer()")
 
     if (len(configFile) != 0):
-        nodeName = returnPropertyConfiguration(configFile, str("server-information"), str("node-name"))
-        serverName = returnPropertyConfiguration(configFile, str("server-information"), str("server-name"))
-        restartTimeout = returnPropertyConfiguration(configFile, str("server-restart-options"), str("restart-timeout")) or "600"
+        nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
+        serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
+        restartTimeout = returnPropertyConfiguration(configFile, "server-restart-options", "restart-timeout") or "600"
 
-        debugLogger.log(logging.DEBUG, str(nodeName))
-        debugLogger.log(logging.DEBUG, str(serverName))
-        debugLogger.log(logging.DEBUG, str(restartTimeout))
+        debugLogger.log(logging.DEBUG, nodeName)
+        debugLogger.log(logging.DEBUG, serverName)
+        debugLogger.log(logging.DEBUG, restartTimeout)
 
         if ((len(nodeName) != 0) and (len(serverName) != 0)):
             #
             # Start the application server
             #
             try:
-                debugLogger.log(logging.DEBUG, str("Calling stopServer()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: restartServer(serverName, nodeName, restartTimeout)"))
+                debugLogger.log(logging.DEBUG, "Calling stopServer()")
+                debugLogger.log(logging.DEBUG, "EXEC: restartServer(serverName, nodeName, restartTimeout)")
 
                 restartServer(serverName, nodeName, restartTimeout)
 
@@ -1011,145 +1011,145 @@ def restartApplicationServer():
                 consoleErrorLogger.log(logging.ERROR, str("An error occurredtrying to restart server server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
             #endtry
         else:
-            errorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
-            consoleErrorLogger.log(logging.ERROR, str("No node/server information was found in the provided configuration file."))
+            errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+            consoleErrorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
         #endif
     else:
-        errorLogger.log(logging.ERROR, str("No configuration file was provided."))
-        consoleErrorLogger.log(logging.ERROR, str("No configuration file was provided."))
+        errorLogger.log(logging.ERROR, "No configuration file was provided.")
+        consoleErrorLogger.log(logging.ERROR, "No configuration file was provided.")
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: restartApplicationServer()"))
+    debugLogger.log(logging.DEBUG, "EXIT: restartApplicationServer()")
 #enddef
 
 def printHelp():
-    print(str("This script performs server management tasks."))
-    print(str("Execution: wsadmin.sh -lang jython -f serverManagement.py <option> <configuration file>"))
-    print(str("Options are: "))
+    print("This script performs server management tasks.")
+    print("Execution: wsadmin.sh -lang jython -f serverManagement.py <option> <configuration file>")
+    print("Options are: ")
 
-    print(str("    configure-deployment-manager: Performs configuration tasks for a deployment manager."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                [server-trace-settings]"))
-    print(str("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\"."))
-    print(str("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\"."))
-    print(str("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is \"50\"."))
-    print(str("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is \"50\"."))
-    print(str("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\"."))
-    print(str("                [server-process-settings]"))
-    print(str("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured."))
-    print(str("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured."))
-    print(str("                [server-jvm-settings]"))
-    print(str("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"1024\"."))
-    print(str("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"1024\"."))
-    print(str("                [server-hamanager]"))
-    print(str("                    This section may contain a value to enable or disable the HA Manager service."))
+    print("    configure-deployment-manager: Performs configuration tasks for a deployment manager.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                [server-trace-settings]")
+    print("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\".")
+    print("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\".")
+    print("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is \"50\".")
+    print("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is \"50\".")
+    print("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\".")
+    print("                [server-process-settings]")
+    print("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured.")
+    print("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured.")
+    print("                [server-jvm-settings]")
+    print("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"1024\".")
+    print("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"1024\".")
+    print("                [server-hamanager]")
+    print("                    This section may contain a value to enable or disable the HA Manager service.")
 
-    print(str("    configure-nodeagent: Performs configuration tasks for a nodeagent."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                [server-trace-settings]"))
-    print(str("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\"."))
-    print(str("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\"."))
-    print(str("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is \"50\"."))
-    print(str("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is \"50\"."))
-    print(str("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\"."))
-    print(str("                [server-process-settings]"))
-    print(str("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured."))
-    print(str("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured."))
-    print(str("                [server-jvm-settings]"))
-    print(str("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"512\"."))
-    print(str("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"512\"."))
+    print("    configure-nodeagent: Performs configuration tasks for a nodeagent.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                [server-trace-settings]")
+    print("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\".")
+    print("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\".")
+    print("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is \"50\".")
+    print("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is \"50\".")
+    print("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\".")
+    print("                [server-process-settings]")
+    print("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured.")
+    print("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured.")
+    print("                [server-jvm-settings]")
+    print("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"512\".")
+    print("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"512\".")
 
-    print(str("    configure-application-server: Performs configuration tasks for an application server."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                    This section may indicate if the server is a WebSphere Portal server. If no value is provided, the default is \"false\""))
-    print(str("                [server-auto-restart]"))
-    print(str("                    This section must contain the server and node names."))
-    print(str("                    This section may contain a value to determine if the nodeagent should automatically start the server if it finds it down. If not provided, the default value is \"STOPPED\""))
-    print(str("                [server-web-container]"))
-    print(str("                    This section may contain a value to set the default virtual host. If not provided, the default value is \"default_host\"."))
-    print(str("                    This section may contain a value to determine if servlet caching is enabled. If not provided, the default value is \"true\"."))
-    print(str("                [server-hamanager]"))
-    print(str("                    This section may contain a value to determine if the HA Manager service should be enabled. No default value is provided."))
-    print(str("                [server-trace-settings]"))
-    print(str("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\"."))
-    print(str("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\"."))
-    print(str("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is 50."))
-    print(str("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is 50."))
-    print(str("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\"."))
-    print(str("                [server-process-settings]"))
-    print(str("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured."))
-    print(str("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured."))
-    print(str("                [server-jvm-settings]"))
-    print(str("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"2048\"."))
-    print(str("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"2048\"."))
-    print(str("                [server-thread-pools]"))
-    print(str("                    This section may contain a value to configure the initial server startup thread pool minimum size. No default is provided."))
-    print(str("                    This section may contain a value to configure the initial server startup thread pool maximum size. No default is provided."))
-    print(str("                    This section may contain a value to configure the initial web container thread pool minimum size. No default is provided."))
-    print(str("                    This section may contain a value to configure the initial web container thread pool maximum size. No default is provided."))
-    print(str("                    This section may contain a value to configure the initial HA Manager thread pool minimum size. No default is provided."))
-    print(str("                    This section may contain a value to configure the initial HA Manager thread pool maximum size. No default is provided."))
-    print(str("                        NOTE: If the [server-hamanger] section disables the HA Manager service, these values should be set to \"0\"."))
-    print(str("                    This section may contain a list of thread pools to configure. No default is provided."))
-    print(str("                [server-tcp-channels]"))
-    print(str("                    This section may contain a value to configure the maximum number of open TCP connections. No default is provided."))
-    print(str("                [server-http-channels]"))
-    print(str("                    This section may contain a value to configure the maximum number of open TCP connections. No default is provided."))
-    print(str("                [server-container-chains]"))
-    print(str("                    This section may contain a list of container chains to skip. No default is provided."))
-    print(str("                [server-tuning-params]"))
-    print(str("                    This section may contain a value indicating the session write content policy. If no value is provided, the default is \"ONLY_UPDATED_ATTRIBUTES\""))
-    print(str("                    This section may contain a value indicating the session write frequency policy. If no value is provided, the default is \"END_OF_SERVLET_SERVICE\""))
-    print(str("                [server-cookie-settings]"))
-    print(str("                    This section may contain a value indicating the name of the session cookie. If no value is provided, the default is \"JSESSIONID\""))
-    print(str("                    This section may contain a value indicating the path for the session cookie. If no value is provided, the default is \"/\""))
+    print("    configure-application-server: Performs configuration tasks for an application server.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                    This section may indicate if the server is a WebSphere Portal server. If no value is provided, the default is \"false\"")
+    print("                [server-auto-restart]")
+    print("                    This section must contain the server and node names.")
+    print("                    This section may contain a value to determine if the nodeagent should automatically start the server if it finds it down. If not provided, the default value is \"STOPPED\"")
+    print("                [server-web-container]")
+    print("                    This section may contain a value to set the default virtual host. If not provided, the default value is \"default_host\".")
+    print("                    This section may contain a value to determine if servlet caching is enabled. If not provided, the default value is \"true\".")
+    print("                [server-hamanager]")
+    print("                    This section may contain a value to determine if the HA Manager service should be enabled. No default value is provided.")
+    print("                [server-trace-settings]")
+    print("                    This section may contain a value to configure startup trace specifications. If no value is provided, the default value is \"*=info\".")
+    print("                    This section may contain a value to configure the trace output type. If no value is provided, the default value is \"SPECIFIED_FILE\".")
+    print("                    This section may contain a value to configure the maximum number of trace backup files. If no value is provided, the default value is 50.")
+    print("                    This section may contain a value to configure the maximum size of the trace file before it is rolled over. If no value is provided, the default value is 50.")
+    print("                    This section may contain a value to configure the trace filename. If no value is provided, the default value is \"${SERVER_LOG_ROOT}/trace.log\".")
+    print("                [server-process-settings]")
+    print("                    This section may contain a value to configure the user to run the server as. If no value is provided, the \"runAsUser\" entry is not configured.")
+    print("                    This section may contain a value to configure the group to run the server as. If no value is provided, the \"runAsGroup\" entry is not configured.")
+    print("                [server-jvm-settings]")
+    print("                    This section may contain a value to configure the initial JVM heap size (in megabytes). If no value is provided, the default value is \"2048\".")
+    print("                    This section may contain a value to configure the maximum JVM heap size (in megabytes). If no value is provided, the default value is \"2048\".")
+    print("                [server-thread-pools]")
+    print("                    This section may contain a value to configure the initial server startup thread pool minimum size. No default is provided.")
+    print("                    This section may contain a value to configure the initial server startup thread pool maximum size. No default is provided.")
+    print("                    This section may contain a value to configure the initial web container thread pool minimum size. No default is provided.")
+    print("                    This section may contain a value to configure the initial web container thread pool maximum size. No default is provided.")
+    print("                    This section may contain a value to configure the initial HA Manager thread pool minimum size. No default is provided.")
+    print("                    This section may contain a value to configure the initial HA Manager thread pool maximum size. No default is provided.")
+    print("                        NOTE: If the [server-hamanger] section disables the HA Manager service, these values should be set to \"0\".")
+    print("                    This section may contain a list of thread pools to configure. No default is provided.")
+    print("                [server-tcp-channels]")
+    print("                    This section may contain a value to configure the maximum number of open TCP connections. No default is provided.")
+    print("                [server-http-channels]")
+    print("                    This section may contain a value to configure the maximum number of open TCP connections. No default is provided.")
+    print("                [server-container-chains]")
+    print("                    This section may contain a list of container chains to skip. No default is provided.")
+    print("                [server-tuning-params]")
+    print("                    This section may contain a value indicating the session write content policy. If no value is provided, the default is \"ONLY_UPDATED_ATTRIBUTES\"")
+    print("                    This section may contain a value indicating the session write frequency policy. If no value is provided, the default is \"END_OF_SERVLET_SERVICE\"")
+    print("                [server-cookie-settings]")
+    print("                    This section may contain a value indicating the name of the session cookie. If no value is provided, the default is \"JSESSIONID\"")
+    print("                    This section may contain a value indicating the path for the session cookie. If no value is provided, the default is \"/\"")
 
-    print(str("    server-status: Retrieves and displays the current status of a given server on a node."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
+    print("    server-status: Retrieves and displays the current status of a given server on a node.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
 
-    print(str("    start-server: Starts a server on a given node."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                [server-start-options]"))
-    print(str("                    This section may contain a value to determine a wait time to start the server (in seconds). If no value is provided, the default value is \"10\"."))
+    print("    start-server: Starts a server on a given node.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                [server-start-options]")
+    print("                    This section may contain a value to determine a wait time to start the server (in seconds). If no value is provided, the default value is \"10\".")
 
-    print(str("    stop-server: Stops a server on a given node."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                [server-stop-options]"))
-    print(str("                    This section may contain a value to determine if the server should be immediately stopped. If no value is provided, the default value is \"False\"."))
-    print(str("                    This section may contain a value to determine if the server should be terminated (killed). If no value is provided, the default value is \"False\"."))
+    print("    stop-server: Stops a server on a given node.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                [server-stop-options]")
+    print("                    This section may contain a value to determine if the server should be immediately stopped. If no value is provided, the default value is \"False\".")
+    print("                    This section may contain a value to determine if the server should be terminated (killed). If no value is provided, the default value is \"False\".")
 
-    print(str("    restart-server: Restarts a server on a given node."))
-    print(str("        <configuration file>: The configuration file containing the information necessary to make appropriate changes."))
-    print(str("            The provided configuration file must contain the following sections:"))
-    print(str("                [server-information]"))
-    print(str("                    This section must contain a value indicating the server name."))
-    print(str("                    This section must contain a value indicating the node name."))
-    print(str("                [server-restart-options]"))
-    print(str("                    This section may contain a value to determine the timeout for the restart operation (in seconds). If no value is provided, the default value is \"600\"."))
+    print("    restart-server: Restarts a server on a given node.")
+    print("        <configuration file>: The configuration file containing the information necessary to make appropriate changes.")
+    print("            The provided configuration file must contain the following sections:")
+    print("                [server-information]")
+    print("                    This section must contain a value indicating the server name.")
+    print("                    This section must contain a value indicating the node name.")
+    print("                [server-restart-options]")
+    print("                    This section may contain a value to determine the timeout for the restart operation (in seconds). If no value is provided, the default value is \"600\".")
 #enddef
 
 ##################################
@@ -1161,24 +1161,24 @@ else:
     configFile = str(sys.argv[1])
 
     if (os.path.exists(configFile)) and (os.access(configFile, os.R_OK)):
-        if (sys.argv[0] == str("configure-deployment-manager")):
+        if (sys.argv[0] == "configure-deployment-manager"):
             configureDeploymentManager()
-        elif (sys.argv[0] == str("configure-nodeagent")):
+        elif (sys.argv[0] == "configure-nodeagent"):
             configureNodeAgent()
-        elif (sys.argv[0] == str("configure-application-server")):
+        elif (sys.argv[0] == "configure-application-server"):
             configureApplicationServer()
-        elif (sys.argv[0] == str("server-status")):
+        elif (sys.argv[0] == "server-status"):
             getServerStatus()
-        elif (sys.argv[0] == str("start-server")):
+        elif (sys.argv[0] == "start-server"):
             startApplicationServer()
-        elif (sys.argv[0] == str("stop-server")):
+        elif (sys.argv[0] == "stop-server"):
             stopApplicationServer()
-        elif (sys.argv[0] == str("restart-server")):
+        elif (sys.argv[0] == "restart-server"):
             restartApplicationServer()
         else:
             printHelp()
         #endif
     else:
-        print(str("The provided configuration file either does not exist or cannot be read."))
+        print("The provided configuration file either does not exist or cannot be read.")
     #endif
 #endif

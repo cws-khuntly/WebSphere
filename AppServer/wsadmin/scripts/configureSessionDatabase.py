@@ -22,10 +22,10 @@
 import os
 import sys
 
-configureLogging("../config/logging.xml")
-consoleLogger = logging.getLogger("console-logger")
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
 errorLogger = logging.getLogger("error-logger")
 debugLogger = logging.getLogger("debug-logger")
+infoLogger = logging.getLogger("info-logger")
 
 lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()

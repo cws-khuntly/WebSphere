@@ -29,9 +29,9 @@ def configureLogging(logConfigFile):
                 print(str("Failed to configure logging: {0}. No logging enabled!").format(str(e)))
             #endtry
         else:
-            print(str("Unable to load logging configuration file. No logging enabled!"))
+            print("Unable to load logging configuration file. No logging enabled!")
         #endif
     else:
-        print(str("No logging configuration file was provided. No logging enabled!"))
+        print("No logging configuration file was provided. No logging enabled!")
     #endif
 #enddef

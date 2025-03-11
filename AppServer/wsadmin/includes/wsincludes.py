@@ -20,22 +20,23 @@
 import sys
 import logging
 
-errorLogger = logging.getLogger(str("error-logger"))
-debugLogger = logging.getLogger(str("debug-logger"))
-infoLogger = logging.getLogger(str("info-logger"))
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
+errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
+infoLogger = logging.getLogger("info-logger")
 
 lineSplit = java.lang.System.getProperty("line.separator")
 
 def getWebSphereVariable(variableName, nodeName = None, serverName = None, clusterName = None):
-    debugLogger.log(logging.DEBUG, str("ENTER: wsincludes#getWebSphereVariable(variableName, nodeName = None, serverName = None, clusterName = None)"))
-    debugLogger.log(logging.DEBUG, str(variableName))
-    debugLogger.log(logging.DEBUG, str(nodeName))
-    debugLogger.log(logging.DEBUG, str(serverName))
-    debugLogger.log(logging.DEBUG, str(clusterName))
+    debugLogger.log(logging.DEBUG, "ENTER: wsincludes#getWebSphereVariable(variableName, nodeName = None, serverName = None, clusterName = None)")
+    debugLogger.log(logging.DEBUG, variableName)
+    debugLogger.log(logging.DEBUG, nodeName)
+    debugLogger.log(logging.DEBUG, serverName)
+    debugLogger.log(logging.DEBUG, clusterName)
 
     returnValue = "None"
 
-    debugLogger.log(logging.DEBUG, str(returnValue))
+    debugLogger.log(logging.DEBUG, returnValue)
 
     mapList = getVariableMap(nodeName, serverName, clusterName)
 
@@ -45,35 +46,36 @@ def getWebSphereVariable(variableName, nodeName = None, serverName = None, clust
         entries = AdminConfig.showAttribute(map, "entries")
         entries = entries[1:-1].split(' ')
 
-        debugLogger.log(logging.DEBUG, str(entries))
+        debugLogger.log(logging.DEBUG, entries)
 
         for entry in (entries):
-            debugLogger.log(logging.DEBUG, str(entry))
+            debugLogger.log(logging.DEBUG, entry)
 
             attributeName = AdminConfig.showAttribute(entry, "symbolicName")
             attributeValue = AdminConfig.showAttribute(entry, "value")
 
-            if (str(variableName) == str(attributeName)):
+            if (variableName == attributeName):
                 returnValue = attributeValue
             #endif
         #endfor
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: wsincludes#getWebSphereVariable(variableName, nodeName = None, serverName = None, clusterName = None)"))
+    debugLogger.log(logging.DEBUG, returnValue)
+    debugLogger.log(logging.DEBUG, "EXIT: wsincludes#getWebSphereVariable(variableName, nodeName = None, serverName = None, clusterName = None)")
 
     return returnValue
 #enddef
 
 def saveWorkspaceChanges():
-    debugLogger.log(logging.DEBUG, str("ENTER: saveWorkspaceChanges()"))
+    debugLogger.log(logging.DEBUG, "ENTER: saveWorkspaceChanges()")
 
     try:
-        debugLogger.log(logging.DEBUG, str("Calling AdminConfig.save()"))
-        debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.save()"))
+        debugLogger.log(logging.DEBUG, "Calling AdminConfig.save()")
+        debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.save()")
 
         AdminConfig.save()
 
-        infoLogger.log(logging.INFO, str("Saved all pending workspace changes."))
+        infoLogger.log(logging.INFO, "Saved all pending workspace changes.")
     except:
         (exception, parms, tback) = sys.exc_info()
 
@@ -82,13 +84,13 @@ def saveWorkspaceChanges():
         raise Exception(str("An error occurred while saving workspace changes: {0} {1}").format(str(exception), str(parms)))
     #endtry
 
-    debugLogger.log(logging.DEBUG, str("EXIT: saveWorkspaceChanges():"))
+    debugLogger.log(logging.DEBUG, "EXIT: saveWorkspaceChanges():")
 #enddef
 
 def syncNodes(nodeList, cellName):
-    debugLogger.log(logging.DEBUG, str("ENTER: syncNodes(nodeList, cellName)"))
-    debugLogger.log(logging.DEBUG, str(nodeList))
-    debugLogger.log(logging.DEBUG, str(cellName))
+    debugLogger.log(logging.DEBUG, "ENTER: syncNodes(nodeList, cellName)")
+    debugLogger.log(logging.DEBUG, nodeList)
+    debugLogger.log(logging.DEBUG, cellName)
 
     if (len(nodeList) != 0):
         debugLogger.log(logging.DEBUG, str("Performing nodeSync for cell {0}..").format(cellName))
@@ -99,37 +101,37 @@ def syncNodes(nodeList, cellName):
 
         for node in (nodeList):
             try:
-                debugLogger.log(logging.DEBUG, str(node))
-                debugLogger.log(logging.DEBUG, str("Calling AdminControl.completeObjectName()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.completeObjectName(str(\"type=ConfigRepository,process=nodeagent,node={0},*\").format(node))"))
+                debugLogger.log(logging.DEBUG, node)
+                debugLogger.log(logging.DEBUG, "Calling AdminControl.completeObjectName()")
+                debugLogger.log(logging.DEBUG, "EXEC: AdminControl.completeObjectName(str(\"type=ConfigRepository,process=nodeagent,node={0},*\").format(node))")
 
                 nodeRepo = AdminControl.completeObjectName(str("type=ConfigRepository,process=nodeagent,node={0},*").format(node))
 
                 debugLogger.log(logging.DEBUG, str(nodeRepo))
 
                 if (nodeRepo):
-                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
-                    debugLogger.log(logging.DEBUG, str("AdminControl.invoke(nodeRepo, str(\"refreshRepositoryEpoch\"))"))
+                    debugLogger.log(logging.DEBUG, "Calling AdminControl.invoke()")
+                    debugLogger.log(logging.DEBUG, "AdminControl.invoke(nodeRepo, str(\"refreshRepositoryEpoch\"))")
 
-                    AdminControl.invoke(nodeRepo, str("refreshRepositoryEpoch"))
+                    AdminControl.invoke(nodeRepo, "refreshRepositoryEpoch")
 
-                    infoLogger.log(logging.INFO, str("Submitted refreshRepositoryEpoch."))
+                    infoLogger.log(logging.INFO, "Submitted refreshRepositoryEpoch.")
                 #endif
 
-                debugLogger.log(logging.DEBUG, str("Calling AdminControl.completeObjectName()"))
-                debugLogger.log(logging.DEBUG, str("EXEC: AdminControl.completeObjectName(str(\"cell={0},node={1},type=NodeSync,*\").format(cellName, node))"))
+                debugLogger.log(logging.DEBUG, "Calling AdminControl.completeObjectName()")
+                debugLogger.log(logging.DEBUG, "EXEC: AdminControl.completeObjectName(str(\"cell={0},node={1},type=NodeSync,*\").format(cellName, node))")
 
                 syncNode = AdminControl.completeObjectName(str("cell={0},node={1},type=NodeSync,*").format(cellName, node))
 
-                debugLogger.log(logging.DEBUG, str(syncNode))
+                debugLogger.log(logging.DEBUG, syncNode)
 
                 if (syncNode):
-                    debugLogger.log(logging.DEBUG, str("Calling AdminControl.invoke()"))
-                    debugLogger.log(logging.DEBUG, str("AdminControl.invoke(syncNode, str(\"sync\"))"))
+                    debugLogger.log(logging.DEBUG, "Calling AdminControl.invoke()")
+                    debugLogger.log(logging.DEBUG, "AdminControl.invoke(syncNode, str(\"sync\"))")
 
-                    AdminControl.invoke(syncNode, str("sync"))
+                    AdminControl.invoke(syncNode, "sync")
 
-                    infoLogger.log(logging.INFO, str("Submitted sync."))
+                    infoLogger.log(logging.INFO, "Submitted sync.")
                 #endif
 
                 continue
@@ -147,5 +149,5 @@ def syncNodes(nodeList, cellName):
         raise Exception(str("No nodes were found in the cell {0}").format(cellName))
     #endif
 
-    debugLogger.log(logging.DEBUG, str("EXIT: syncNodes(nodeList, cellName)"))
+    debugLogger.log(logging.DEBUG, "EXIT: syncNodes(nodeList, cellName)")
 #enddef

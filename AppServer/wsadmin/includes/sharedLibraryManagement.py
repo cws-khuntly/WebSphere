@@ -1,7 +1,7 @@
 #==============================================================================
 #
-#          FILE:  objectCacheManagement.py
-#         USAGE:  wsadmin.sh -lang jython -f configureDMGR.py
+#          FILE:  sharedLibraryManagement.py
+#         USAGE:  wsadmin.sh -lang jython -f sharedLibraryManagement.py
 #     ARGUMENTS:  wasVersion
 #   DESCRIPTION:  Executes an scp connection to a pre-defined server
 #
@@ -19,24 +19,23 @@
 import sys
 import logging
 
-configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
-errorLogger = logging.getLogger(str("error-logger"))
-debugLogger = logging.getLogger(str("debug-logger"))
-infoLogger = logging.getLogger(str("info-logger"))
-
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
+errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
+infoLogger = logging.getLogger("info-logger")
 
 def createSharedLibrary(targetCell, targetLibraryName, targetLibraryClassPath):
-    debugLogger.log(logging.DEBUG, str("ENTER: sharedLibraryManagement#createSharedLibrary(targetCell, targetLibraryName, targetLibraryClassPath)"))
-    debugLogger.log(logging.DEBUG, str(targetCell))
-    debugLogger.log(logging.DEBUG, str(targetLibraryName))
-    debugLogger.log(logging.DEBUG, str(targetLibraryClassPath))
+    debugLogger.log(logging.DEBUG, "ENTER: sharedLibraryManagement#createSharedLibrary(targetCell, targetLibraryName, targetLibraryClassPath)")
+    debugLogger.log(logging.DEBUG, targetCell)
+    debugLogger.log(logging.DEBUG, targetLibraryName)
+    debugLogger.log(logging.DEBUG, targetLibraryClassPath)
 
     if ((len(targetLibraryName) != 0) and (len(targetLibraryClassPath) != 0)):
         try:
             debugLogger.log(logging.DEBUG, str("Calling AdminConfig.create()"))
             debugLogger.log(logging.DEBUG, str("EXEC: AdminConfig.create(\"Library\", targetCell, str(\"[[\"name\"', \"{0}\"], [\"classPath\", \"{1}\"]]\").format(targetLibraryName, targetLibraryClassPath)"))
 
-            result = AdminConfig.create("Library", targetCell, str("[[\"name\"', \"{0}\"], [\"classPath\", \"{1}\"]]").format(targetLibraryName, targetLibraryClassPath))
+            AdminConfig.create("Library", targetCell, str("[[\"name\"', \"{0}\"], [\"classPath\", \"{1}\"]]").format(targetLibraryName, targetLibraryClassPath))
 
             infoLogger.log(logging.INFO, str("Completed creating shared library {0} with classpath {1}.").format(targetLibraryName, targetLibraryClassPath))
         except:
@@ -55,7 +54,7 @@ def createSharedLibrary(targetCell, targetLibraryName, targetLibraryClassPath):
     debugLogger.log(logging.DEBUG, str("EXIT: sharedLibraryManagement#createSharedLibrary(targetCell, targetLibrary, targetLibraryClassPath)"))
 #enddef
 
-def createSharedLibraryClassloader(nodename, servername, libname):
+def addSharedLibraryToServer(targetServer, targetLibraryName):
     """Creates a classloader on the specified appserver and associates it with a shared library"""
     m = "createSharedLibraryClassloader:"
     #sop(m,"Entry. Create shared library classloader. nodename=%s servername=%s libname=%s " % ( repr(nodename), repr(servername), repr(libname) ))
@@ -67,18 +66,3 @@ def createSharedLibraryClassloader(nodename, servername, libname):
     #sop(m,"classloader=%s " % ( repr(classloader), ))
     result = AdminConfig.create('LibraryRef', classloader, [['libraryName', libname], ['sharedClassloader', 'true']])
     #sop(m,"Exit. result=%s" % ( repr(result), ))
-
-def createReplicationDomain(domainname, numberofreplicas):
-    """Creates a replication domain with the specified name and replicas.
-    Set number of replicas to -1 for whole-domain replication.
-    Returns the config id of the DataReplicationDomain object."""
-    m = "createReplicationDomain:"
-    #sop(m,"Entry. Create replication domain. domainname=%s numberofreplicas=%s " % (repr(domainname), repr(numberofreplicas) ))
-    cell_id = getCellId()
-    #sop(m,"cell_id=%s " % ( repr(cell_id), ))
-    domain = AdminConfig.create('DataReplicationDomain', cell_id, [['name', domainname]])
-    #sop(m,"domain=%s " % ( repr(domain), ))
-    domainsettings = AdminConfig.create('DataReplication', domain, [['numberOfReplicas', numberofreplicas]])
-    #sop(m,"domainsettings=%s " % ( repr(domainsettings), ))
-    #sop(m,"Exit. ")
-    return domain
