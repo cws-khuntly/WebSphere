@@ -24,8 +24,8 @@ configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logg
 errorLogger = logging.getLogger("error-logger")
 debugLogger = logging.getLogger("debug-logger")
 infoLogger = logging.getLogger("info-logger")
-consoleInfoLogger = logging.getLogger("info-logger")
-consoleErrorLogger = logging.getLogger("info-logger")
+consoleInfoLogger = logging.getLogger("console-out")
+consoleErrorLogger = logging.getLogger("console-err")
 
 lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()

@@ -19,9 +19,39 @@
 import logging
 import ConfigParser
 
-configureLogging(str("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties"))
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
 errorLogger = logging.getLogger("error-logger")
 debugLogger = logging.getLogger("debug-logger")
+
+def checkIfPropertySectionExists(configFile, sectionName):
+    debugLogger.log(logging.DEBUG, "ENTER: includes#checkIfPropertySectionExists(configFile, sectionName)")
+    debugLogger.log(logging.DEBUG, configFile)
+    debugLogger.log(logging.DEBUG, sectionName)
+
+    configResponse = False
+
+    debugLogger.log(logging.DEBUG, configResponse)
+
+    config = ConfigParser.ConfigParser()
+    config.read(configFile)
+
+    debugLogger.log(logging.DEBUG, config)
+
+    if (len(config) != 0):
+        if (config.has_section(sectionName)):
+            configResponse = True
+        #endif
+    else:
+        errorLogger.log(logging.ERROR, str("Unable to load configuration file {0}.").format(configFile))
+
+        raise Exception(str("Unable to load configuration file {0}.").format(configFile))
+    #endif
+
+    debugLogger.log(logging.DEBUG, configResponse)
+    debugLogger.log(logging.DEBUG, "EXIT: includes#checkIfPropertySectionExists(configFile, sectionName)")
+
+    return configResponse
+#enddef
 
 def returnPropertyConfiguration(configFile, sectionName, valueName):
     debugLogger.log(logging.DEBUG, "ENTER: includes#returnPropertyConfiguration(configFile, sectionName, valueName)")
@@ -41,9 +71,9 @@ def returnPropertyConfiguration(configFile, sectionName, valueName):
     if (len(config) != 0):
         configResponse = config.get(sectionName, valueName)
     else:
-        errorLogger.log(logging.ERROR, str("Unable to locate value {0}, section {1} in file {3}").format(valueName, sectionName, configFile))
+        errorLogger.log(logging.ERROR, str("Unable to load configuration file {0}.").format(configFile))
 
-        raise Exception(str("Unable to locate value {0}, section {1} in file {3}").format(valueName, sectionName, configFile))
+        raise Exception(str("Unable to load configuration file {0}.").format(configFile))
     #endif
 
     debugLogger.log(logging.DEBUG, configResponse)
