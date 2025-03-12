@@ -533,6 +533,8 @@ function main()
 
                                 [[ -z "${func_entry}" ]] && continue;
                                 [[ "${func_entry}" == "writeLogEntry" ]] && continue;
+                                [[ "${func_entry}" == "writeLogEntryToConsole" ]] && continue;
+                                [[ "${func_entry}" == "writeLogEntryToFile" ]] && continue;
 
                                 unset -f "${func_entry}";
 
