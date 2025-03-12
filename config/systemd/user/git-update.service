@@ -19,7 +19,7 @@
 Description=git update for specific repos
 
 [Service]
-Type=forking
+Type=oneshot
 ExecStart=/bin/git -C %h/workspace/dotfiles pull
 ExecStart=/bin/git -C %h/workspace/WebSphere pull
 SuccessExitStatus=0
