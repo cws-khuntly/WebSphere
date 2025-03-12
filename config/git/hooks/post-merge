@@ -1,7 +1,5 @@
 #!/bin/sh
 
 if [[ ! $(git diff-index --quiet HEAD --) ]]; then
-    printf "Running command %s" "$(dirname $(dirname "${PWD}"))/bin/manageDotFiles -a reloadDotFiles"
-
     $(dirname $(dirname "${PWD}"))/bin/manageDotFiles -a refreshDotFiles;
 fi
