@@ -520,7 +520,7 @@ function main()
                             fi
 
                             ## unset the functions
-                            mapfile -t function_list < <( compgen -A function);
+                            mapfile -t function_list < <(compgen -A function);
 
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
@@ -547,13 +547,13 @@ function main()
                             fi
 
                             ## unset the aliases
-                            mapfile -t alias_list < <( compgen -A alias);
+                            mapfile -t alias_list < <(compgen -A alias);
 
                             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
                             fi
 
-                            for alias_entry in "${function_list[@]}"; do
+                            for alias_entry in "${alias_list[@]}"; do
                                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "alias_entry -> ${alias_entry}";
                                 fi
