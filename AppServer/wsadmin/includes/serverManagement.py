@@ -104,6 +104,9 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]")
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]")
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]")
+            AdminConfig.create("Property", targetWebContainer, "[[validationExpression, ""], ["name", "com.ibm.ws.webcontainer.httpOnlyCookies"], ["description", ""], ["value", "JSESSIONID"], ["required", "false"]]")
+            AdminTask.setAdminActiveSecuritySettings("[-customProperties[\"com.ibm.ws.security.addHttpOnlyAttributeToCookies=true\"]]")
+
 
             infoLogger.log(logging.INFO, str("Completed adding web container properties in web container {0}.").format(targetWebContainer))
         except:
