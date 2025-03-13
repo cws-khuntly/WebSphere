@@ -12,7 +12,7 @@ function validateHostAvailability()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-network";
+    cname="F03-network.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -336,10 +336,9 @@ function validateHostAvailability()
         writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${error_count}" ]] && unset -v error_count;
-    [[ -n "${random_generator}" ]] && unset -v random_generator;
+    [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
@@ -359,7 +358,7 @@ function isValidHost()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-network";
+    cname="F03-network.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -491,9 +490,15 @@ function isValidHost()
         fi
     fi
 
+    [[ -n "${returnedHostname}" ]] && printf "%s" "${returnedHostname}";
+
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${searchForNameInHosts}" ]] && unset -v searchForNameInHosts;
     [[ -n "${checkForHostname}" ]] && unset -v checkForHostname;
+    [[ -n "${returnedHostname}" ]] && unset -v returnedHostname;
+    [[ -n "${searchForAddressInHosts}" ]] && unset -v searchForAddressInHosts;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -508,14 +513,13 @@ function isValidHost()
         writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    [[ -n "${returnedHostname}" ]] && printf "%s" "${returnedHostname}";
     return ${return_code};
 )
 
@@ -531,7 +535,7 @@ function isValidAddress()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-network";
+    cname="F03-network.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -654,10 +658,15 @@ function isValidAddress()
         fi
     fi
 
+    [[ -n "${returnedHostAddress}" ]] && printf "%s" "${returnedHostAddress}";
+
     [[ -n "${isValidAddress}" ]] && unset -v isValidAddress;
     [[ -n "${searchForAddressInHosts}" ]] && unset -v searchForAddressInHosts;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${checkForAddress}" ]] && unset -v checkForAddress;
+    [[ -n "${returnedHostAddress}" ]] && unset -v returnedHostAddress;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -672,14 +681,13 @@ function isValidAddress()
         writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    [[ -n "${returnedHostAddress}" ]] && printf "%s" "${returnedHostAddress}";
     return ${return_code};
 )
 
@@ -695,7 +703,7 @@ function isValidPort()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-network";
+    cname="F03-network.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -744,8 +752,13 @@ function isValidPort()
         fi
     fi
 
+    [[ -n "${returnedPortNumber}" ]] && printf "%d" "${returnedPortNumber}";
+
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${checkPortNumber}" ]] && unset -v checkPortNumber;
+    [[ -n "${returnedPortNumber}" ]] && unset -v returnedPortNumber;
+
+    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -760,14 +773,13 @@ function isValidPort()
         writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    [[ -n "${returnedPortNumber}" ]] && printf "%s" "${returnedPortNumber}";
     return ${return_code};
 )
 
@@ -783,7 +795,7 @@ function isValidNetworkName()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F03-network";
+    cname="F03-network.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -937,12 +949,12 @@ function isValidNetworkName()
         writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
+    [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
 
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    return ${return_code};
+    return ${return_code}
 )

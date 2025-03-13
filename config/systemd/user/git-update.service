@@ -20,10 +20,14 @@ Description=git update for specific repos
 
 [Service]
 Type=oneshot
+ExecStart=/bin/git -C %h/workspace/dotfiles fetch origin
+ExecStart=/bin/git -C %h/workspace/dotfiles reset --hard origin/master
 ExecStart=/bin/git -C %h/workspace/dotfiles pull
+ExecStart=/bin/git -C %h/workspace/WebSphere fetch origin
+ExecStart=/bin/git -C %h/workspace/WebSphere reset --hard origin/master
 ExecStart=/bin/git -C %h/workspace/WebSphere pull
+ExecStart=/bin/systemctl --user daemon-reload
 SuccessExitStatus=0
-User=%u
 
 [Install]
 WantedBy=default.target
