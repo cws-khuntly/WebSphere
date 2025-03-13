@@ -1,6 +1,6 @@
 #==============================================================================
 #
-#          FILE:  serverMaintenance.py
+#          FILE:  serverManagement.py
 #         USAGE:  Include file containing various wsadmin functions
 #     ARGUMENTS:  N/A
 #
@@ -27,6 +27,35 @@ debugLogger = logging.getLogger("debug-logger")
 infoLogger = logging.getLogger("info-logger")
 
 lineSplit = java.lang.System.getProperty("line.separator")
+
+def createApplicationServer(targetNode, targetServer):
+    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#createApplicationServer(targetNode, targetServer)")
+    debugLogger.log(logging.DEBUG, targetNode)
+    debugLogger.log(logging.DEBUG, targetServer)
+
+    if ((len(targetNode) != 0) and (len(targetServer) != 0)):
+        try:
+            debugLogger.log(logging.DEBUG, "Calling AdminConfig.createApplicationServer()")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminTask.createApplicationServer(str(\"{0}\", \"[-name {1} -templateName default -genUniquePorts true]\").format(targetNode, targetServer))")
+
+            AdminTask.createApplicationServer(str("{0}", "[-name {1} -templateName default -genUniquePorts true]").format(targetNode, targetServer))
+
+            infoLogger.log(logging.INFO, str("Successfully created new application server {0} in node {1}.").format(targetServer, targetNode))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("Failed to create server {0} in node {1}: {2} {3}").format(targetServer, targetNode, str(exception), str(parms)))
+
+            raise Exception(str("Failed to create server {0} in node {1}: {2} {3}").format(targetServer, targetNode, str(exception), str(parms)))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, "No node/server information was provided.")
+
+        raise Exception("No node/server information was provided.")
+    #endif
+
+    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#createApplicationServer(targetNode, targetServer)")
+#enddef
 
 def configureAutoRestart(targetMonitorPolicy, policyOption):
     debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#configureAutoRestart(targetMonitorPolicy, policyOption)")
@@ -598,48 +627,37 @@ def setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs
     debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#setJVMProperties(serverName, nodeName, initialHeapSize, maxHeapSize, jvmArgs, hprofArgs = \"\")")
 #enddef
 
-def serverStatus(serverName, nodeName):
-    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#serverStatus(serverName, nodeName)")
-    debugLogger.log(logging.DEBUG, serverName)
-    debugLogger.log(logging.DEBUG, nodeName)
+def getServerStatus(targetServer):
+    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#getServerStatus(targetServer)")
+    debugLogger.log(logging.DEBUG, targetServer)
 
     serverState = "UNKNOWN"
 
     debugLogger.log(logging.DEBUG, serverState)
 
-    if ((len(nodeName) != 0) and (len(serverName) != 0)):
-        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}").format(nodeName, serverName))
+    if (len(targetServer) != 0):
+        try:
+            debugLogger.log(logging.DEBUG, "Calling AdminControl.getAttribute()")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminControl.getAttribute(targetServer, \"state\")")
 
-        debugLogger.log(logging.DEBUG, targetServer)
+            serverState = AdminControl.getAttribute(targetServer, "state")
 
-        if (len(targetServer) != 0):
-            try:
-                debugLogger.log(logging.DEBUG, "Calling AdminControl.getAttribute()")
-                debugLogger.log(logging.DEBUG, "EXEC: AdminControl.getAttribute(targetServer, \"state\")")
+            debugLogger.log(logging.DEBUG, serverState)
+            infoLogger.log(logging.INFO, str("Current server state of {0} is: {1}.").format(targetServer, serverState))
+        except:
+            (exception, parms, tback) = sys.exc_info()
 
-                serverState = AdminControl.getAttribute(targetServer, "state")
+            errorLogger.log(logging.ERROR, str("An error occurred trying to determine the state the provided server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
 
-                debugLogger.log(logging.DEBUG, serverState)
-                infoLogger.log(logging.INFO, str("Current server state of {0} on node {1} is: {2}.").format(serverName, nodeName, serverState))
-            except:
-                (exception, parms, tback) = sys.exc_info()
-
-                errorLogger.log(logging.ERROR, str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-
-                raise Exception(str("An error occurred trying to determine the state the provided server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-            #endtry
-        else:
-            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-
-            raise Exception(str(("No server named {0} was found on node {1}.").format(serverName, nodeName)))
-        #endif
+            raise Exception(str("An error occurred trying to determine the state the provided server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
+        #endtry
     else:
-        errorLogger.log(logging.ERROR, "No node/server information was found in the provided configuration file.")
+        errorLogger.log(logging.ERROR, str("No server named {0} was found.").format(targetServer))
 
-        raise Exception("No node/server information was found in the provided configuration file.")
+        raise Exception(str("No server named {0} was found.").format(targetServer))
     #endif
 
-    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#serverStatus(serverName, nodeName)")
+    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#getServerStatus(targetServer)")
 
     return serverState
 #enddef
@@ -736,82 +754,72 @@ def stopServer(serverName, nodeName, immediate, terminate):
     debugLogger.log(logging.DEBUG, "EXIT: stopServer(serverName, nodeName, immediate = False, terminate = False)")
 #enddef
 
-def restartServer(serverName, nodeName, restartTimeout):
-    debugLogger.log(logging.DEBUG, "ENTER: restartServer(serverName, nodeName, restartTimeout = 600)")
-    debugLogger.log(logging.DEBUG, serverName)
-    debugLogger.log(logging.DEBUG, nodeName)
+def restartServer(targetServer, restartTimeout):
+    debugLogger.log(logging.DEBUG, "ENTER: restartServer(targetServer, restartTimeout = 600)")
+    debugLogger.log(logging.DEBUG, targetServer)
     debugLogger.log(logging.DEBUG, restartTimeout)
 
     isRunning = "UNKNOWN"
 
     debugLogger.log(logging.DEBUG, isRunning)
 
-    if ((len(nodeName) != 0) and (len(serverName) != 0)):
-        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
+    if (len(targetServer) != 0):
+        debugLogger.log(logging.DEBUG, "Calling AdminControl.invoke()")
 
-        debugLogger.log(logging.DEBUG, targetServer)
+        try:
+            AdminControl.invoke(targetServer, "restart")
 
-        if (len(targetServer) != 0):
-            debugLogger.log(logging.DEBUG, "Calling AdminControl.invoke()")
+            elapsedTime = 0
 
-            try:
-                AdminControl.invoke(targetServer, "restart")
+            debugLogger.log(elapsedTime)
 
-                elapsedTime = 0
+            if (restartTimeout > 0):
+                sleepTime = 5
+                isRunning = getServerStatus(targetServer)
 
-                debugLogger.log(elapsedTime)
-
-                if (restartTimeout > 0):
-                    sleepTime = 5
-                    isRunning = serverStatus(nodeName, serverName)
-
-                    debugLogger.log(logging.DEBUG, sleepTime)
-                    debugLogger.log(logging.DEBUG, isRunning)
-
-                    while ((isRunning) and (elapsedTimeSeconds < restartTimeout)):
-                        debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for {0}..").format(sleepTime))
-
-                        time.sleep(sleepTime)
-
-                        elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
-                        isRunning = serverStatus(nodeName, serverName)
-
-                        debugLogger.log(logging.DEBUG, elapsedTimeSeconds)
-                        debugLogger.log(logging.DEBUG, isRunning)
-                    #endwhile
-
-                    while ((not isRunning) and (elapsedTimeSeconds < restartTimeout)):
-                        debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for %d..").format(sleepTime))
-                        infoLogger.log(logging.INFO, str("Waiting {0} of {1} seconds for {2} to restart. isRunning = {3}").format(elapsedTimeSeconds, restartTimeout, serverName, isRunning))
-
-                        time.sleep(sleepTime)
-
-                        elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
-                        isRunning = serverStatus(nodeName, serverName)
-
-                        debugLogger.log(logging.DEBUG, elapsedTimeSeconds)
-                        debugLogger.log(logging.DEBUG, isRunning)
-                    #endwhile
-                #endif
-
-                isRunning = serverStatus(nodeName, serverName)
-
+                debugLogger.log(logging.DEBUG, sleepTime)
                 debugLogger.log(logging.DEBUG, isRunning)
-                infoLogger.log(logging.INFO, str("Restart completed for server {0} on node {1}. Elapsed time: {2}.").format(serverName, nodeName, elapsedTimeSeconds))
-            except:
-                (exception, parms, tback) = sys.exc_info()
 
-                errorLogger.log(logging.ERROR, str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-                raise Exception(str("An error occurred trying to restart server {0} on node {1}: {2} {3}").format(serverName, nodeName, str(exception), str(parms)))
-            #endtry
-        else:
-            errorLogger.log(logging.ERROR, str("No server named {0} was found on node {1}.").format(serverName, nodeName))
+                while ((isRunning) and (elapsedTimeSeconds < restartTimeout)):
+                    debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for {0}..").format(sleepTime))
 
-            raise Exception(str("No server named {0} was found on node {1}.").format(serverName, nodeName))
-        #endif
+                    time.sleep(sleepTime)
+
+                    elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
+                    isRunning = getServerStatus(targetServer)
+
+                    debugLogger.log(logging.DEBUG, elapsedTimeSeconds)
+                    debugLogger.log(logging.DEBUG, isRunning)
+                #endwhile
+
+                while ((not isRunning) and (elapsedTimeSeconds < restartTimeout)):
+                    debugLogger.log(logging.DEBUG, str("Waiting for restart. Sleeping for %d..").format(sleepTime))
+                    infoLogger.log(logging.INFO, str("Waiting {0} of {1} seconds for {2} to restart. isRunning = {3}").format(elapsedTimeSeconds, restartTimeout, targetServer, isRunning))
+
+                    time.sleep(sleepTime)
+
+                    elapsedTimeSeconds = elapsedTimeSeconds + sleepTime
+                    isRunning = getServerStatus(targetServer)
+
+                    debugLogger.log(logging.DEBUG, elapsedTimeSeconds)
+                    debugLogger.log(logging.DEBUG, isRunning)
+                #endwhile
+            #endif
+
+            isRunning = getServerStatus(targetServer)
+
+            debugLogger.log(logging.DEBUG, isRunning)
+            infoLogger.log(logging.INFO, str("Restart completed for server {0} on node {1}. Elapsed time: {2}.").format(targetServer, elapsedTimeSeconds))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred trying to restart server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
+            raise Exception(str("An error occurred trying to restart server {0}: {1} {2}").format(targetServer, str(exception), str(parms)))
+        #endtry
     else:
-        errorLogger.log(logging.ERROR, "No node/server information provided.")
-        raise Exception("No node/server information provided.")
+        errorLogger.log(logging.ERROR, str("No server named {0} was found.").format(targetServer))
+
+        raise Exception(str("No server named {0} was found.").format(targetServer))
     #endif
 
     debugLogger.log(logging.DEBUG, "EXIT: restartServer(serverName, nodeName, restartTimeout = 600)")

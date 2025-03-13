@@ -28,8 +28,8 @@ infoLogger = logging.getLogger("info-logger")
 consoleInfoLogger = logging.getLogger("console-out")
 consoleErrorLogger = logging.getLogger("console-err")
 
-lineSplit = java.lang.System.getProperty("line.separator")
 targetCell = AdminControl.getCell()
+lineSplit = java.lang.System.getProperty("line.separator")
 nodeList = AdminTask.listManagedNodes().split(lineSplit)
 
 def configureDeploymentManager():
@@ -476,6 +476,37 @@ def configureApplicationServer():
             if (len(targetServer) != 0):
                 infoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
                 consoleInfoLogger.log(logging.INFO, str("Starting configuration for deployment manager {0}..").format(serverName))
+
+                #
+                # Add shared libraries, if any
+                #
+                propertyExists = checkIfPropertySectionExists("server-shared-libraries")
+
+                debugLogger.log(logging.DEBUG, propertyExists)
+
+                if (propertyExists):
+                    sharedLibraryName = returnPropertyConfiguration(configFile, "server-shared-libraries", "library-name")
+
+                    debugLogger.log(logging.DEBUG, sharedLibraryName)
+                    debugLogger.log(logging.DEBUG, sharedLibraryClasspath)
+
+                    if ((len(sharedLibraryName) != 0) and (len(sharedLibraryClasspath) != 0)):
+                        try:
+                            debugLogger.log(logging.DEBUG, "Calling addSharedLibraryToServer()")
+                            debugLogger.log(logging.DEBUG, "EXEC: addSharedLibraryToServer(targetServer, sharedLibraryName)")
+
+                            addSharedLibraryToServer(targetServer, sharedLibraryName)
+
+                            infoLogger.log(logging.INFO, str("Completed adding shared library {0} on server {1}").format(sharedLibraryName, serverName))
+                            consoleInfoLogger.log(logging.INFO, str("Completed adding shared library {0} on server {1}").format(sharedLibraryName, serverName))
+                        except:
+                            (exception, parms, tback) = sys.exc_info()
+
+                            errorLogger.log(logging.ERROR, str("An error occurred adding shared library {0} on server {1}: {2} {3}").format(targetHAManager, targetServer, str(exception), str(parms)))
+                            consoleErrorLogger.log(logging.ERROR, str("An error occurred adding shared library {0} on server {1}: {2} {3}").format(targetHAManager, targetServer, str(exception), str(parms)))
+                        #endtry
+                    #endif
+                #endif
 
                 #
                 # Enable/disable HAManager
@@ -976,37 +1007,27 @@ def configureApplicationServer():
     debugLogger.log(logging.DEBUG, "EXIT: configureApplicationServer()")
 #enddef
 
-def createSharedLibraryEntry():
-    print ("new thing")
-#enddef
-
-def addSharedLibraryClasspathVariable():
-    print ("new thing")
-#enddef
-
-def addSharedLibraryToServer():
-    print ("new thing")
-#enddef
-
-def getServerStatus():
-    debugLogger.log(logging.DEBUG, "ENTER: getServerStatus()")
+def showServerStatus():
+    debugLogger.log(logging.DEBUG, "ENTER: showServerStatus()")
 
     if (len(configFile) != 0):
         nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
         serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
+        targetServer = AdminConfig.getid(str("/Node:{0}/Server:{1}/").format(nodeName, serverName))
 
         debugLogger.log(logging.DEBUG, nodeName)
         debugLogger.log(logging.DEBUG, serverName)
+        debugLogger.log(logging.DEBUG, targetServer)
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
+        if (len(targetServer) != 0):
             #
             # Get the current status of the server
             #
             try:
-                debugLogger.log(logging.DEBUG, "Calling serverStatus()")
-                debugLogger.log(logging.DEBUG, "EXEC: serverStatus(serverName, nodeName)")
+                debugLogger.log(logging.DEBUG, "Calling getServerStatus()")
+                debugLogger.log(logging.DEBUG, "EXEC: getServerStatus(targetServer)")
 
-                serverStatus = serverStatus(serverName, nodeName)
+                serverStatus = getServerStatus(targetServer)
 
                 debugLogger.log(logging.DEBUG, str("Current server state: {0}").format(serverStatus))
 
@@ -1036,20 +1057,22 @@ def startApplicationServer():
         nodeName = returnPropertyConfiguration(configFile, "server-information", "node-name")
         serverName = returnPropertyConfiguration(configFile, "server-information", "server-name")
         startWaitTime = returnPropertyConfiguration(configFile, "server-start-options", "start-wait-time") or "10"
+        targetServer = AdminControl.completeObjectName(str("cell={0},node={1},name={2},type=Server,*").format(targetCell, nodeName, serverName))
 
         debugLogger.log(logging.DEBUG, nodeName)
         debugLogger.log(logging.DEBUG, serverName)
         debugLogger.log(logging.DEBUG, startWaitTime)
+        debugLogger.log(logging.DEBUG, targetServer)
 
-        if ((len(nodeName) != 0) and (len(serverName) != 0)):
+        if (len(targetServer) != 0):
             #
             # Start the application server
             #
             try:
                 debugLogger.log(logging.DEBUG, "Calling startServer()")
-                debugLogger.log(logging.DEBUG, "EXEC: startServer(serverName, nodeName, startWaitTime)")
+                debugLogger.log(logging.DEBUG, "EXEC: startServer(targetServer, startWaitTime)")
 
-                startServer(serverName, nodeName, startWaitTime)
+                startServer(targetServer, startWaitTime)
 
                 debugLogger.log(logging.DEBUG, str("An attempt to start server {0} on node {1} has been initiated.").format(serverName, nodeName))
 
@@ -1308,7 +1331,7 @@ else:
         elif (sys.argv[0] == "add-shared-library"):
             addSharedLibraryToServer()
         elif (sys.argv[0] == "server-status"):
-            getServerStatus()
+            showServerStatus()
         elif (sys.argv[0] == "start-server"):
             startApplicationServer()
         elif (sys.argv[0] == "stop-server"):
