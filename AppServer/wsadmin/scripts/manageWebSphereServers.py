@@ -486,6 +486,7 @@ def configureApplicationServer():
 
                 if (propertyExists):
                     sharedLibraryName = returnPropertyConfiguration(configFile, "server-shared-libraries", "library-name")
+                    sharedLibraryClasspath = returnPropertyConfiguration(configFile, "server-shared-libraries", "library-classpath")
 
                     debugLogger.log(logging.DEBUG, sharedLibraryName)
                     debugLogger.log(logging.DEBUG, sharedLibraryClasspath)
@@ -493,9 +494,9 @@ def configureApplicationServer():
                     if ((len(sharedLibraryName) != 0) and (len(sharedLibraryClasspath) != 0)):
                         try:
                             debugLogger.log(logging.DEBUG, "Calling addSharedLibraryToServer()")
-                            debugLogger.log(logging.DEBUG, "EXEC: addSharedLibraryToServer(targetServer, sharedLibraryName)")
+                            debugLogger.log(logging.DEBUG, "EXEC: addSharedLibraryToServer(targetServer, sharedLibraryName, sharedLibraryClasspath)")
 
-                            addSharedLibraryToServer(targetServer, sharedLibraryName)
+                            addSharedLibraryToServer(targetServer, sharedLibraryName, sharedLibraryClasspath)
 
                             infoLogger.log(logging.INFO, str("Completed adding shared library {0} on server {1}").format(sharedLibraryName, serverName))
                             consoleInfoLogger.log(logging.INFO, str("Completed adding shared library {0} on server {1}").format(sharedLibraryName, serverName))
@@ -543,7 +544,7 @@ def configureApplicationServer():
                 #
                 # Configure trace service
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-trace-settings")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -585,7 +586,7 @@ def configureApplicationServer():
                 #
                 # Configure process execution
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-process-settings")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -619,7 +620,7 @@ def configureApplicationServer():
                 #
                 # Configure JVM properties
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-jvm-settings")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -655,7 +656,7 @@ def configureApplicationServer():
                 #
                 # Configure auto restart policy
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-auto-restart")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -687,7 +688,7 @@ def configureApplicationServer():
                 #
                 # Configure web container
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-web-container")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -695,19 +696,21 @@ def configureApplicationServer():
                     virtualHost = returnPropertyConfiguration(configFile, "server-web-container", "virtual-host") or "default_host"
                     enableServletCaching = returnPropertyConfiguration(configFile, "server-web-container", "servlet-caching-enabled") or "true"
                     enablePortletCaching = returnPropertyConfiguration(configFile, "server-web-container", "portlet-caching-enabled") or "true"
+                    securedCookieName = returnPropertyConfiguration(configFile, "server-cookie-settings", "cookie-name") or "JSESSIONID"
                     targetWebContainer = AdminConfig.list("WebContainer", targetServer)
 
                     debugLogger.log(logging.DEBUG, virtualHost)
                     debugLogger.log(logging.DEBUG, enableServletCaching)
                     debugLogger.log(logging.DEBUG, enablePortletCaching)
+                    debugLogger.log(logging.DEBUG, securedCookieName)
                     debugLogger.log(logging.DEBUG, targetWebContainer)
 
                     if (len(targetWebContainer) != 0):
                         try:
                             debugLogger.log(logging.DEBUG, "Calling configureWebContainer()")
-                            debugLogger.log(logging.DEBUG, "EXEC: configureWebContainer(targetWebContainer, virtualHost, enableServletCaching, isPortalServer, enablePortletCaching)")
+                            debugLogger.log(logging.DEBUG, "EXEC: configureWebContainer(targetWebContainer, virtualHost, securedCookieName, enableServletCaching, isPortalServer, enablePortletCaching)")
 
-                            configureWebContainer(targetWebContainer, virtualHost, enableServletCaching, isPortalServer, enablePortletCaching)
+                            configureWebContainer(targetWebContainer, virtualHost, securedCookieName, enableServletCaching, isPortalServer, enablePortletCaching)
 
                             infoLogger.log(logging.INFO, str("Completed configuration of web container {0} on server {1}").format(targetWebContainer, serverName))
                             consoleInfoLogger.log(logging.INFO, str("Completed configuration of web container on server {0}").format(serverName))
@@ -723,7 +726,7 @@ def configureApplicationServer():
                 #
                 # Configure server cookies
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-cookie-settings")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -757,7 +760,7 @@ def configureApplicationServer():
                 #
                 # Configure thread pools
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-thread-pools")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -800,7 +803,7 @@ def configureApplicationServer():
                 #
                 # Configure TCP channels
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-tcp-channels")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -832,7 +835,7 @@ def configureApplicationServer():
                 #
                 # Configure HTTP channels
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-http-channels")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -864,7 +867,7 @@ def configureApplicationServer():
                 #
                 # Configure container chains
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-container-chains")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
@@ -896,25 +899,27 @@ def configureApplicationServer():
                 #
                 # Configure tuning parameters
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-tuning-params")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 
                 if (propertyExists):
                     writeContent = returnPropertyConfiguration(configFile, "server-tuning-params", "write-content") or "ONLY_UPDATED_ATTRIBUTES"
                     writeFrequency = returnPropertyConfiguration(configFile, "server-tuning-params", "write-frequency") or "END_OF_SERVLET_SERVICE"
+                    maxInMemorySessions = returnPropertyConfiguration(configFile, "server-tuning-params", "max-inmemory-sessions") or "1000"
                     targetTuningParams = AdminConfig.list("TuningParams", targetServer)
 
                     debugLogger.log(logging.DEBUG, writeContent)
                     debugLogger.log(logging.DEBUG, writeFrequency)
+                    debugLogger.log(logging.DEBUG, maxInMemorySessions)
                     debugLogger.log(logging.DEBUG, targetTuningParams)
 
                     if (len(targetTuningParams != 0)):
                         try:
                             debugLogger.log(logging.DEBUG, "Calling configureTuningParams()")
-                            debugLogger.log(logging.DEBUG, "EXEC: configureTuningParams(targetTuningParams, writeContent, writeFrequency)")
+                            debugLogger.log(logging.DEBUG, "EXEC: configureTuningParams(targetTuningParams, writeContent, writeFrequency, maxInMemorySessions)")
 
-                            configureTuningParams(targetTuningParams, writeContent, writeFrequency)
+                            configureTuningParams(targetTuningParams, writeContent, writeFrequency, maxInMemorySessions)
 
                             infoLogger.log(logging.INFO, str("Completed configuration of tuning parameters on server {0}").format(serverName))
                             consoleInfoLogger.log(logging.INFO, str("Completed configuration of tuning parameters on server {0}").format(serverName))
@@ -931,7 +936,7 @@ def configureApplicationServer():
                 # Configure session manager
                 # TODO
                 #
-                propertyExists = checkIfPropertySectionExists("server-hamanager")
+                propertyExists = checkIfPropertySectionExists("server-session-manager")
 
                 debugLogger.log(logging.DEBUG, propertyExists)
 

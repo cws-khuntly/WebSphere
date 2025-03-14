@@ -86,10 +86,11 @@ def configureAutoRestart(targetMonitorPolicy, policyOption):
     debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureAutoRestart(monitorPolicy, policyOption)")
 #enddef
 
-def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled):
-    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled)")
+def configureWebContainer(targetWebContainer, vhostName, cookieName, servletCachingEnabled, isPortalServer, portletCachingEnabled):
+    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, cookieName, servletCachingEnabled, isPortalServer, portletCachingEnabled)")
     debugLogger.log(logging.DEBUG, targetWebContainer)
     debugLogger.log(logging.DEBUG, vhostName)
+    debugLogger.log(logging.DEBUG, cookieName)
     debugLogger.log(logging.DEBUG, servletCachingEnabled)
     debugLogger.log(logging.DEBUG, isPortalServer)
     debugLogger.log(logging.DEBUG, portletCachingEnabled)
@@ -100,13 +101,17 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
             debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]\")")
             debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]\")")
             debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.create(\"Property\", targetWebContainer, \"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]\")")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.create(\"Property\", targetWebContainer, str(\"[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.httpOnlyCookies\"] [description \"\"] [value \"{0}}\"] [required \"false\"]]\").format(cookieName))")
 
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.extractHostHeaderPort\"] [description \"\"] [value \"true\"] [required \"false\"]]")
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"trusthostheaderport\"] [description \"\"] [value \"true\"] [required \"false\"]]")
             AdminConfig.create("Property", targetWebContainer, "[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.invokefilterscompatibility\"] [description \"\"] [value \"true\"] [required \"false\"]]")
-            AdminConfig.create("Property", targetWebContainer, "[[validationExpression, ""], ["name", "com.ibm.ws.webcontainer.httpOnlyCookies"], ["description", ""], ["value", "JSESSIONID"], ["required", "false"]]")
-            AdminTask.setAdminActiveSecuritySettings("[-customProperties[\"com.ibm.ws.security.addHttpOnlyAttributeToCookies=true\"]]")
+            AdminConfig.create("Property", targetWebContainer, str("[[validationExpression \"\"] [name \"com.ibm.ws.webcontainer.httpOnlyCookies\"] [description \"\"], [value \"{0}\"] [required \"false\"]]").format(cookieName))
 
+            debugLogger.log(logging.DEBUG, "Calling AdminTask.setAdminActiveSecuritySettings()")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminTask.setAdminActiveSecuritySettings(\"[-customProperties[\"com.ibm.ws.security.addHttpOnlyAttributeToCookies=true\"]]\")")
+
+            AdminTask.setAdminActiveSecuritySettings("[-customProperties [\"com.ibm.ws.security.addHttpOnlyAttributeToCookies=true\"]]")
 
             infoLogger.log(logging.INFO, str("Completed adding web container properties in web container {0}.").format(targetWebContainer))
         except:
@@ -173,7 +178,7 @@ def configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, 
         raise Exception("No web container was provided to configure.")
     #endif
 
-    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, servletCachingEnabled, isPortalServer, portletCachingEnabled)")
+    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureWebContainer(targetWebContainer, vhostName, cookieName, servletCachingEnabled, isPortalServer, portletCachingEnabled)")
 #enddef
 
 def configureHAManager(targetHAManager, enableHA):
@@ -429,18 +434,19 @@ def configureContainerChains(targetContainerChains, chainsToSkip):
     debugLogger.log(logging.DEBUG, str("EXIT: serverMaintenance#configureContainerChains(targetContainerChains, chainsToSkip)"))
 #enddef
 
-def configureTuningParams(targetTuningParams, writeContent, writeFrequency):
-    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency)")
+def configureTuningParams(targetTuningParams, writeContent, writeFrequency, maxInMemorySessions):
+    debugLogger.log(logging.DEBUG, "ENTER: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency, maxInMemorySessions)")
     debugLogger.log(logging.DEBUG, targetTuningParams)
     debugLogger.log(logging.DEBUG, writeContent)
     debugLogger.log(logging.DEBUG, writeFrequency)
+    debugLogger.log(logging.DEBUG, maxInMemorySessions)
 
     if ((len(targetTuningParams) != 0) and (len(writeContent) != 0) and (len(writeFrequency) != 0)):
         try:
             debugLogger.log(logging.DEBUG, "Calling AdminConfig.modify")
-            debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.modify(targetTuning, str(\"[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]\").format(targetWriteContents, targetWriteFrequency))")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.modify(targetTuning, str(\"[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"] [maxInMemorySessionCount {2}]]\").format(writeContent, writeFrequency, maxInMemorySessions))")
     
-            AdminConfig.modify(targetTuningParams, str("[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"]]").format(writeContent, writeFrequency))
+            AdminConfig.modify(targetTuningParams, str("[[writeContents \"{0}\"] [writeFrequency \"{1}\"] [scheduleInvalidation \"false\"] [invalidationTimeout \"60\"] [maxInMemorySessionCount {2}]]").format(writeContent, writeFrequency, maxInMemorySessions))
 
             infoLogger.log(logging.INFO, str("Completed configuration of tuning parameters {0} with values {1} {2}.").format(targetTuningParams, writeContent, writeFrequency))
         except:
@@ -456,7 +462,7 @@ def configureTuningParams(targetTuningParams, writeContent, writeFrequency):
         raise Exception("No tuning parameters were provided or no write content/write frequency was provided")
     #endif
 
-    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency)")
+    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureTuningParams(targetTuningParams, writeContent, writeFrequency, maxInMemorySessions)")
 #enddef
 
 def configureSessionManager(targetSessionManager):
