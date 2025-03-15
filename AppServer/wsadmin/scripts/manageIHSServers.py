@@ -1,3 +1,37 @@
+#==============================================================================
+#
+#          FILE:  manageIHSServers.py
+#         USAGE:  wsadmin.sh -lang jython -p wsadmin.properties \
+#                   -f manageIHSServers.py <option> <config-file>
+#     ARGUMENTS:  <option>, <config-file>
+#   DESCRIPTION:  Configures servers with provided options.
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
+
+import os
+import sys
+import logging
+
+configureLogging("/home/wasadm/workspace/WebSphere/AppServer/wsadmin/config/logging.properties")
+errorLogger = logging.getLogger("error-logger")
+debugLogger = logging.getLogger("debug-logger")
+infoLogger = logging.getLogger("info-logger")
+consoleInfoLogger = logging.getLogger("info-logger")
+consoleErrorLogger = logging.getLogger("info-logger")
+
+lineSplit = java.lang.System.getProperty("line.separator")
+targetCell = AdminControl.getCell()
+nodeList = AdminTask.listManagedNodes().split(lineSplit)
+
 def createWebserver(serverName, nodeName, templateName = "IHS", webPort = 8080, webInstallRoot = "/opt/IBM/HTTPServer", pluginInstallRoot = "/opt/IBM/WebSphere/Plugins",
                     mapApplications = "ALL", adminPort = 8008, adminUserID = "ihsadm", adminPasswd = ""):
     debugLogger.log(logging.DEBUG, str(serverName))
