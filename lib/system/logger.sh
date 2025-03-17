@@ -10,13 +10,11 @@
 #          BUGS:  ---
 #         NOTES:
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
-#       COMPANY:  CaspersBox Web Services
+#       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---
 #==============================================================================
-
-PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 ## get the available log config and load it
 if [[ -z "${LOGGING_PROPERTIES}" ]]; then

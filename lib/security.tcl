@@ -9,7 +9,7 @@
 #          BUGS:  ---
 #         NOTES:  ---
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
-#       COMPANY:  CaspersBox Web Services
+#       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---
@@ -286,7 +286,7 @@ proc getAuthValue { _HOSTNAME _USERNAME { _AUTH_FILE "" } { _ID_FILE "" } { _ENC
 #          BUGS:  ---
 #         NOTES:  ---
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
-#       COMPANY:  CaspersBox Web Services
+#       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---

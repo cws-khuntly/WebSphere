@@ -10,7 +10,7 @@
 #          BUGS:  ---
 #         NOTES:
 #        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
-#       COMPANY:  CaspersBox Web Services
+#       COMPANY:  ---
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---

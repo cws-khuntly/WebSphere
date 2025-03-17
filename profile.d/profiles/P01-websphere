@@ -2,9 +2,9 @@
 
 #==============================================================================
 #
-#          FILE:  ansible
-#         USAGE:  . ansible
-#   DESCRIPTION:  Loads keychain and adds available keys to it
+#          FILE:  P01-websphere
+#         USAGE:  . P01-websphere
+#   DESCRIPTION:  Sets up the shell for WebSphere
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -18,11 +18,39 @@
 #
 #==============================================================================
 
-[[ -d /opt/IBM/WebSphere/AppServer ]] || return;
-
 declare -x OTEL_JAVAAGENT_ENABLED=false;
-declare WAS_PROFILE_PATH="/opt/IBM/WebSphere/profiles";
 
-for WAS_PROFILE in $(ls -ltr "${WAS_PROFILE_PATH}" | grep ^d | awk '{print $NF}' | cut -d "/" -f 1); do
-    source "${WAS_PROFILE_PATH}/${WAS_PROFILE}/bin/setupCmdLine.sh";
-done
+[[ -d "/opt/IBM/WebSphere/AppServer" ]] || return;
+
+declare WAS_HOME="/opt/IBM/WebSphere/AppServer";
+declare WAS_PROFILE_PATH="/opt/IBM/WebSphere/AppServer/profiles";
+declare PATH="${PATH}:${WAS_HOME}/bin";
+
+if [[ -d "${HOME}/lib/WebSphere/AppServer" ]]; then
+    for file_entry in "${HOME}/lib/WebSphere/AppServer/*"; do
+        [[ -z "${file_entry}" ]] && continue;
+
+        if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
+    done
+
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
+fi
+
+[[ -d "/opt/IBM/WebSphere/PortalServer" ]] || return;
+
+declare WPS_HOME="/opt/IBM/WebSphere/PortalServer";
+declare WPS_PROFILE_PATH="/opt/IBM/WebSphere/profiles";
+
+if [[ -d "${HOME}/lib/WebSphere/PortalServer" ]]; then
+    for file_entry in "${HOME}/lib/WebSphere/PortalServer/*"; do
+        [[ -z "${file_entry}" ]] && continue;
+
+        if [[ -r "${file_entry}" ]] && [[ -s "${file_entry}" ]]; then source "${file_entry}"; fi
+
+        [[ -n "${file_entry}" ]] && unset -v file_entry;
+    done
+
+    [[ -n "${file_entry}" ]] && unset -v file_entry;
+fi
