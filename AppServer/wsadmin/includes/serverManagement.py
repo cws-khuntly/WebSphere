@@ -503,7 +503,7 @@ def configureServerHostname(targetServer, hostName):
             debugLogger.log(logging.DEBUG, "Calling AdminConfig.modify")
             debugLogger.log(logging.DEBUG, "EXEC: AdminConfig.modify(targetServer, str(\"[[hostName \"{0}\"]]\").format(hostName))")
 
-            AdminConfig.modify(targetServer, str("[[hostName \"{0}\"]]").format(hostName))
+            AdminConfig.modify(targetServer, str("[[hostName {0}]]").format(hostName))
 
             infoLogger.log(logging.INFO, str("Successfully modified hostname for server {0} to {1}.").format(targetServer, hostName))
         except:
