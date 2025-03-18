@@ -92,7 +92,7 @@ def remapApplication(appName, targetCluster, vhostName = "default_host"):
     debugLogger.log(logging.DEBUG, "Executing command AdminApp.listModules()...")
     debugLogger.log(logging.DEBUG, "EXEC: AdminApp.listModules(\"{0}, -server\").split(\"#\")[1].split(\"+\")[0].format(appName)")
 
-    moduleName = AdminApp.listModules("{0}, -server").split("#")[1].split("+")[0].format(appName)
+    moduleName = AdminApp.listModules("{0}, -server").format(appName).split("#")[1].split("+")[0]
 
     debugLogger.log(logging.DEBUG, moduleName)
 

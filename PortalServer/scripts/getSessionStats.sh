@@ -147,7 +147,7 @@ function collectSessionStats()
             fi
 
             portal_server_profile="$(cut -d "|" -f 1 <<< "${portal_server}")"
-            portal_server_name="$(cut -d "|" -f 1 <<< "${portal_server}")"
+            portal_server_name="$(cut -d "|" -f 2 <<< "${portal_server}")"
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "portal_server_profile -> ${portal_server_profile}";
