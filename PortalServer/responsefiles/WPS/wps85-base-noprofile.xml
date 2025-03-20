@@ -6,8 +6,6 @@
         <variable name='configEngineLocation' value='/opt/IBM/WebSphere/ConfigEngine'/>
         <variable name='wasInstallLocation' value='/opt/IBM/WebSphere/AppServer'/>
         <variable name='wasProfilesLocation' value='/opt/IBM/WebSphere/AppServer/profiles'/>
-        <variable name='wpsProfileLocation' value='/opt/IBM/WebSphere/profiles/<PROFILE NAME>'/>
-        <variable name='wpsProfileName' value='<SPECIFY VALUE>'/>
         <variable name='cfgAdminUsername' value='cwprovider'/>
         <variable name='cfgAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
     </variables>

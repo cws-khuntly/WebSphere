@@ -8,9 +8,9 @@
         <variable name='wasProfilesLocation' value='/opt/IBM/WebSphere/AppServer/profiles'/>
         <variable name='wpsProfileLocation' value='/opt/IBM/WebSphere/profiles/<PROFILE NAME>'/>
         <variable name='wpsProfileName' value='<SPECIFY VALUE>'/>
-        <variable name='cfgAdminUsername' value='cwprovider'/>
+        <variable name='cfgAdminUsername' value='cwadmin'/>
         <variable name='cfgAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
-        <variable name='wpsAdminUsername' value='wpsadminprovider'/>
+        <variable name='wpsAdminUsername' value='wpsadmin'/>
         <variable name='wpsAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
         <variable name='hostname' value='<SPECIFY VALUE>'/> <!-- This should be the FQDN -->
         <variable name='nodename' value='<SPECIFY VALUE>'/> <!-- This should be a combination of the hostname with the word Node, e.g. myhostNode -->
