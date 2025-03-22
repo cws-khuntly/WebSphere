@@ -293,7 +293,7 @@ function installLocalFiles()
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${entry_target}";
                                 fi
 
-                                mkdir -pv "$(eval printf "%s" "${entry_target}")";
+                                mkdir -p "$(eval printf "%s" "${entry_target}")";
                                 ret_code="${?}";
 
                                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
