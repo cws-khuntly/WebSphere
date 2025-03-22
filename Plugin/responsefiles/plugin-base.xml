@@ -5,8 +5,8 @@
         <variable name='pluginInstallLocation' value='/opt/IBM/WebSphere/Plugins'/>
     </variables>
     <server>
-        <repository location='/opt/installables/IBM/Plugin/Base'/>
-        <repository location='/opt/installables/IBM/JDK/Base'/>
+        <repository location='/nfs/software/IBM/Plugin/Base'/>
+        <repository location='/nfs/software/IBM/JDK/Base'/>
     </server>
     <profile id='Web Server Plug-ins for IBM WebSphere Application Server V9.0' installLocation='${pluginInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>

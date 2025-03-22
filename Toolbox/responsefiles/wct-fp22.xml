@@ -5,8 +5,8 @@
         <variable name='wctInstallLocation' value='/opt/IBM/WebSphere/Toolbox'/>
     </variables>
     <server>
-        <repository location='/opt/installables/IBM/WCT/FP/FP22'/>
-        <repository location='/opt/installables/IBM/JDK/FP/FP40/IIMPackage'/>
+        <repository location='/nfs/software/IBM/WCT/FP/FP22'/>
+        <repository location='/nfs/software/IBM/JDK/FP/FP40/IIMPackage'/>
     </server>
     <profile id='WebSphere Customization Toolbox V9.0' installLocation='${wctInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>

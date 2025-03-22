@@ -5,8 +5,8 @@
         <variable name='wasInstallLocation' value='/opt/IBM/WebSphere/AppServer'/>
     </variables>
     <server>
-        <repository location='/opt/installables/IBM/WAS/Base'/>
-        <repository location='/opt/installables/IBM/JDK/Base'/>
+        <repository location='/nfs/software/IBM/WAS/Base'/>
+        <repository location='/nfs/software/IBM/JDK/Base'/>
     </server>
     <profile id='IBM WebSphere Application Server V9.0' installLocation='${wasInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>

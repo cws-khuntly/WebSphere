@@ -17,8 +17,8 @@
         <variable name='cellname' value='<SPECIFY VALUE>'/> <!-- This should be a combination of the hostname with the word Cell, e.g. myhostCell -->
     </variables>
     <server>
-        <repository location='/opt/installables/HCL/WPS/Base/WP85_Server'/>
-        <repository location='/opt/installables/HCL/WPS/iFix/IFPI59896/8.5.0.0-WP-Server-IFPI59896.zip'/>
+        <repository location='/nfs/software/HCL/WPS/Base/WP85_Server'/>
+        <repository location='/nfs/software/HCL/WPS/iFix/IFPI59896/8.5.0.0-WP-Server-IFPI59896.zip'/>
     </server>
     <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>

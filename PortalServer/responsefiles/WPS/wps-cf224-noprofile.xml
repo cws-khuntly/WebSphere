@@ -10,7 +10,7 @@
         <variable name='cfgAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
     </variables>
     <server>
-        <repository location='/opt/installables/HCL/WPS/CF/CF224/8500CF224/repository'/>
+        <repository location='/nfs/software/HCL/WPS/CF/CF224/8500CF224/repository'/>
     </server>
     <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>

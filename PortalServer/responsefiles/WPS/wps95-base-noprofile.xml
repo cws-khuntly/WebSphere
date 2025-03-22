@@ -12,7 +12,7 @@
         <variable name='wpsAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
     </variables>
     <server>
-        <repository location='/opt/installables/HCL/WPS/Base/WP95_Server'/>
+        <repository location='/nfs/software/HCL/WPS/Base/WP95_Server'/>
     </server>
     <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
