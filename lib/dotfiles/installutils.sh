@@ -308,9 +308,9 @@ function installLocalFiles()
                                 fi
 
                                 if [[ -n "${recurse_permissions}" ]] && [[ "${recurse_permissions}" == "${_TRUE}" ]]; then
-                                    chmod -R "${entry_permissions}" "${entry_target}";
+                                    chmod -R "${entry_permissions}" "$(eval printf "%s" "${entry_target}")";
                                 else
-                                    chmod "${entry_permissions}" "${entry_target}";
+                                    chmod "${entry_permissions}" "$(eval printf "%s" "${entry_target}")";
                                 fi
 
                                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -371,7 +371,7 @@ function installLocalFiles()
                                     continue;
                                 fi
 
-                                chmod "${entry_permissions}" "${entry_target}"
+                                chmod "${entry_permissions}" "$(eval printf "%s" "${entry_target}")"
 
                                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "INFO" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "File ${entry_source} copied to ${entry_target}.";
