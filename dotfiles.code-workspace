@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../WebSphere"
+		},
+		{
+			"path": "../named"
 		}
 	],
 	"settings": {}
