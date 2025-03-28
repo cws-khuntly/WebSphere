@@ -19,6 +19,7 @@
 Description=git update for specific repos
 
 [Timer]
+OnBootSec=10s
 OnCalendar=daily
 Persistent=true
 Unit=git-update.service

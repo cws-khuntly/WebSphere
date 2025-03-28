@@ -47,14 +47,7 @@ function showHostInfo()
     printf "%s\n" "+-------------------------------------------------------------------+" >&2;
     printf "%40s %s\n" "Welcome to" "${host_system_name}" >&2;
     printf "%s\n" "+-------------------------------------------------------------------+" >&2;
-
-    if [[ -r /etc/motd ]] && [[ -s /etc/motd ]]
-    then
-        printf "\n" >&2;
-        cat /etc/motd <&2;
-        printf "\n" >&2;
-    fi
-
+    printf "\n" >&2;
     printf "%s\n" "+---------------------- System Information -------------------------+" >&2;
     printf "%-16s : %-10s\n" "+ IP Address" "${host_ip_address[@]}" >&2;
     printf "%-16s : %-10s\n" "+ Kernel version" "${host_kernel_version}" >&2;
@@ -69,6 +62,13 @@ function showHostInfo()
     printf "%-16s : %-10s %s in %s\n" "+ Disk Usage" "You're currently using" "${user_disk_usage}" "${HOME}" >&2;
     printf "%-16s : %-10d\n" "+ Processes" "${user_process_count}" >&2;
     printf "%s\n" "+-------------------------------------------------------------------+" >&2;
+    if [[ -r /etc/motd ]] && [[ -s /etc/motd ]]; then
+        printf "\n" >&2;
+        printf "%s\n" "+------------------------------ MOTD -------------------------------+" >&2;
+        cat /etc/motd >&2;
+        printf "%s\n" "+-------------------------------------------------------------------+" >&2;
+    fi
+    printf "\n" >&2;
 
     [[ -n "${host_system_name}" ]] && unset -v host_system_name;
     [[ -n "${host_ip_address[*]}" ]] && unset -v host_ip_address;
