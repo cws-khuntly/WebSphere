@@ -66,6 +66,54 @@ def getWebSphereVariable(variableName, nodeName = None, serverName = None, clust
     return returnValue
 #enddef
 
+def getModuleNames(appName):
+    debugLogger.log(logging.DEBUG, "ENTER: wsincludes#getModuleNames(appName)")
+    debugLogger.log(logging.DEBUG, appName)
+
+    moduleNames = []
+
+    debugLogger.log(logging.DEBUG, moduleNames)
+
+    if (len(appName) != 0):
+        try:
+            debugLogger.log(logging.DEBUG, "Calling AdminApp.listModules()")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminApp.listModules(appName, \"-server\")")
+
+            appModules = AdminApp.listModules(appName, "-server")
+
+            debugLogger.log(logging.DEBUG, appModules)
+
+            for appModule in (appModules):
+                debugLogger.log(logging.DEBUG, appModule)
+
+                moduleName = str(appModule).split("#")[1].split("+")[0]
+
+                debugLogger.log(logging.DEBUG, moduleName)
+
+                moduleNames.append(moduleName)
+
+                debugLogger.log(logging.DEBUG, moduleNames)
+            #endfor
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred listing modules for {0}: {1} {2}").format(appName, str(exception), str(parms)))
+
+            raise Exception(str("An error occurred listing modules for {0}: {1} {2}").format(appName, str(exception), str(parms)))
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, "No application was provided to obtain modules for.")
+
+        raise Exception("No application was provided to obtain modules for.")
+    #endif
+
+    debugLogger.log(logging.DEBUG, moduleNames)
+
+    debugLogger.log(logging.DEBUG, "EXIT: serverMaintenance#configureServerHostname(targetServer, hostName)")
+
+    return moduleNames
+#enddef
+
 def saveWorkspaceChanges():
     debugLogger.log(logging.DEBUG, "ENTER: saveWorkspaceChanges()")
 

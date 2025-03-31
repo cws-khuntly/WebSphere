@@ -20,14 +20,14 @@
 #==============================================================================
 [Unit]
 Description=IBM WebSphere Application Server - Application Server
-After=ibm-was-nodeagent@%i
-Requires=ibm-was-nodeagent@%i
+After=ibm-was-nodeagent@${PROFILE_NAME}
+Requires=ibm-was-nodeagent@${PROFILE_NAME}
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
-ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
-PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/%i/${SERVER_NAME}.pid
+ExecStart=/opt/IBM/WebSphere/profiles/${PROFILE_NAME}/bin/startServer.sh %i
+ExecStop=/opt/IBM/WebSphere/profiles/${PROFILE_NAME}/bin/startServer.sh %i
+PIDFile=/opt/IBM/WebSphere/profiles/${PROFILE_NAME}/logs/%i/%i.pid
 SuccessExitStatus=0
 TimeoutStartSec=180
 TimeoutStopSec=180
