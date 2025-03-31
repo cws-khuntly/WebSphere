@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "../named"
+		},
+		{
+			"path": "../dhcpd"
 		}
 	],
 	"settings": {}
