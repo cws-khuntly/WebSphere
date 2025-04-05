@@ -83,11 +83,71 @@ def exportApp(appName):
     debugLogger.log(logging.DEBUG, "EXIT: manageApplications#exportApp(appName)")
 #enddef
 
-def remapApplication(appName, targetCluster, vhostName = "default_host"):
-    debugLogger.log(logging.DEBUG, "ENTER: manageApplications#remapApplication(appName, targetCluster, vhostName = \"default_host\")")
+def remapWebModule(appName, targetCluster, targetNodes, targetWebServers, vhostName = "default_host"):
+    debugLogger.log(logging.DEBUG, "ENTER: manageApplications#remapWebModule(appName, targetCluster, targetNodes, targetWebServers, vhostName = \"default_host\")")
     debugLogger.log(logging.DEBUG, appName)
     debugLogger.log(logging.DEBUG, targetCluster)
+    debugLogger.log(logging.DEBUG, targetNodes)
+    debugLogger.log(logging.DEBUG, targetWebServers)
     debugLogger.log(logging.DEBUG, vhostName)
+
+    debugLogger.log(logging.DEBUG, "Executing command AdminApp.listModules()...")
+    debugLogger.log(logging.DEBUG, "EXEC: AdminApp.listModules(\"{0}, -server\").split(\"#\")[1].split(\"+\")[0].format(appName)")
+
+    moduleName = AdminApp.listModules("{0}, -server").format(appName).split("#")[1].split("+")[0]
+
+    debugLogger.log(logging.DEBUG, moduleName)
+
+    if (moduleName):
+        for targetNode in (targetNodes):
+            debugLogger.log(logging.DEBUG, targetNode)
+
+            for targetWebServer in (targetWebServers):
+                debugLogger.log(logging.DEBUG, targetWebServer)
+
+                if (len(nodeMapList) == 0):
+                    nodeMapList = str("WebSphere:cell={0},node={1},server={2}").format(targetNode, targetWebServer)
+                else:
+                    nodeMapList = str(",WebSphere:cell={0},node={1},server={2}").format(targetNode, targetWebServer)
+                #endif
+
+                debugLogger.log(logging.DEBUG, nodeMapList)
+            #endfor
+        #endfor
+
+        appMappingOptions = str("{0}, {1}").format(nodeMapList, vhostName)
+
+        debugLogger.log(logging.DEBUG, appMappingOptions)
+
+        try:
+            debugLogger.log(logging.DEBUG, "Executing command AdminApp.edit()...")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminApp.edit(\"{0}, [-MapModulesToServers [[{1} {2}},WEB-INF/web.xml WebSphere:cell=dmgrCell01,cluster={3} {4}]]]\").format(appName, moduleName, targetCluster, vhostName)")
+
+            AdminApp.edit("{0}, [-MapModulesToServers [[\".*\" {1}]]]").format(appName, appMappingOptions)
+
+            infoLogger.log(logging.INFO, str("Application {0} remapped to cluster {1}").format(appName, targetCluster))
+            consoleInfoLogger.log(logging.INFO, str("Application {0} remapped to cluster {1}").format(appName, targetCluster))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}: {2} {3}").format(appName, targetCluster, str(exception), str(parms)))
+            consoleErrorLogger.log(logging.ERROR, str("An error occurred updating application {0} to cluster {1}. Please review logs.").format(appName, targetCluster))
+        finally:
+            saveWorkspaceChanges()
+            syncAllNodes(nodeList, targetCell)
+        #endtry
+    else:
+        errorLogger.log(logging.ERROR, str("No module was found for application {0}").format(appName))
+        consoleErrorLogger.log(logging.ERROR, str("No module was found for application {0}").format(appName))
+    #endif
+
+    debugLogger.log(logging.DEBUG, "EXIT: manageApplications#remapWebModule(appName, targetCluster, vhostName = \"default_host\")")
+#enddef
+
+def remapEJBModule(appName, targetCluster):
+    debugLogger.log(logging.DEBUG, "ENTER: manageApplications#remapEJBModule(appName, targetCluster)")
+    debugLogger.log(logging.DEBUG, appName)
+    debugLogger.log(logging.DEBUG, targetCluster)
 
     debugLogger.log(logging.DEBUG, "Executing command AdminApp.listModules()...")
     debugLogger.log(logging.DEBUG, "EXEC: AdminApp.listModules(\"{0}, -server\").split(\"#\")[1].split(\"+\")[0].format(appName)")
