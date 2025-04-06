@@ -17,12 +17,13 @@
 #==============================================================================
 [Unit]
 Description=git update for WebSphere repo
+ConditionPathExists=%h/workspace/WebSphere
 
 [Service]
 Type=oneshot
-ExecStart=[[ -d %h/workspace/WebSphere ]] && /bin/git -C %h/workspace/WebSphere fetch origin
-ExecStart=[[ -d %h/workspace/WebSphere ]] && /bin/git -C %h/workspace/WebSphere reset --hard origin/master
-ExecStart=[[ -d %h/workspace/WebSphere ]] && /bin/git -C %h/workspace/WebSphere pull
+ExecStart=/bin/git -C %h/workspace/WebSphere fetch origin
+ExecStart=/bin/git -C %h/workspace/WebSphere reset --hard origin/master
+ExecStart=/bin/git -C %h/workspace/WebSphere pull
 SuccessExitStatus=0
 
 [Install]

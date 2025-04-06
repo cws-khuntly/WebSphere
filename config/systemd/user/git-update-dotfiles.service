@@ -17,12 +17,13 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
+ConditionPathExists=%h/workspace/dotfiles
 
 [Service]
 Type=oneshot
-ExecStart=[[ -d %h/workspace/dotfiles ]] && /bin/git -C %h/workspace/dotfiles fetch origin
-ExecStart=[[ -d %h/workspace/dotfiles ]] && /bin/git -C %h/workspace/dotfiles reset --hard origin/master
-ExecStart=[[ -d %h/workspace/dotfiles ]] && /bin/git -C %h/workspace/dotfiles pull
+ExecStart=/bin/git -C %h/workspace/dotfiles fetch origin
+ExecStart=/bin/git -C %h/workspace/dotfiles reset --hard origin/master
+ExecStart=/bin/git -C %h/workspace/dotfiles pull
 ExecStart=/bin/systemctl --user daemon-reload
 SuccessExitStatus=0
 
