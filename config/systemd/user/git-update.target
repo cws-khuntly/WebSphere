@@ -20,4 +20,5 @@ Description=git update for specific repos
 BindsTo=git-update-dotfiles.service git-update-websphere.service
 
 [Install]
+WantedBy=default.target
 Also=git-update.timer

@@ -19,7 +19,7 @@
 
 [Unit]
 Description=tmux Terminal Multiplexor
-After=multi-user.target
+After=default.target
 
 [Service]
 Type=forking
@@ -27,4 +27,4 @@ ExecStart=/usr/bin/tmux new-session -d -s default
 ExecStop=/usr/bin/tmux kill-session -t default
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
