@@ -23,10 +23,8 @@ After=multi-user.target
 
 [Service]
 Type=simple
-User=%u
-Group=%g
 ExecStart=/usr/bin/tmux new-session -d -s tmux -s default
 ExecStop=/usr/bin/tmux kill-session -t default
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
