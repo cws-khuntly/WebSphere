@@ -17,6 +17,7 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
+Wants=git-update-dotfiles.service git-update-websphere.service
 BindsTo=git-update-dotfiles.service git-update-websphere.service
 
 [Install]
