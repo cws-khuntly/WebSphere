@@ -1,6 +1,6 @@
 #==============================================================================
 #
-#          FILE:  git-update.timer
+#          FILE:  git-update.service
 #         USAGE:  Install unit file using appropriate systemctl syntax.
 #     ARGUMENTS:  None
 #   DESCRIPTION:  systemd service to run git update periodically
@@ -16,14 +16,15 @@
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=git update for specific repos
-Wants=git-update.target
+Description=git update for WebSphere repo
+ConditionPathExists=%h/workspace/WebSphere
 
-[Timer]
-OnBootSec=10s
-OnCalendar=daily
-Persistent=true
-Unit=git-update.target
+[Service]
+Type=oneshot
+ExecStart=/bin/git -C %h/workspace/WebSphere fetch origin
+ExecStart=/bin/git -C %h/workspace/WebSphere reset --hard origin/master
+ExecStart=/bin/git -C %h/workspace/WebSphere pull
+SuccessExitStatus=0
 
 [Install]
-WantedBy=timers.target
+Also=git-update.timer
