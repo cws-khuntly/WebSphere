@@ -24,7 +24,6 @@ PATH="${PATH}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 ARG_COUNTER=0;
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#startup";
-LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties";
 CONFIG_FILE_LOCATION="${HOME}/workspace/WebSphere/PortalServer/properties/getSessionStats.properties";
 
 ## load the logger
@@ -454,7 +453,6 @@ fi
 [[ -n "${ARG_COUNTER}" ]] && unset -v ARG_COUNTER;
 [[ -n "${CNAME}" ]] && unset -v CNAME;
 [[ -n "${FUNCTION_NAME}" ]] && unset -v FUNCTION_NAME;
-[[ -n "${LOGGING_PROPERTIES}" ]] && unset -v LOGGING_PROPERTIES;
 [[ -n "${CONFIG_FILE_LOCATION}" ]] && unset -v CONFIG_FILE_LOCATION;
 
 exit ${RETURN_CODE};
