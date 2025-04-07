@@ -25,7 +25,6 @@ ARG_COUNTER=0;
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
-LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/dotfiles/logging.properties";
 CONFIG_FILE_LOCATION="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 ## load the logger
