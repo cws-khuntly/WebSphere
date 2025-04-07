@@ -17,7 +17,7 @@
         <variable name='cellname' value='<SPECIFY VALUE>'/> <!-- This should be a combination of the hostname with the word Cell, e.g. myhostCell -->
     </variables>
     <server>
-        <repository location='/nfs/software/HCL/WPS/Base/WP95_Server'/>
+        <repository location='/nfs/software/HCL/WPS/Base/WP95_Server' temporary='true'/>
     </server>
     <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -59,4 +59,5 @@
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>
+    <preference name='com.ibm.cic.common.core.preferences.searchForUpdates' value='false'/>
 </agent-input>

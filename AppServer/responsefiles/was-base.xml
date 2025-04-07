@@ -5,8 +5,8 @@
         <variable name='wasInstallLocation' value='/opt/IBM/WebSphere/AppServer'/>
     </variables>
     <server>
-        <repository location='/nfs/software/IBM/WAS/Base'/>
-        <repository location='/nfs/software/IBM/JDK/Base'/>
+        <repository location='/nfs/software/IBM/WAS/Base' temporary='true'/>
+        <repository location='/nfs/software/IBM/JDK/Base' temporary='true'/>
     </server>
     <profile id='IBM WebSphere Application Server V9.0' installLocation='${wasInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -19,4 +19,5 @@
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>
+    <preference name='com.ibm.cic.common.core.preferences.searchForUpdates' value='false'/>
 </agent-input>

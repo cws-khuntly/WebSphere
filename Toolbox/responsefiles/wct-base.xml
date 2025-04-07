@@ -5,8 +5,8 @@
         <variable name='wctInstallLocation' value='/opt/IBM/WebSphere/Toolbox'/>
     </variables>
     <server>
-        <repository location='/nfs/software/IBM/WCT/Base'/>
-        <repository location='/nfs/software/IBM/JDK/Base'/>
+        <repository location='/nfs/software/IBM/WCT/Base' temporary='true'/>
+        <repository location='/nfs/software/IBM/JDK/Base' temporary='true'/>
     </server>
     <profile id='WebSphere Customization Toolbox V9.0' installLocation='${wctInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -19,4 +19,5 @@
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>
+    <preference name='com.ibm.cic.common.core.preferences.searchForUpdates' value='false'/>
 </agent-input>

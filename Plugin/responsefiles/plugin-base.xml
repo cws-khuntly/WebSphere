@@ -5,8 +5,8 @@
         <variable name='pluginInstallLocation' value='/opt/IBM/WebSphere/Plugins'/>
     </variables>
     <server>
-        <repository location='/nfs/software/IBM/Plugin/Base'/>
-        <repository location='/nfs/software/IBM/JDK/Base'/>
+        <repository location='/nfs/software/IBM/Plugin/Base' temporary='true'/>
+        <repository location='/nfs/software/IBM/JDK/Base' temporary='true'/>
     </server>
     <profile id='Web Server Plug-ins for IBM WebSphere Application Server V9.0' installLocation='${pluginInstallLocation}'>
         <data key='cic.selector.arch' value='x86_64'/>
@@ -19,4 +19,5 @@
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>
+    <preference name='com.ibm.cic.common.core.preferences.searchForUpdates' value='false'/>
 </agent-input>

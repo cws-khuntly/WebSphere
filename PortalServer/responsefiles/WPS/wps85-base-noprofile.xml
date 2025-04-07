@@ -10,7 +10,7 @@
         <variable name='cfgAdminPassword' value='<SPECIFY VALUE>'/> <!-- This should be a 20 character, unique, random alphanumeric value. To obtain the appropriate value for Installation Manager, execute imcl encryptString <VALUE> -->
     </variables>
     <server>
-        <repository location='/nfs/software/HCL/WPS/Base/WP85_Server'/>
+        <repository location='/nfs/software/HCL/WPS/Base/WP85_Server' temporary='true'/>
         <repository location='/nfs/software/HCL/WPS/iFix/IFPI59896/8.5.0.0-WP-Server-IFPI59896.zip'/>
     </server>
     <profile id='IBM WebSphere Portal Server V8.5' installLocation='${wpsInstallLocation}'>
@@ -31,4 +31,5 @@
     </install>
     <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
     <preference name='offering.service.repositories.areUsed' value='false'/>
+    <preference name='com.ibm.cic.common.core.preferences.searchForUpdates' value='false'/>
 </agent-input>
