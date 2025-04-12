@@ -23,4 +23,3 @@ stty kill "^B";
 stty -ixon;
 stty echoe;
 stty istrip;
-stty columns 200 rows 50

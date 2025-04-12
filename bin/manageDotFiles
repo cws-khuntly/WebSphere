@@ -778,7 +778,7 @@ function usage()
     printf "%s %s\n" "${function_name}" "Deploy and install dotfiles." >&2;
     printf "%s %s\n" "Usage: ${function_name}" "[ options ]" >&2;
     printf "    %s: %s\n" "NOTE" "All configuration options are available in the configuration file, and may be overridden with the appropriate arguments." >&2;
-    printf "    %s: %s\n" "--config | -c <configuration file>" "(Optional) Te location to an alternative configuration file for this utility. Default configuration file -> ${CONFIG_FILE_LOCATION}" >&2;
+    printf "    %s: %s\n" "--config | -c <configuration file>" "(Optional) The location to an alternative configuration file for this utility. Default configuration file -> ${CONFIG_FILE_LOCATION}" >&2;
     printf "        %s: %s\n" "NOTE" "While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options." >&2;
     printf "    %s: %s\n" "--servername | -s <hostname>" "(Optional) The target system name to process against. Default value -> ${TARGET_HOST}." >&2;
     printf "    %s: %s\n" "--username | -u <username>" "(Optional) The username to utilize for the target system. Default value -> ${TARGET_USER}." >&2;
