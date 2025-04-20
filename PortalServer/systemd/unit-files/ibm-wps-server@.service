@@ -20,8 +20,8 @@
 #==============================================================================
 [Unit]
 Description=IBM WebSphere Portal Server
-After=ibm-was-nodeagent@%i
-Requires=ibm-was-nodeagent@%i
+After=ibm-was-nodeagent@${PROFILE_NAME}
+Requires=ibm-was-nodeagent@${PROFILE_NAME}
 
 [Service]
 Type=forking
