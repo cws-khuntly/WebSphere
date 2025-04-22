@@ -19,7 +19,12 @@
 #==============================================================================
 
 ## path
-declare -x PATH="${PATH}:${HOME}/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games";
+declare -x SYSTEM_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games";
+declare -x ORACLE_PATH="/usr/lib/oracle/19.26/client64/bin";
+declare -x WAS_PATH="/opt/IBM/WebSphere/AppServer/bin:/opt/IBM/WebSphere/AppServer/derby/bin:/opt/IBM/WebSphere/AppServer/derby/bin/embedded";
+declare -x WPS_PATH="/opt/IBM/WebSphere/PortalServer/bin";
+declare -x USER_PATH="${HOME}/bin";
+declare -x PATH="${PATH}:${SYSTEM_PATH}:${ORACLE_PATH}:${WAS_PATH}:${WPS_PATH}:${USER_PATH}";
 
 ## trap logout
 trap 'logoutUser; exit' EXIT;

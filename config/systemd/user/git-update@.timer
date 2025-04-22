@@ -17,13 +17,13 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
-Wants=git-update.target
+Wants=git-update@%i.target
 
 [Timer]
 OnBootSec=10s
 OnCalendar=daily
 Persistent=true
-Unit=git-update.target
+Unit=git-update@%i.service
 
 [Install]
-WantedBy=timers.target
+WantedBy=git-update@%i.target

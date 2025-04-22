@@ -1,6 +1,6 @@
 #==============================================================================
 #
-#          FILE:  git-update.service
+#          FILE:  git-update.target
 #         USAGE:  Install unit file using appropriate systemctl syntax.
 #     ARGUMENTS:  None
 #   DESCRIPTION:  systemd service to run git update periodically
@@ -17,15 +17,9 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
-ConditionPathExists=%h/workspace/dotfiles
-
-[Service]
-Type=oneshot
-ExecStart=/bin/git -C %h/workspace/dotfiles fetch origin
-ExecStart=/bin/git -C %h/workspace/dotfiles reset --hard origin/master
-ExecStart=/bin/git -C %h/workspace/dotfiles pull
-ExecStart=/bin/systemctl --user daemon-reload
-SuccessExitStatus=0
+Wants=git-update@%i.service
+BindsTo=git-update@%i.service
 
 [Install]
-Also=git-update.timer
+WantedBy=default.target
+Also=git-update@%i.timer

@@ -16,15 +16,15 @@
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=git update for WebSphere repo
-ConditionPathExists=%h/workspace/WebSphere
+Description=git update for specific repos
+ConditionPathExists=%h/workspace/%i
 
 [Service]
 Type=oneshot
-ExecStart=/bin/git -C %h/workspace/WebSphere fetch origin
-ExecStart=/bin/git -C %h/workspace/WebSphere reset --hard origin/master
-ExecStart=/bin/git -C %h/workspace/WebSphere pull
+ExecStart=/bin/git -C %h/workspace/%i fetch origin
+ExecStart=/bin/git -C %h/workspace/%i reset --hard origin/master
+ExecStart=/bin/git -C %h/workspace/%i pull
 SuccessExitStatus=0
 
 [Install]
-Also=git-update.timer
+WantedBy=git-update@%i.target
