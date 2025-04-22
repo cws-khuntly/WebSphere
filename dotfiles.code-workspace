@@ -2,18 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../WebSphere"
-		},
-		{
-			"path": "../named"
-		},
-		{
-			"path": "../dhcpd"
-		},
-		{
-			"path": "../nfs"
 		}
 	],
 	"settings": {}

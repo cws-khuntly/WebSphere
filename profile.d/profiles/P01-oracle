@@ -18,6 +18,6 @@
 #
 #==============================================================================
 
-[[ -d "${HOME}/workspace/Oracle/admin" ]] || return;
+[[ ! -d "${HOME}/workspace/Oracle/admin" ]] && return;
 
 declare -x TNS_ADMIN="${HOME}/workspace/Oracle/admin";

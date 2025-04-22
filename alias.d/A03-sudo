@@ -19,7 +19,6 @@
 #==============================================================================
 
 ## sudo aliases
-alias ecuser="sudo su - ecuser";
 alias sysadmin="sudo su - sysadmin";
 alias ihsadm="sudo su - ihsadm";
 alias appadm="sudo su - appadm";
@@ -28,5 +27,4 @@ alias wasadm="sudo su - wasadm";
 alias dnsadm="sudo su - dnsadm";
 alias db2adm="sudo su - db2adm";
 alias ldapadm="sudo su - ldapadm";
-alias zimbra="sudo su - zimbra";
 alias root="sudo su -";

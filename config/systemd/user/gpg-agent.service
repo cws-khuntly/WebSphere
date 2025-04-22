@@ -16,9 +16,11 @@
 #      REVISION:  ---
 #
 #==============================================================================
-
 [Unit]
 Description=GnuPG private key agent
+After=default.target
+After=network-online.target
+After=systemd-user-sessions.service
 IgnoreOnIsolate=true
 
 [Service]

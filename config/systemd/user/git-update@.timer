@@ -17,11 +17,13 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
+PartOf=git-update@%i.target
+ReloadPropagatedFrom=git-update@%i.target
 Wants=git-update@%i.target
 
 [Timer]
 OnBootSec=10s
-OnCalendar=daily
+OnCalendar=hourly
 Persistent=true
 Unit=git-update@%i.service
 

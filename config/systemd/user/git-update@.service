@@ -17,6 +17,8 @@
 #==============================================================================
 [Unit]
 Description=git update for specific repos
+PartOf=git-update@%i.target
+ReloadPropagatedFrom=git-update@%i.target
 ConditionPathExists=%h/workspace/%i
 
 [Service]

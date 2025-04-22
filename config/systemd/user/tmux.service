@@ -16,10 +16,10 @@
 #      REVISION:  ---
 #
 #==============================================================================
-
 [Unit]
 Description=tmux Terminal Multiplexor
 After=default.target
+After=systemd-user-sessions.service
 
 [Service]
 Type=forking
