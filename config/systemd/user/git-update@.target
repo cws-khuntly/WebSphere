@@ -18,8 +18,8 @@
 [Unit]
 Description=git update for specific repos
 After=default.target
-Wants=git-update@%i.service
-BindsTo=git-update@%i.service
+Wants=git-update@%i.timer
+BindsTo=git-update@%i.timer
 
 [Install]
 WantedBy=default.target
