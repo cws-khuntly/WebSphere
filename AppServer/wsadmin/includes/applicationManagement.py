@@ -24,6 +24,8 @@ errorLogger = logging.getLogger("error-logger")
 debugLogger = logging.getLogger("debug-logger")
 infoLogger = logging.getLogger("info-logger")
 
+lineSplit = java.lang.System.getProperty("line.separator")
+
 def installApplicationModuleToCluster(appPath, appOptions):
     debugLogger.log(logging.DEBUG, "ENTER: applicationMaintenance#installApplicationModuleToCluster(appOptions)")
     debugLogger.log(logging.DEBUG, appPath)
@@ -199,4 +201,61 @@ def removeInstalledApplication(appName):
     #endif
 
     debugLogger.log(logging.DEBUG, "EXIT: applicationMaintenance#removeInstalledApplication(appName)")
+#enddef
+
+def remapModuleToSingleCluster(deployment, targetCell, targetCluster, targetNode, targetWebServer, vhost = "default_host"):
+    debugLogger.log(logging.DEBUG, "ENTER: applicationMaintenance#remapModule(deployment, targetCell, targetCluster, targetNode, targetWebServer, vhost = \"default_host\")")
+    debugLogger.log(logging.DEBUG, deployment)
+    debugLogger.log(logging.DEBUG, targetCell)
+    debugLogger.log(logging.DEBUG, targetCluster)
+    debugLogger.log(logging.DEBUG, targetNode)
+    debugLogger.log(logging.DEBUG, targetWebServer)
+    debugLogger.log(logging.DEBUG, vhost)
+
+    deploymentObject = AdminConfig.showAttribute(deployment, "deployedObject")
+    modules = AdminConfig.showAttribute(deploymentObject, "modules").split(lineSplit)
+
+    debugLogger.log(logging.DEBUG, deploymentObject)
+    debugLogger.log(logging.DEBUG, modules)
+
+    for module in (modules):
+        debugLogger.log(logging.DEBUG, module)
+
+        moduleURI = AdminConfig.showAttribute(str(module).split("[")[1].split("]")[0], "uri")
+        fileType = moduleURI[-3:]
+
+        debugLogger.log(logging.DEBUG, moduleURI)
+        debugLogger.log(logging.DEBUG, fileType)
+
+        if (fileType == "jar"):
+            appMappingOptions = (str("-MapModulesToServers [[\".*\" {0},META-INF/ejb-jar.xml WebSphere:cell={1},cluster={2}+WebSphere:cell={1},cluster={3}]]").format(moduleURI, targetCell, targetCluster))
+
+            debugLogger.log(logging.DEBUG, appMappingOptions)
+        elif (fileType == "war"):
+            appMappingOptions = str("-MapModulesToServers [[\".*\" {0},WEB-INF/web.xml WebSphere:cell={1},cluster={2}+WebSphere:cell={1},cluster={3}+WebSphere:cell={1},node={4},server={5}+WebSphere:cell={1},node={6},server={5}]]").format(moduleURI, targetCell, targetCluster, targetNode, targetWebServer)
+            appVHostOptions = str("-MapWebModToVH [[ \".*\" {0},WEB-INF/web.xml {1} ]]").format(moduleURI, vhost)
+
+            debugLogger.log(logging.DEBUG, appMappingOptions)
+            debugLogger.log(logging.DEBUG, appVHostOptions)
+        else:
+            errorLogger.log(logging.ERROR, str("Module {0} has an unknown file type of {1}").format(moduleURI, fileType))
+            raise Exception(str("Module {0} has an unknown file type of {1}").format(moduleURI, fileType))
+        #endif
+
+        try:
+            debugLogger.log(logging.DEBUG, "Executing command AdminApp.edit()...")
+            debugLogger.log(logging.DEBUG, "EXEC: AdminApp.edit(appName, str(\"[{0} {1}]\").format(appMappingOptions, appVHostOptions))")
+
+            AdminApp.edit(appName, str("[{0} {1}]").format(appMappingOptions, appVHostOptions))
+
+            infoLogger.log(logging.INFO, str("Application {0} has been re-mapped to cluster {1}, node {2}, webserver {3}, with vhost {4}").format(deployment, targetCluster, targetNode, targetWebServer, vhost))
+        except:
+            (exception, parms, tback) = sys.exc_info()
+
+            errorLogger.log(logging.ERROR, str("An error occurred re-mapping application {0}: {1} {2}.").format(deployment, str(exception), str(parms)))
+            raise Exception(str("An error occurred re-mapping application {0}: {1} {2}.").format(deployment, str(exception), str(parms)))
+        #endtry
+    #endfor
+
+    debugLogger.log(logging.DEBUG, "EXIT: applicationMaintenance#remapModule(deployment, targetCell, targetCluster, targetNode, targetWebServer, vhost = \"default_host\")")
 #enddef
