@@ -1,6 +1,6 @@
 #==============================================================================
 #
-#          FILE:  ibm-was-nodeagent@.service
+#          FILE:  ibm-was-services@.service
 #         USAGE:  Install unit file using appropriate systemctl syntax.
 #     ARGUMENTS:  None
 #   DESCRIPTION:  systemd service to start up IBM WAS servers
@@ -23,12 +23,12 @@ ConditionPathExists=/usr1/IBM/WebSphere/profiles/%i
 
 [Service]
 Type=forking
-ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startNode.sh
-ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/stopNode.sh
-PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/nodeagent/nodeagent.pid
+ExecStart=/opt/IBM/WebSphere/profiles/%i/bin/startServer.sh ${SERVER_NAME}
+ExecStop=/opt/IBM/WebSphere/profiles/%i/bin/stopServer.sh ${SERVER_NAME}
+PIDFile=/opt/IBM/WebSphere/profiles/%i/logs/${SERVER_NAME}/${SERVER_NAME}.pid
 SuccessExitStatus=0
-TimeoutStartSec=180
-TimeoutStopSec=180
+TimeoutStartSec=600
+TimeoutStopSec=600
 RemainAfterExit=true
 
 [Install]
