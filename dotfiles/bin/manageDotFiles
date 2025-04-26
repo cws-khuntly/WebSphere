@@ -811,7 +811,7 @@ while (( ${#} > 0 )); do
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided Argument -> ${1}";
     fi
 
-    (( ARG_COUNTER == ${#} )) && break;
+    (( ${#} == 0 )) && break;
 
     ARGUMENT="${1}";
 

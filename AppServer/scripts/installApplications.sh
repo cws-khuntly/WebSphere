@@ -89,7 +89,7 @@ function installTargetApplication()
         return ${return_code};
     )
 
-    if (( ${#} == 0 )); then usage; return "${?}"; fi
+    (( ${#} != 1 )) && usage;
 
     property_file="${1}";
 
@@ -243,7 +243,7 @@ function installRequestedApplication()
         return ${return_code};
     )
 
-    if (( ${#} == 0 )); then usage; return "${?}"; fi
+    (( ${#} != 7 )) && usage;
 
     [[ -z "${DMGR_HOST_NAME}" ]] && DMGR_HOST_NAME="$(hostname -f)";
     [[ -z "${DMGR_PROFILE_CELL}" ]] && DMGR_PROFILE_CELL="dmgrCell01";
@@ -372,7 +372,7 @@ function augmentDeploymentManager()
         return ${return_code};
     )
 
-    if (( ${#} == 0 )); then usage; return "${?}"; fi
+    (( ${#} != 7 )) && usage;
 
     [[ -z "${DMGR_HOST_NAME}" ]] && DMGR_HOST_NAME="$(hostname -f)";
     [[ -z "${DMGR_PROFILE_CELL}" ]] && DMGR_PROFILE_CELL="dmgrCell01";
