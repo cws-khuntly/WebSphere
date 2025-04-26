@@ -20,8 +20,8 @@
 
 ## path
 declare -x SYSTEM_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games";
-declare -x ORACLE_PATH="/usr/lib/oracle/19.26/client64/bin";
 declare -x USER_PATH="${HOME}/bin";
+declare -x USER_LIB_PATH="${HOME}/lib";
 declare -x PATH="${PATH}:${SYSTEM_PATH}:${ORACLE_PATH}:${USER_PATH}";
 
 ## trap logout
