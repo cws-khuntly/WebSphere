@@ -16,10 +16,14 @@
 #      REVISION:  ---
 #==============================================================================
 
+trap 'set +v; set +x' INT TERM EXIT;
+
+## load the logger
+if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -z "${LOGGING_LOADED}" ]]; then source "${SCRIPT_ROOT}/lib/system/logger.sh"; fi
+if [[ -z "$(command -v "writeLogEntry" 2>/dev/null)" ]] || [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "false" ]]; then printf "\e[00;31m%s\e[00;32m\n" "Failed to load logging configuration. No logging available!" >&2; LOGGING_LOADED="${_FALSE}"; fi;
+
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-trap 'set +v; set +x' INT TERM EXIT;
 
 #
 # load the system libs
