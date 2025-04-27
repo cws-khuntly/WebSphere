@@ -28,17 +28,9 @@ function isNaN
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    checkString="${1}";
+    (( ${#} != 1 )) && return 3;
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "checkString -> ${checkString}";
-    fi
-
-    [[ ${checkString} =~ ^-?[0-9]+$ ]] || (( error_count += 1 ));
-
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
-
-    [[ -n "${checkString}" ]] && unset -v checkString;
+    [[ "${1}" =~ ^-?[0-9]+$ ]] || return_code=1;
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";

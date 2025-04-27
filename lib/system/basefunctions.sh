@@ -28,7 +28,7 @@ function readPropertyFile
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="F02-misc";
+    cname="basefunctions.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
 
@@ -55,7 +55,7 @@ function readPropertyFile
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
         set +o noclobber;
-        cname="F02-misc";
+        cname="basefunctions.sh";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
 
@@ -127,7 +127,7 @@ function readPropertyFile
     ## restore the original ifs
     IFS="${CURRENT_IFS}";
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -150,3 +150,164 @@ function readPropertyFile
 
     return ${return_code};
 }
+
+#=====  FUNCTION  =============================================================
+#          NAME:  validateAndCopyKeysForHost
+#   DESCRIPTION:  Reads a provided property file into the shell
+#    PARAMETERS:  File
+#       RETURNS:  0 if success, 1 otherwise
+#==============================================================================
+function validateAndCopyKeysForHost
+{
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+    set +o noclobber;
+    cname="F02-misc";
+    function_name="${cname}#${FUNCNAME[0]}";
+    return_code=0;
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        start_epoch="$(date +"%s")";
+
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
+    fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
+    fi
+
+    #======  FUNCTION  ============================================================
+    #          NAME:  usage
+    #   DESCRIPTION:  
+    #    PARAMETERS:  None
+    #       RETURNS:  0 regardless of result.
+    #==============================================================================
+    function usage()
+    (
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+        set +o noclobber;
+        cname="F02-misc";
+        function_name="${cname}#${FUNCNAME[1]}";
+        return_code=3;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter"; fi
+
+        printf "%s %s\n" "${FUNCNAME[1]}" "Read a provided property file from the filesystem" >&2;
+        printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ property file ]" >&2;
+        printf "    %s: %s\n" "<property file>" "The full path to the property file to be read." >&2;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit"; fi
+
+        if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+        if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+        return ${return_code};
+    )
+
+    (( ${#} == 0 )) && usage;
+
+	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+		writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
+	fi
+
+	[[ -n "${cname}" ]] && unset -v cname;
+	[[ -n "${function_name}" ]] && unset -v function_name;
+	[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+	validateHostAddress "${target_host}" "${target_port}";
+	ret_code="${?}";
+
+	cname="installutils.sh";
+	function_name="${cname}#${FUNCNAME[0]}";
+
+	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+		writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+	fi
+
+	if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+		return_code="${ret_code}"
+
+		if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+			writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Host ${target_host} does not appear to be available. Please review logs.";
+		fi
+	else
+		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+			writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: getHostKeys ${target_host} ${target_port}";
+		fi
+
+		[[ -n "${cname}" ]] && unset -v cname;
+		[[ -n "${function_name}" ]] && unset -v function_name;
+		[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+		getHostKeys "${target_host}" ${target_port};
+		ret_code=${?};
+
+		cname="installutils.sh";
+		function_name="${cname}#${FUNCNAME[0]}";
+
+		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+			writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+		fi
+
+		if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+			return_code="${ret_code}";
+
+			if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+				writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred getting SSH host keys from host ${target_host}. Please review logs.";
+			fi
+		else
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+				writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: copyKeysToTarget ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+			fi
+
+			[[ -n "${cname}" ]] && unset -v cname;
+			[[ -n "${function_name}" ]] && unset -v function_name;
+			[[ -n "${ret_code}" ]] && unset -v ret_code;
+
+			copyKeysToTarget "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+			ret_code="${?}";
+
+			cname="managedotfiles.sh";
+			function_name="${cname}#${FUNCNAME[0]}";
+
+			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+				writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+			fi
+
+			if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+				return_code="${ret_code}"
+
+				if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+					[[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute copyKeysToTarget. Please review logs.";
+				fi
+			fi
+		fi
+	fi
+
+    (( error_count != 0 )) && return_code="${error_count}";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> exit";
+    fi
+
+    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        end_epoch="$(date +"%s")"
+        runtime=$(( end_epoch - start_epoch ));
+
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
+    fi
+
+    [[ -n "${error_count}" ]] && unset -v error_count;
+    [[ -n "${function_name}" ]] && unset -v function_name;
+
+    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
+    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
+
+    return ${return_code};
+)

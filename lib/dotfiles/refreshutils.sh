@@ -29,6 +29,8 @@ function refreshFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
+    (( ${#} != 5 )) && return 3;
+
     refresh_mode="${1}";
     target_host="${2}";
     target_port="${3}";
@@ -72,67 +74,33 @@ function refreshFiles()
             fi
             ;;
         "${INSTALL_LOCATION_REMOTE}")
-            ## check if the host is alive
-            if [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_FALSE}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Checking host availibility for ${target_host}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
-                fi
-
-                [[ -n "${cname}" ]] && unset -v cname;
-                [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                returnedHostInfo="$(validateHostAddress "${target_host}" "${target_port}")";
-                ret_code="${?}";
-
-                cname="refreshutils.sh";
-                function_name="${cname}#${FUNCNAME[0]}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returnedHostInfo -> ${returnedHostInfo}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ));
-
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "An error occurred checking host availability for host ${target_host}. Please review logs.";
-                    fi
-                fi
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${target_host} ${target_port} ${target_user}";
             fi
 
-            if [[ -n "${returnedHostInfo}" ]] && (( ret_code == 0 )) || [[ -n "${force_exec}" ]] && [[ "${force_exec}" == "${_TRUE}" ]]; then
-                returned_hostname="$(cut -d ":" -f 1 <<< "${returnedHostInfo}")";
-                returned_port="$(cut -d ":" -f 2 <<< "${returnedHostInfo}")";
+            [[ -n "${cname}" ]] && unset -v cname;
+            [[ -n "${function_name}" ]] && unset -v function_name;
+            [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_hostname -> ${returned_hostname}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "returned_port -> ${returned_port}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${returned_hostname} ${returned_port:-${SSH_PORT_NUMBER}} ${target_user}";
+            refreshRemoteFiles "${target_host}" "${target_port}" "${target_user}";
+            ret_code="${?}";
+
+            cname="refreshutils.sh";
+            function_name="${cname}#${FUNCNAME[0]}";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+            fi
+
+            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                return_code="${ret_code}"
+
+                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Remote refresh of files failed. Please review logs.";
                 fi
-
-                [[ -n "${cname}" ]] && unset -v cname;
-                [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                refreshRemoteFiles "${returned_hostname}" "${returned_port:-${SSH_PORT_NUMBER}}" "${target_user}";
-                ret_code="${?}";
-
-                cname="refreshutils.sh";
-                function_name="${cname}#${FUNCNAME[0]}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ))
-
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Local installation of package failed. Please review logs.";
-                    fi
+            else
+                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${refresh_mode} on host ${returned_hostname} as user ${target_ssh_user} has completed successfully.";
                 fi
             fi
             ;;
@@ -149,8 +117,6 @@ function refreshFiles()
     [[ -n "${target_host}" ]] && unset -v target_host;
     [[ -n "${target_user}" ]] && unset -v target_user;
     [[ -n "${continue_exec}" ]] && unset -v continue_exec;
-
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         end_epoch="$(date +"%s")"
@@ -201,27 +167,37 @@ function refreshLocalFiles()
 
     if [[ ! -d "${DOTFILES_INSTALL_PATH}" ]]; then
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir \"${DOTFILES_INSTALL_PATH}\"";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir ${DOTFILES_INSTALL_PATH}";
         fi
 
         mkdir "${DOTFILES_INSTALL_PATH}";
-    fi
+        ret_code="${?}";
 
-    if [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
-        ## extract the archive to the appropriate place
-        cd "${DOTFILES_INSTALL_PATH}" || (( error_count += 1 ));
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+        fi
 
-        if [[ "${PWD}" == "${DOTFILES_INSTALL_PATH}" ]]; then
-            "${UNARCHIVE_PROGRAM}" -c "${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" | tar -xf -;
+        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )) || [[ -w "${DOTFILES_INSTALL_PATH}" ]]; then
+            return_code="${ret_code}"
 
-            ## switch to homedir
-            cd "${HOME}" || (( error_count += 1 ));
+            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${TARGET_ACTION} on host ${target_hostname} as user ${target_ssh_user}. Please review logs.";
+            fi
+        else
+            "${UNARCHIVE_PROGRAM}" -c "${DEPLOY_TO_DIR}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}" | tar -C "${DOTFILES_INSTALL_PATH}" -xf -;
+            ret_code="${?}";
 
-            if [[ "${PWD}" == "${HOME}" ]]; then
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Processing entries from ${INSTALL_CONF}";
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+            fi
+
+            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                return_code="${ret_code}"
+
+                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while unpacking the file archive. Please review logs.";
                 fi
-
+            else
                 if [[ -s "${INSTALL_CONF}" ]]; then
                     ## change the IFS
                     IFS="${MODIFIED_IFS}";
@@ -247,69 +223,66 @@ function refreshLocalFiles()
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry_permissions -> ${entry_permissions}";
                         fi
 
-                        if [[ -z "${entry_command}" ]]; then
+                        if [[ -z "${entry_command}" ]] || [[ -z "${entry_source}" ]] || [[ -z "${entry_target}" ]]; then
                             (( error_count += 1 ));
 
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry command from ${INSTALL_CONF} was empty. entry_command -> ${entry_command}";
+                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry command from ${INSTALL_CONF} was missing one of the following: entry_command -> ${entry_command}, entry_source -> ${entry_source}, entry_target -> ${entry_target}";
 
                             continue;
-                        elif [[ -z "${entry_source}" ]] && [[ "${entry_command}" == "ln" ]]; then
-                            (( error_count += 1 ));
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry source from ${INSTALL_CONF} was empty. entry_source -> ${entry_source}";
-                            fi
-
-                            continue;
-                        elif [[ -z "${entry_target}" ]] && [[ "${entry_command}" == "ln" ]]; then
-                            (( error_count += 1 ));
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided entry target from ${INSTALL_CONF} was empty. entry_target -> ${entry_target}";
-                            fi
-
-                            continue;
-                        fi
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Command -> ${entry_command}, Source -> ${entry_source}, target -> ${entry_target}";
                         fi
 
                         case "${entry_command}" in
                             "mkdir")
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Creating directory ${entry_target}";
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${entry_target}";
-                                fi
-
-                                mkdir -p "$(eval printf "%s" "${entry_target}")";
-                                ret_code="${?}";
-
-                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 ))
-                                then
-                                    (( error_count += 1 ));
-
+                                if [[ -d "${entry_target}" ]]; then
                                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create directory ${entry_target}.";
+                                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${entry_target} exists";
                                     fi
 
-                                    continue;
-                                fi
+                                    continue
+                                else
+                                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Creating directory ${entry_target}";
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mkdir -p ${entry_target}";
+                                    fi
 
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${entry_target} created";
+                                    mkdir -p "$(eval printf "%s" "${entry_target}")";
+                                    ret_code="${?}";
+
+                                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                                    fi
+
+                                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                                        (( error_count += 1 ));
+
+                                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create directory ${entry_target}.";
+                                        fi
+
+                                        continue;
+                                    else
+                                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                            writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${entry_target} created";
+                                        fi
+
+                                        [[ ! -z "${entry_permissions}" ]] && chmod "${entry_permissions}" "${entry_target}";
                                 fi
                                 ;;
                             "ln")
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Removing symbolic link ${entry_target} if exists...";
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC:
-                                        [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
-                                        [[ -f \$(eval printf \"%s\" ${entry_target}) ]] && rm -f \$(eval printf \"%s\" ${entry_target})";
-                                fi
+                                if [[ -L "${entry_target}" ]] || [[ -f "${entry_target}" ]]; then
+                                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Symbolic link ${entry_target} exists, removing";
+                                    fi
 
-                                [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
-                                [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
+                                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC:
+                                            [[ -L \$(eval printf \"%s\" ${entry_target}) ]] && unlink \$(eval printf \"%s\" ${entry_target})
+                                            [[ -f \$(eval printf \"%s\" ${entry_target}) ]] && rm -f \$(eval printf \"%s\" ${entry_target})";
+                                    fi
+
+                                    [[ -L "$(eval printf "%s" "${entry_target}")" ]] && unlink "$(eval printf "%s" "${entry_target}")";
+                                    [[ -f "$(eval printf "%s" "${entry_target}")" ]] && rm -f "$(eval printf "%s" "${entry_target}")";
+                                fi
 
                                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Creating symbolic link ${entry_source} -> ${entry_target}";
@@ -332,6 +305,58 @@ function refreshLocalFiles()
 
                                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                                fi
+                                ;;
+                            "cp")
+                                if [[ -f "${entry_target}" ]]; then
+                                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "File ${entry_target} exists, removing";
+                                    fi
+
+                                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: rm -f ${entry_target}";
+                                    fi
+
+                                    rm -f "${entry_target}";
+                                    ret_code="${?}";
+
+                                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                                    fi
+
+                                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                                        return_code="${ret_code}"
+
+                                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to remove existing file ${entry_target}. Please review logs.";
+                                        fi
+                                    else
+                                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Copying file ${entry_source} to ${entry_target}";
+                                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cp ${entry_source} ${entry_target}";
+                                        fi
+
+                                        cp "${entry_source}" "${entry_target}";
+                                        ret_code="${?}";
+
+                                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                                        fi
+
+                                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                                            (( error_count += 1 ));
+
+                                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create symbolic link ${entry_target} with source ${entry_source}.";
+                                            fi
+
+                                            continue;
+                                        else
+                                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                                writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Symbolic link ${entry_source} -> ${entry_target} created.";
+                                            fi
+                                        fi
+                                    fi
                                 fi
                                 ;;
                             *)
@@ -374,18 +399,6 @@ function refreshLocalFiles()
                         writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Installation configuration file ${INSTALL_CONF} not found or cannot be read. Please ensure the file exists and can be read by the current user.";
                     fi
                 fi
-            else
-                (( error_count += 1 ));
-
-                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to switch to ${HOME}. Please ensure the path exists and can be written to.";
-                fi
-            fi
-        else
-            (( error_count += 1 ));
-
-            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to switch to ${DOTFILES_INSTALL_PATH}. Please ensure the path exists and can be read from.";
             fi
         fi
     else
@@ -420,14 +433,12 @@ function refreshLocalFiles()
     fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        (( error_count += 1 ));
-
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
         fi
     fi
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;
     [[ -n "${entry_command}" ]] && unset -v entry_command;
@@ -458,7 +469,7 @@ function refreshLocalFiles()
 )
 
 #=====  FUNCTION  =============================================================
-#          NAME:  installRemoteFiles
+#          NAME:  refreshRemoteFiles
 #   DESCRIPTION:  Re-loads existing dotfiles for use
 #    PARAMETERS:  None
 #       RETURNS:  0 if success, non-zero otherwise
@@ -469,8 +480,9 @@ function refreshRemoteFiles()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
-    cname="installutils.sh";
+    cname="refreshutils.sh";
     function_name="${cname}#${FUNCNAME[0]}";
+    ret_code=0;
     return_code=0;
     error_count=0;
 
@@ -485,15 +497,13 @@ function refreshRemoteFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
+	(( ${#} != 3 )) && return 3;
+
     target_host="${1}";
     target_port="${2}";
     target_user="${3}";
 
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_user -> ${target_user}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating validation script...";
+	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mktemp --tmpdir=${TMPDIR:-${USABLE_TMP_DIR}}";
     fi
 
@@ -504,7 +514,7 @@ function refreshRemoteFiles()
     fi
 
     if [[ ! -e "${file_verification_script}" ]] || [[ ! -w "${file_verification_script}" ]]; then
-        (( error_count += 1 ))
+        return_code="${ret_code}";
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
@@ -534,7 +544,7 @@ function refreshRemoteFiles()
         } >| "${file_verification_script}";
 
         if [[ ! -s "${file_verification_script}" ]]; then
-            (( error_count += 1 ))
+            return_code=1;
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the file verification script ${file_verification_script}. Please ensure the file exists and can be written to.";
@@ -565,7 +575,7 @@ function refreshRemoteFiles()
             fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
+                return_code="${ret_code}";
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
@@ -602,7 +612,7 @@ function refreshRemoteFiles()
                     fi
 
                     if [[ ! -e "${installation_script}" ]] || [[ ! -w "${installation_script}" ]]; then
-                        (( error_count += 1 ))
+                        return_code=1;
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to generate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
@@ -633,7 +643,7 @@ function refreshRemoteFiles()
                         } >| "${installation_script}";
 
                         if [[ ! -s "${installation_script}" ]]; then
-                            (( error_count += 1 ))
+                            return_code=1;
 
                             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                 writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to populate the installation script ${installation_script}. Please ensure the file exists and can be written to.";
@@ -664,7 +674,7 @@ function refreshRemoteFiles()
                             fi
 
                             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                                (( error_count += 1 ))
+                                return_code="${ret_code}";
 
                                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                                     writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
@@ -683,7 +693,7 @@ function refreshRemoteFiles()
                                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                                 fi
 
-                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )) || [[ -z "${refresh_response}" ]]; then
                                     return_code="${ret_code}";
 
                                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -702,62 +712,23 @@ function refreshRemoteFiles()
         fi
     fi
 
-    ## cleanup (remote)
-    [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
-
-    cleanup_list="${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
-    cleanup_list+="$(basename "${WORKING_CONFIG_FILE}")|${DEPLOY_TO_DIR}\n";
-    cleanup_list+="$(basename "${INSTALL_CONF}")|${DEPLOY_TO_DIR}\n";
-    cleanup_list+="$(basename "${file_verification_script}")|${DEPLOY_TO_DIR}\n";
-    cleanup_list+="$(basename "${installation_script}")|${DEPLOY_TO_DIR}\n";
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_list -> ${cleanup_list}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_REMOTE} ${cleanup_list} ${target_host} ${target_port} ${target_user}";
-    fi
-
-    [[ -n "${cname}" ]] && unset -v cname;
-    [[ -n "${function_name}" ]] && unset -v function_name;
-    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-    cleanupFiles "${CLEANUP_LOCATION_REMOTE}" "${cleanup_list}" "${target_host}" "${target_port}" "${target_user}";
-    ret_code="${?}";
-
-    cname="installutils.sh";
-    function_name="${cname}#${FUNCNAME[0]}";
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-    fi
-
-    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        (( error_count += 1 ));
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_REMOTE}. Please review logs.";
-        fi
-    fi
-
-    ## cleanup (local)
+    ## cleanup
     [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
 
     cleanup_list="${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${TMPDIR:-${USABLE_TMP_DIR}}\n";
-    cleanup_list+="$(basename "${file_verification_script}")|${TMPDIR:-${USABLE_TMP_DIR}}\n";
-    cleanup_list+="$(basename "${installation_script}")|${TMPDIR:-${USABLE_TMP_DIR}}\n";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_list -> ${cleanup_list}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cleanupFiles ${CLEANUP_LOCATION_LOCAL} ${cleanup_list}";
     fi
 
-    [[ -n "${cname}" ]] && unset -v cname;
     [[ -n "${function_name}" ]] && unset -v function_name;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
     cleanupFiles "${CLEANUP_LOCATION_LOCAL}" "${cleanup_list}";
     ret_code="${?}";
 
-    cname="installutils.sh";
+    set +o noclobber;
     function_name="${cname}#${FUNCNAME[0]}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -765,9 +736,7 @@ function refreshRemoteFiles()
     fi
 
     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-        (( error_count += 1 ));
-
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to execute cleanupFiles with cleanup type of ${CLEANUP_LOCATION_LOCAL}. Please review logs.";
         fi
     fi

@@ -321,7 +321,7 @@ function validateHostAvailability()
     [[ -n "${provided_port}" ]] && unset -v provided_port;
     [[ -n "${provided_hostname}" ]] && unset -v provided_hostname;
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -498,7 +498,7 @@ function isValidHost()
     [[ -n "${returnedHostname}" ]] && unset -v returnedHostname;
     [[ -n "${searchForAddressInHosts}" ]] && unset -v searchForAddressInHosts;
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -666,7 +666,7 @@ function isValidAddress()
     [[ -n "${checkForAddress}" ]] && unset -v checkForAddress;
     [[ -n "${returnedHostAddress}" ]] && unset -v returnedHostAddress;
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -758,7 +758,7 @@ function isValidPort()
     [[ -n "${checkPortNumber}" ]] && unset -v checkPortNumber;
     [[ -n "${returnedPortNumber}" ]] && unset -v returnedPortNumber;
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -934,7 +934,7 @@ function isValidNetworkName()
     [[ -n "${checkNetworkPort}" ]] && unset -v checkNetworkPort;
     [[ -n "${checkNetworkName}" ]] && unset -v checkNetworkName;
 
-    if [[ -n "${error_count}" ]] && (( error_count != 0 )); then return_code="${error_count}"; fi
+    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";

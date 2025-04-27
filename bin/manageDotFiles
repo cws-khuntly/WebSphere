@@ -54,9 +54,6 @@ if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${
     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SCRIPT_ROOT -> ${SCRIPT_ROOT}";
     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "CONFIG_FILE_LOCATION -> ${CONFIG_FILE_LOCATION}";
     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SSH_PORT_NUMBER -> ${SSH_PORT_NUMBER}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_USER -> ${TARGET_USER}";
 fi
 
 #======  FUNCTION  ============================================================
@@ -88,21 +85,34 @@ function main()
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    case "${TARGET_ACTION}" in
+    (( ${#} != 5 )) && return 3;
+
+    target_action="${1}";
+    target_host="${2}";
+    ssh_port_number="${3}";
+    target_user="${4}";
+    force_exec="${5}";
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "target_action -> ${target_action}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ssh_port_number -> ${ssh_port_number}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "target_user -> ${target_user}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "force_exec -> ${force_exec}";
+    fi
+
+    case "${target_action}" in
         [Ii][Nn][Ss][Tt][Aa][Ll][Ll][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
+            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installFiles ${TRANSFER_LOCATION_LOCAL}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installLocalFiles";
                 fi
 
-                [[ -n "${CNAME}" ]] && unset -v CNAME;
                 [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                installFiles "${INSTALL_LOCATION_LOCAL}";
+                installLocalFiles;
                 ret_code="${?}";
 
-                CNAME="$(basename "${BASH_SOURCE[0]}")";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -110,111 +120,120 @@ function main()
                 fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ))
+                    return_code="${ret_code}"
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
                     fi
                 fi
             else
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
                 fi
 
-                [[ -n "${CNAME}" ]] && unset -v CNAME;
                 [[ -n "${function_name}" ]] && unset -v function_name;
-                [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-                installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
-
-                CNAME="$(basename "${BASH_SOURCE[0]}")";
-                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                 fi
 
                 if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    (( error_count += 1 ))
+                    return_code="${ret_code}"
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_REMOTE}. Please review logs.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                    fi
+
+                    installRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    ret_code="${?}";
+
+                    function_name="${CNAME}#${FUNCNAME[0]}";
+
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                    fi
+
+                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                        return_code="${ret_code}"
+
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                        fi
+                    else
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
+                        fi
                     fi
                 fi
             fi
             ;;
         [Dd][Ee][Pp][Ll][Oo][Yy][Ff][Ii][Ll][Ee][Ss])
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: buildPackage";
+            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployLocalFiles";
                 fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
-            [[ -n "${function_name}" ]] && unset -v function_name;
-            [[ -n "${ret_code}" ]] && unset -v ret_code;
+                [[ -n "${function_name}" ]] && unset -v function_name;
 
-            buildPackage;
-            ret_code="${?}";
+                deployLocalFiles;
+                ret_code="${?}";
 
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
-            function_name="${CNAME}#${FUNCNAME[0]}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-            fi
-
-            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
-
-                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
-                fi
-            else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
-                transfer_file_list+="${WORKING_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                 fi
 
-                if [[ "${TARGET_HOST}" == "${SYSTEM_HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}";
-                    fi
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    transferFiles "${TRANSFER_LOCATION_LOCAL}" "${transfer_file_list}";
-                    ret_code="${?}";
-
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
-                    function_name="${CNAME}#${FUNCNAME[0]}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
-
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
+                    fi
+                fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
+                fi
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
+                ret_code="${?}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                fi
+
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
+
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                    deployRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -222,137 +241,75 @@ function main()
                     fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
+                        return_code="${ret_code}"
 
-                        [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute copyKeysToTarget. Please review logs.";
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                        fi
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
-                        fi
-
-                        [[ -n "${CNAME}" ]] && unset -v CNAME;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
-                        ret_code="${?}";
-
-                        CNAME="$(basename "${BASH_SOURCE[0]}")";
-                        function_name="${CNAME}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ));
-
-                            [[ "${LOGGING_LOADED}" == "${_TRUE}" ]] && writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
                     fi
                 fi
             fi
             ;;
         [Dd][Ee][Pp][Ll][Oo][Yy][Aa][Nn][Dd][Ii][Nn][Ss][Tt][Aa][Ll][Ll])
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: buildPackage";
-            fi
-
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
-            [[ -n "${function_name}" ]] && unset -v function_name;
-            [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-            buildPackage;
-            ret_code="${?}";
-
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
-            function_name="${CNAME}#${FUNCNAME[0]}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-            fi
-
-            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
-
-                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
+            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployAndInstallLocalFiles";
                 fi
-            else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
-                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                deployAndInstallLocalFiles;
+                ret_code="${?}";
+
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                 fi
 
-                if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}";
-                    fi
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    transferFiles "${TRANSFER_LOCATION_LOCAL}" "${transfer_file_list}";
-                    ret_code="${?}";
-
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
-                    function_name="${CNAME}#${FUNCNAME[0]}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
-                        fi
-                    else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
-                        fi
-
-                        [[ -n "${CNAME}" ]] && unset -v CNAME;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        installFiles "${INSTALL_LOCATION_LOCAL}";
-                        ret_code="${?}";
-
-                        CNAME="$(basename "${BASH_SOURCE[0]}")";
-                        function_name="${CNAME}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ))
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
-                            fi
-                        fi
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: copyKeysToTarget ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
+                    fi
+                fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
+                fi
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
+                ret_code="${?}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                fi
+
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
+
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployAndInstallRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    copyKeysToTarget "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                    deployAndInstallRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -360,239 +317,75 @@ function main()
                     fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
+                        return_code="${ret_code}"
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute copyKeysToTarget. Please review logs.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
-                        fi
-
-                        [[ -n "${CNAME}" ]] && unset -v CNAME;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
-                        ret_code="${?}";
-
-                        CNAME="$(basename "${BASH_SOURCE[0]}")";
-                        function_name="${CNAME}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ));
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
-                            fi
-                        else
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installFiles ${INSTALL_LOCATION_REMOTE} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
-                            fi
-
-                            [[ -n "${CNAME}" ]] && unset -v CNAME;
-                            [[ -n "${function_name}" ]] && unset -v function_name;
-                            [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                            installFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
-                            ret_code="${?}";
-
-                            CNAME="$(basename "${BASH_SOURCE[0]}")";
-                            function_name="${CNAME}#${FUNCNAME[0]}";
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                            fi
-
-                            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                                (( error_count += 1 ))
-
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_REMOTE}. Please review logs.";
-                                fi
-                            fi
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
                     fi
                 fi
             fi
             ;;
         [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: buildPackage";
-            fi
-
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
-            [[ -n "${function_name}" ]] && unset -v function_name;
-            [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-            buildPackage;
-            ret_code="${?}";
-
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
-            function_name="${CNAME}#${FUNCNAME[0]}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-            fi
-
-            if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
-
-                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute buildPackage. Please review logs.";
+            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshLocalFiles";
                 fi
-            else
-                transfer_file_list="${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}|${DEPLOY_TO_DIR}\n";
-                transfer_file_list+="${REMOTE_CONFIG_FILE}|${DEPLOY_TO_DIR}/$(basename "${WORKING_CONFIG_FILE}")\n";
-                transfer_file_list+="${INSTALL_CONF}|${DEPLOY_TO_DIR}/$(basename "${INSTALL_CONF}")\n";
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                refreshLocalFiles;
+                ret_code="${?}";
+
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                 fi
 
-                if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_LOCAL} ${transfer_file_list}";
-                    fi
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    transferFiles "${TRANSFER_LOCATION_LOCAL}" "${transfer_file_list}";
-                    ret_code="${?}";
-
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
-                    function_name="${CNAME}#${FUNCNAME[0]}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_LOCAL}. Please review logs.";
-                        fi
-                    else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshFiles ${INSTALL_LOCATION_LOCAL}";
-                        fi
-
-                        [[ -n "${CNAME}" ]] && unset -v CNAME;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        refreshFiles "${INSTALL_LOCATION_LOCAL}";
-                        ret_code="${?}";
-
-                        CNAME="$(basename "${BASH_SOURCE[0]}")";
-                        function_name="${CNAME}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ))
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL} as user ${TARGET_USER}. Please review logs.";
-                            fi
-                        else
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File reload complete.";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Cleaning up existing functions/aliases...";
-                            fi
-
-                            ## clean up existing aliases and functions so when they reload we get the new ones
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating function listing...";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A function";
-                            fi
-
-                            ## unset the functions
-                            mapfile -t function_list < <(compgen -A function);
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${function_list[*]}";
-                            fi
-
-                            for func_entry in "${function_list[@]}"; do
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "func_entry -> ${func_entry}";
-                                fi
-
-                                [[ -z "${func_entry}" ]] && continue;
-                                [[ "${func_entry}" == "writeLogEntry" ]] && continue;
-                                [[ "${func_entry}" == "writeLogEntryToConsole" ]] && continue;
-                                [[ "${func_entry}" == "writeLogEntryToFile" ]] && continue;
-
-                                unset -f "${func_entry}";
-
-                                [[ -n "${func_entry}" ]] && unset -v func_entry;
-                            done
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Generating alias listing...";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: compgen -A alias";
-                            fi
-
-                            ## unset the aliases
-                            mapfile -t alias_list < <(compgen -A alias);
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "function_list -> ${alias_list[*]}";
-                            fi
-
-                            for alias_entry in "${alias_list[@]}"; do
-                                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "alias_entry -> ${alias_entry}";
-                                fi
-
-                                [[ -z "${alias_entry}" ]] && continue;
-
-                                unalias "${alias_entry}";
-
-                                [[ -n "${alias_entry}" ]] && unset -v alias_entry;
-                            done
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting isReloadRequest to ${_TRUE}...";
-                            fi
-
-                            isReloadRequest="${_TRUE}";
-
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "isReloadRequest -> ${isReloadRequest}";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Reloading dotfiles...";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: tput reset && source ${RELOAD_DOTFILE}";
-                            fi
-
-                            tput reset && source "${RELOAD_DOTFILE}";
-                        fi
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "transfer_file_list -> ${transfer_file_list}";
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: transferFiles ${TRANSFER_LOCATION_REMOTE} ${transfer_file_list} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
+                    fi
+                fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
+                fi
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
+                ret_code="${?}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                fi
+
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
+
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    transferFiles "${TRANSFER_LOCATION_REMOTE}" "${transfer_file_list}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                    refreshRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -600,94 +393,75 @@ function main()
                     fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ));
+                        return_code="${ret_code}"
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute transferFiles with transfer type of ${TRANSFER_LOCATION_REMOTE}. Please review logs.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: reloadDotFiles";
-                        fi
-
-                        [[ -n "${CNAME}" ]] && unset -v CNAME;
-                        [[ -n "${function_name}" ]] && unset -v function_name;
-                        [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                        refreshFiles "${INSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
-                        ret_code="${?}";
-
-                        CNAME="$(basename "${BASH_SOURCE[0]}")";
-                        function_name="${CNAME}#${FUNCNAME[0]}";
-
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                        fi
-
-                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                            (( error_count += 1 ))
-
-                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute installFiles with install type of ${INSTALL_LOCATION_LOCAL}. Please review logs.";
-                            fi
-                        else
-                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File reload complete.";
-                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: tput reset && source ${RELOAD_DOTFILE}";
-                            fi
-
-                            tput reset && source "${RELOAD_DOTFILE}";
+                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
                     fi
                 fi
             fi
             ;;
         [Rr][Ee][Mm][Oo][Vv][Ee][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
-                if [[ "${TARGET_HOST}" == "${HOSTNAME}" ]] || [[ "${TARGET_HOST}" == "localhost" ]]; then
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: uninstallFiles ${UNINSTALL_LOCATION_LOCAL}";
-                    fi
+            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: removeLocalFiles";
+                fi
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
+                [[ -n "${function_name}" ]] && unset -v function_name;
 
-                    uninstallFiles "${UNINSTALL_LOCATION_LOCAL}";
-                    ret_code="${?}";
+                removeLocalFiles;
+                ret_code="${?}";
 
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
-                    function_name="${CNAME}#${FUNCNAME[0]}";
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                fi
 
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
 
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_LOCAL}. Please review logs.";
-                        fi
-                    else
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-                            writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-                        fi
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: uninstallFiles ${UNINSTALL_LOCATION_LOCAL}";
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
+                    fi
+                fi
+            else
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
+                fi
+
+                [[ -n "${function_name}" ]] && unset -v function_name;
+
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
+                ret_code="${?}";
+
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                fi
+
+                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                    return_code="${ret_code}"
+
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                    fi
+                else
+                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: removeRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    [[ -n "${CNAME}" ]] && unset -v CNAME;
-                    [[ -n "${function_name}" ]] && unset -v function_name;
-                    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-                    uninstallFiles "${UNINSTALL_LOCATION_REMOTE}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
+                    removeRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
-                    CNAME="$(basename "${BASH_SOURCE[0]}")";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -695,44 +469,31 @@ function main()
                     fi
 
                     if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        (( error_count += 1 ))
+                        return_code="${ret_code}"
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to execute uninstallFiles with uninstall type of ${UNINSTALL_LOCATION_REMOTE} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
-                            writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "dotfiles uninstall complete on host ${TARGET_HOST} for user ${TARGET_USER}.";
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
                     fi
                 fi
+            fi
             ;;
         *)
-            (( error_count += 1 ));
+            return_code="${ret_code}"
 
-            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An unknown action was provided. TARGET_ACTION -> ${TARGET_ACTION}";
-            fi
+            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An unknown action was provided. target_action -> ${target_action}";
             ;;
     esac
 
-    if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
-        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
-            writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER} has completed successfully.";
-        fi
-    else
-        return_code="${error_count}"
-
-        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${TARGET_ACTION} on host ${TARGET_HOST} as user ${TARGET_USER}. Please review logs.";
-        fi
-    fi
-
-    [[ -n "${transfer_file_list}" ]] && unset -v transfer_file_list;
+    [[ -n "${target_action}" ]] && unset -v target_action;
+    [[ -n "${target_host}" ]] && unset -v target_host;
+    [[ -n "${ssh_port_number}" ]] && unset -v ssh_port_number;
+    [[ -n "${target_user}" ]] && unset -v target_user;
+    [[ -n "${force_exec}" ]] && unset -v force_exec;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -804,7 +565,7 @@ function usage()
     return ${return_code};
 )
 
-if (( ${#} == 0 )); then usage; exit ${?}; fi
+(( ${#} == 0 )) && usage;
 
 while (( ${#} > 0 )); do
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -1122,7 +883,6 @@ else
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: captureGpgData";
             fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -1130,7 +890,6 @@ else
             ret_code="${?}";
 
             set +o noclobber;
-            CNAME="$(basename "${BASH_SOURCE[0]}")"; CNAME;
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -1155,19 +914,19 @@ else
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}";
             fi
 
-            for server_entry in $(< "${SERVER_LIST}"); do
+            for SERVER_ENTRY in $(< "${SERVER_LIST}"); do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "server_entry -> ${server_entry}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_ENTRY -> ${SERVER_ENTRY}";
                 fi
 
-                [[ -z "${server_entry}" ]] && continue;
-                [[ "${server_entry}" =~ ^\# ]] && continue;
+                [[ -z "${SERVER_ENTRY}" ]] && continue;
+                [[ "${SERVER_ENTRY}" =~ ^\# ]] && continue;
 
-                TARGET_HOST="$(cut -d ":" -f 1 <<< "${server_entry}")";
-                SSH_PORT_NUMBER="$(cut -d ":" -f 2 <<< "${server_entry}")";
-                TARGET_USER="$(cut -d ":" -f 3 <<< "${server_entry}")";
-                TARGET_ACTION="$(cut -d ":" -f 4 <<< "${server_entry}")";
-                FORCE_EXEC="$(cut -d ":" -f 5 <<< "${server_entry}")";
+                TARGET_HOST="$(cut -d ":" -f 1 <<< "${SERVER_ENTRY}")";
+                SSH_PORT_NUMBER="$(cut -d ":" -f 2 <<< "${SERVER_ENTRY}")";
+                TARGET_USER="$(cut -d ":" -f 3 <<< "${SERVER_ENTRY}")";
+                TARGET_ACTION="$(cut -d ":" -f 4 <<< "${SERVER_ENTRY}")";
+                FORCE_EXEC="$(cut -d ":" -f 5 <<< "${SERVER_ENTRY}")";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_HOST -> ${TARGET_HOST}";
@@ -1178,12 +937,12 @@ else
                 fi
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
                 fi
 
-                main;
+                main "${TARGET_ACTION}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
 
-                [[ -n "${server_entry}" ]] && unset -v server_entry;
+                [[ -n "${SERVER_ENTRY}" ]] && unset -v SERVER_ENTRY;
                 [[ -n "${TARGET_HOST}" ]] && unset -v TARGET_HOST;
                 [[ -n "${SSH_PORT_NUMBER}" ]] && unset -v SSH_PORT_NUMBER;
                 [[ -n "${TARGET_USER}" ]] && unset -v TARGET_USER;
@@ -1192,10 +951,10 @@ else
             done
         else
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${TARGET_HOST} ${SSH_PORT_NUMBER} ${TARGET_USER} ${FORCE_EXEC}";
             fi
 
-            main;
+            main "${TARGET_ACTION}" "${TARGET_HOST}" "${SSH_PORT_NUMBER}" "${TARGET_USER}" "${FORCE_EXEC}";
         fi
 
         RETURN_CODE="${?}";

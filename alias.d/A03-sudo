@@ -19,7 +19,7 @@
 #==============================================================================
 
 ## sudo aliases
-alias sysadmin="sudo su - sysadmin";
+alias sysadm="sudo su - sysadm";
 alias ihsadm="sudo su - ihsadm";
 alias appadm="sudo su - appadm";
 alias webadm="sudo su - webadm";
