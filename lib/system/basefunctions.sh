@@ -217,7 +217,7 @@ function validateAndCopyKeysForHost
 	[[ -n "${cname}" ]] && unset -v cname;
 	[[ -n "${function_name}" ]] && unset -v function_name;
 	[[ -n "${ret_code}" ]] && unset -v ret_code;
-
+compgen -A function
 	validateHostAddress "${target_host}" "${target_port}";
 	ret_code="${?}";
 
@@ -412,20 +412,3 @@ function waitForProcessFile
 
     return ${return_code};
 }
-
-if (( ${#} !=0 )); then
-    while (( ${#} > 0 )); do
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided Argument -> ${1}";
-        fi
-
-        (( ARG_COUNTER == ${#} )) && break;
-
-        buildCommand+="${1} ";
-
-        (( ARG_COUNTER += 1 ));
-    done
-
-    ${buildCommand};
-    return ${?};
-fi
