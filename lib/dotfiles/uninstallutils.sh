@@ -485,25 +485,38 @@ function uninstallRemoteFiles()
 
                     continue;
                 else
-                    if [[ "${entry_command}" == "mkdir" ]]; then
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove directory ${removable_entry}";
-                        fi
+                    case "${entry_command}" in
+                        "mkdir")
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove directory ${removable_entry}";
+                            fi
 
-                        { printf "%s %s %s\n" "-" "rm -rf" "${removable_entry}"; } >> "${file_removal_script}";
-                    elif [[ "${entry_command}" == "ln" ]]; then
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove symbolic link ${removable_entry}";
-                        fi
+                            { printf "%s %s %s\n" "-" "rm -rf" "${removable_entry}"; } >> "${file_removal_script}";
+                            ;;
+                        "ln")
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove symbolic link ${removable_entry}";
+                            fi
 
-                        { printf "%s %s %s\n" "-" "unlink" "${removable_entry}"; } >> "${file_removal_script}";
-                    if [[ "${entry_command}" == "cp" ]]; then
-                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove file ${removable_entry}";
-                        fi
+                            { printf "%s %s %s\n" "-" "unlink" "${removable_entry}"; } >> "${file_removal_script}";
+                            ;;
+                        "cp")
+                            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Setting up to remove file ${removable_entry}";
+                            fi
 
-                        { printf "%s %s %s\n" "-" "rm -f" "${removable_entry}"; } >> "${file_removal_script}";
-                    fi
+                            { printf "%s %s %s\n" "-" "rm -f" "${removable_entry}"; } >> "${file_removal_script}";
+                            ;;
+                        *)
+                            (( error_count += 1 ));
+
+                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Unable to determine entry command, cannot generate.";
+                            fi
+
+                            continue;
+                            ;;
+                    esac
                 fi
 
                 [[ -n "${ret_code}" ]] && unset -v ret_code;

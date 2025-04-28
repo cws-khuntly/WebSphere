@@ -442,7 +442,7 @@ function checkForValidAddress()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
-    if [[ -n "${returnedHostInfo}" ]]; then printf "%s" "${returnedHostInfo}"; unset -v returnedHostInfo; else return_code=1;
+    if [[ -n "${returnedHostInfo}" ]]; then printf "%s" "${returnedHostInfo}"; unset -v returnedHostInfo; else return_code=1; fi
 
     return ${return_code};
 )

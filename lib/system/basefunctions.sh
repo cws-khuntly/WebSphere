@@ -310,7 +310,7 @@ function validateAndCopyKeysForHost
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-)
+}
 
 #=====  FUNCTION  =============================================================
 #          NAME:  waitForProcessFile
@@ -411,7 +411,7 @@ function waitForProcessFile
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
 
     return ${return_code};
-)
+}
 
 if (( ${#} !=0 )); then
     while (( ${#} > 0 )); do
