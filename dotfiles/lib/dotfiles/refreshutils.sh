@@ -266,6 +266,7 @@ function refreshLocalFiles()
                                         fi
 
                                         [[ ! -z "${entry_permissions}" ]] && chmod "${entry_permissions}" "${entry_target}";
+                                    fi
                                 fi
                                 ;;
                             "ln")

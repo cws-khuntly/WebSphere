@@ -104,7 +104,7 @@ function getHostKeys()
     [[ -n "${hosts_to_process[*]}" ]] && unset -v hosts_to_process;
     [[ -n "${hostlist}" ]] && unset -v hostlist;
 
-    if (( error_count != 0 ));
+    if (( error_count != 0 )); then
         return_code=${error_count};
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then

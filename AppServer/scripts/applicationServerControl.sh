@@ -85,53 +85,7 @@ function main()
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-	#======  FUNCTION  ============================================================
-	#          NAME:  usage
-	#   DESCRIPTION:  Rotates log files in logs directory
-    #    PARAMETERS:  None
-    #       RETURNS:  3
-	#==============================================================================
-	function usage()
-	(
-		function_name="${CNAME}#${FUNCNAME[0]}";
-		return_code=3;
-
-		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-			writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-		fi
-
-		printf "%s %s\n" "${function_name}" "Start/stop/restart a WebSphere Application Server instance with a provided profile / server name." >&2;
-		printf "%s %s\n" "Usage: ${function_name}" "[ <options> ]" >&2;
-        printf "    %s: %s\n" "Required" "<profile name>: The target WebSphere Application Server profile. Default value -> ${DEFAULT_WAS_PROFILE}." >&2;
-        printf "    %s: %s\n" "Required" "<server name>: The target WebSphere Application Server name. Default value -> ${DEFAULT_WAS_SERVER}." >&2;
-        printf "    %s: %s\n" "Required" "<action>: The type of process to execute. One of the following:" >&2;
-        printf "        %s: %s\n" "start / startServer" "Starts the provided WebSphere Application Server" >&2;
-        printf "        %s: %s\n" "stop / stopServer" "Stops the provided WebSphere Application Server" >&2;
-        printf "        %s: %s\n" "restart" "Restarts the provided WebSphere Application Server" >&2;
-
-		if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-			writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
-			writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-		fi
-
-		if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-			end_epoch="$(date +"%s")"
-			runtime=$(( end_epoch - start_epoch ));
-
-			writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-			writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-		fi
-
-		[[ -n "${error_count}" ]] && unset -v error_count;
-		[[ -n "${function_name}" ]] && unset -v function_name;
-
-		if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-		if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-		return ${return_code};
-	)
-
-	(( ${#} != 2 )) && usage;
+	(( ${#} != 2 )) && return 3;
 
     target_action="${1}";
     profile_name="${2}";
@@ -750,39 +704,57 @@ else
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}";
         fi
 
-        for server_entry in $(< "${SERVER_LIST}"); do
+        for SERVER_ENTRY in $(< "${SERVER_LIST}"); do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "server_entry -> ${server_entry}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_ENTRY -> ${SERVER_ENTRY}";
             fi
 
-            [[ -z "${server_entry}" ]] && continue;
-            [[ "${server_entry}" =~ ^\# ]] && continue;
-
-            TARGET_PROFILE="$(cut -d "|" -f 1 <<< "${server_entry}")";
-            TARGET_SERVER="$(cut -d "|" -f 2 <<< "${server_entry}")";
+            [[ -z "${SERVER_ENTRY}" ]] && continue;
+            [[ "${SERVER_ENTRY}" =~ ^\# ]] && continue;
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${SERVER_ENTRY}";
             fi
 
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER}";
-            fi
+            main "${TARGET_ACTION}" "${PROFILE_NAME}" "${SERVER_ENTRY}";
 
-            main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}";
-
-            [[ -n "${server_entry}" ]] && unset -v server_entry;
+            [[ -n "${SERVER_ENTRY}" ]] && unset -v SERVER_ENTRY;
         done
     else
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER}";
         fi
 
-        [[ -n "${PROFILE_NAME}" ]] && PROFILE_NAME="${DEFAULT_PROFILE_NAME}";
-        [[ -n "${TARGET_SERVER}" ]] && TARGET_SERVER="${DEFAULT_SERVER_NAME}";
+        if [[ "${TARGET_SERVER}" =~ ":" ]]; then
+            [[ -z "${PROFILE_NAME}" ]] && PROFILE_NAME="${DEFAULT_PROFILE_NAME}";
+            mapfile -d ":" TARGET_SERVERS <<< "${TARGET_SERVER}";
 
-        main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}";
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "PROFILE_NAME -> ${PROFILE_NAME}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVERS -> ${TARGET_SERVERS}";
+            fi
+
+            for TARGET_SERVER in $(${TARGET_SERVERS[@]}); do
+                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER}";
+                fi
+
+                main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}";
+
+                [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
+            done
+        else
+            [[ -z "${PROFILE_NAME}" ]] && PROFILE_NAME="${DEFAULT_PROFILE_NAME}";
+            [[ -z "${TARGET_SERVER}" ]] && TARGET_SERVER="${DEFAULT_SERVER_NAME}";
+
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "PROFILE_NAME -> ${PROFILE_NAME}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER}";
+            fi
+
+            main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}";
+        fi
     fi
 
     RETURN_CODE=${?};

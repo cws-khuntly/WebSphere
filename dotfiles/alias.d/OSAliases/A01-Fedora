@@ -1,8 +1,10 @@
+#!/usr/bin/env bash
+
 #==============================================================================
 #
-#          FILE:  ibm-was-nodeagent@.d/override.conf
-#         USAGE:  systemd Service Configuration File
-#   DESCRIPTION:  Configuration options for the ibm-was-dmgr service
+#          FILE:  A01-dnf
+#         USAGE:  . A01-dnf
+#   DESCRIPTION:  Sets dnf aliases
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -16,7 +18,6 @@
 #
 #==============================================================================
 
-[Service]
-User=wasadm
-Group=wasgrp
-Environment=PROFILE_NAME=TheProfileName
+alias install="sudo dnf install";
+alias uninstall="sudo dnf erase";
+alias update="sudo dnf update";

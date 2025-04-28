@@ -40,6 +40,41 @@ fi
 if [[ -n "${LOG_ROOT}" ]] && [[ ! -d "${LOG_ROOT}" ]]; then mkdir -p "${LOG_ROOT}"; fi
 
 #======  FUNCTION  ============================================================
+#          NAME:  usage
+#   DESCRIPTION:  Rotates log files in logs directory
+#    PARAMETERS:  None
+#       RETURNS:  0 regardless of result.
+#==============================================================================
+function usage()
+(
+    function_name="${CNAME}#${FUNCNAME[0]}";
+    return_code=3;
+
+    printf "%s %s\n" "${function_name}" "Write a log message to a provided target." >&2;
+    printf "%s %s\n" "Usage: ${function_name}" "[ <options> ]" >&2;
+    printf "    %s: %s\n" "The type of log output." "Supported levels (not case-sensitive):" >&2; ## TODO: This should also be able to send email, write to a db, etc
+    printf "        %s: %s\n" "FILE" "Write the provided data to the console (writeable level provided as an argument)." >&2;
+    printf "        %s: %s\n" "CONSOLE" "Write the provided data to the console (either STDOUT or STDERR)." >&2;
+    printf "    %s: %s\n" "The level to write for." "Supported levels (not case-sensitive):" >&2;
+    printf "        %s: %s\n" "STDOUT" "Write the provided data to standard output - commonly a terminal screen." >&2;
+    printf "        %s: %s\n" "STDERR" "Write the provided data to standard error - commonly a terminal screen." >&2;
+    printf "        %s: %s\n" "PERFORMANCE" "Write performance metrics as provided by the scripting." >&2;
+    printf "        %s: %s\n" "FATAL" "Errors that cannot be recovered from." >&2;
+    printf "        %s: %s\n" "ERROR" "Errors that are handled within the application." >&2;
+    printf "        %s: %s\n" "INFO" "Informational messages about runtime processing." >&2;
+    printf "        %s: %s\n" "WARN" "Warning messages usually related to configuration." >&2;
+    printf "        %s: %s\n" "AUDIT" "Performs an audit log write." >&2;
+    printf "        %s: %s\n" "DEBUG" "Messaging related to immediate runtime actions or configurations." >&2;
+    printf "    %s: %s\n" "Process IDentifier (PID)" "The process ID of the running instance." >&2;
+    printf "    %s: %s\n" "Calling script" "The script calling the method to write the log entry." >&2;
+    printf "    %s: %s\n" "Line number" "The line on which the message was produced." >&2;
+    printf "    %s: %s\n" "Calling function" "The method within the script calling the method to write the log entry." >&2;
+    printf "    %s: %s\n" "Message" "The data to write to the logfile." >&2;
+
+    return ${return_code};
+)
+
+#======  FUNCTION  ============================================================
 #          NAME:  main
 #   DESCRIPTION:  Rotates log files in logs directory
 #    PARAMETERS:  None
@@ -52,61 +87,17 @@ function writeLogEntry()
     return_code=0;
     error_count=0;
 
-    #======  FUNCTION  ============================================================
-    #          NAME:  usage
-    #   DESCRIPTION:  Rotates log files in logs directory
-    #    PARAMETERS:  None
-    #       RETURNS:  0 regardless of result.
-    #==============================================================================
-    function usage()
-    (
-        function_name="${CNAME}#${FUNCNAME[0]}";
-        return_code=3;
-
-        printf "%s %s\n" "${function_name}" "Write a log message to a provided target." >&2;
-        printf "%s %s\n" "Usage: ${function_name}" "[ <options> ]" >&2;
-        printf "    %s: %s\n" "The type of log output." "Required. Supported levels (not case-sensitive):" >&2; ## TODO: This should also be able to send email, write to a db, etc
-        printf "        %s: %s\n" "FILE" "Required. Write the provided data to the console (writeable level provided as an argument)." >&2;
-        printf "        %s: %s\n" "CONSOLE" "Required. Write the provided data to the console (either STDOUT or STDERR)." >&2;
-        printf "    %s: %s\n" "The level to write for." "Supported levels (not case-sensitive):" >&2;
-        printf "            %s: %s\n" "Options" "One of the following options must be provided when log output type is console:" >&2;
-        printf "                %s: %s\n" "Required" "STDOUT: Required when log output type is console. Write the provided data to standard output - commonly a terminal screen." >&2;
-        printf "                %s: %s\n" "Required" "STDERR: Required when log output type is console. Write the provided data to standard error - commonly a terminal screen." >&2;
-        printf "            %s: %s\n" "Required options" "One of the following options must be provided when log output type is file:" >&2;
-        printf "                %s: %s\n" "PERFORMANCE" "Write performance metrics as provided by the scripting." >&2;
-        printf "                %s: %s\n" "FATAL" "Errors that cannot be recovered from." >&2;
-        printf "                %s: %s\n" "ERROR" "Errors that are handled within the application." >&2;
-        printf "                %s: %s\n" "INFO" "Informational messages about runtime processing." >&2;
-        printf "                %s: %s\n" "WARN" "Warning messages usually related to configuration." >&2;
-        printf "                %s: %s\n" "AUDIT" "Performs an audit log write." >&2;
-        printf "                %s: %s\n" "DEBUG" "Messaging related to immediate runtime actions or configurations." >&2;
-        printf "            %s: %s\n" "Required options" "The options below must be provided if log output type is file, and are optional if log output type is console (but recommended):" >&2;
-        printf "                %s: %s\n" "Required" "Process IDentifier (PID): The process ID of the running instance." >&2;
-        printf "                %s: %s\n" "Required" "Calling script: The script calling the method to write the log entry." >&2;
-        printf "                %s: %s\n" "Required" "Line number: The line on which the message was produced." >&2;
-        printf "                %s: %s\n" "Required" "Calling function: The method within the script calling the method to write the log entry." >&2;
-        printf "                %s: %s\n" "Required" "Message: The data to write to the logfile." >&2;
-
-        return ${return_code};
-    )
-
-    (( ${#} == 0 )) && usage;
-
     action="${1}";
 
     case "${action}" in
         [Ff][Ii][Ll][Ee])
-            (( ${#} != 6 )) && usage;
-
             writeLogEntryToFile "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "$(date -d @"$(date +"%s")" +"${TIMESTAMP_OPTS}")";
             ;;
         [Cc][Oo][Nn][Ss][Oo][Ll][Ee])
-            (( ${#} != 2 )) && usage;
-
             writeLogEntryToConsole "${2}" "${7}";
             ;;
         *)
-            usage;
+            (( error_count += 1 ));
             ;;
     esac
 

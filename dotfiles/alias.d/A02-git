@@ -18,7 +18,7 @@
 #
 #==============================================================================
 
-[[ -n "$(compgen -c | grep -Ew ^git | sort | uniq)" ]] || return;
+[[ ! -n "$(compgen -c | grep -Ew ^git | sort | uniq)" ]] && return;
 
 ## git
 alias ga="git add";

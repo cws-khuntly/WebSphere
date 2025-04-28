@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  ibm-was-services.target
-#         USAGE:  Install unit file using appropriate systemctl syntax.
-#     ARGUMENTS:  None
-#   DESCRIPTION:  systemd service to contain IBM WebSphere application servers.
+#          FILE:  tmux.service
+#         USAGE:  systemctl --user enable tmux.service;
+#                 systemctl --user start tmux.service
+#   DESCRIPTION:  Loads the tmux systemd service
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -14,13 +14,17 @@
 #       VERSION:  1.0
 #       CREATED:  ---
 #      REVISION:  ---
+#
 #==============================================================================
 [Unit]
-Description=IBM WAS Services
+Description=tmux Terminal Multiplexor
 After=default.target
-Wants=ibm-was-services@%i.timer
-BindsTo=ibm-was-services@%i.timer
+After=systemd-user-sessions.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/tmux new-session -d -s default
+ExecStop=/usr/bin/tmux kill-session -t default
 
 [Install]
 WantedBy=default.target
-Also=ibm-was-services@%i.timer

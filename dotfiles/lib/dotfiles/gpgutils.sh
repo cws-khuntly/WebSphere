@@ -184,6 +184,7 @@ function captureGpgData()
                     writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "GPG configuration file successfully generated.";
                 fi
             fi
+        fi
     fi
 
     [[ -n "${ret_code}" ]] && unset -v ret_code;

@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  ibm-was-services@.service
+#          FILE:  git-update.target
 #         USAGE:  Install unit file using appropriate systemctl syntax.
 #     ARGUMENTS:  None
-#   DESCRIPTION:  systemd service to start up IBM WAS servers
+#   DESCRIPTION:  systemd service to run git update periodically
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -16,17 +16,11 @@
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=IBM WAS Services
-PartOf=ibm-was-services@%i.target
-ReloadPropagatedFrom=ibm-was-services@%i.target
-
-[Service]
-Type=oneshot
-ConditionPathExists=/software/.searchIsStarted
-ExecStart=/bin/sleep 90
-ExecStartPost=/bin/rm -f /software/.isSearchStarted
-TimeoutStartSec=infinity
-RemainAfterExit=true
+Description=git update for specific repos
+After=default.target
+Wants=git-update@%i.timer
+BindsTo=git-update@%i.timer
 
 [Install]
-WantedBy=ibm-was-services@%i.target
+WantedBy=default.target
+Also=git-update@%i.timer

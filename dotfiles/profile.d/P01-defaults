@@ -39,13 +39,18 @@ RANDOM_GENERATOR="/dev/urandom";
 ENTROPY_FILE="${HOME}/etc/entropy";
 ENTROPY_FILE_SIZE=16384;
 SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket";
-PATHSEP=":";
 
 case "$(uname -s)" in
+    [Cc][Yy][Gg][Ww][Ii][Nn]*)
+        TERM="ansi";
+        PATHSEP=";";
+        ;;
     [Ll][Ii][Nn][Uu][Xx])
         TERM="linux";
+        PATHSEP=":";
         ;;
     [Aa][Ii][Xx]|[Ss][Uu][Nn][Oo][Ss]|[Ss][Oo][Ll][Aa][Rr][Ii][Ss])
         TERM="ansi";
+        PATHSEP=":";
         ;;
 esac
