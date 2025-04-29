@@ -18,10 +18,8 @@
 [Unit]
 Description=Mount VMware fuse mount
 ConditionPathExists=%u/workspace
-DefaultDependencies=no
-Conflicts=umount.target
-Before=local-fs.target umount.target
-After=swap.target
+Requires=fuse-overlayfs.target
+After=fuse-overlayfs.target
 
 [Mount]
 What=.host:/Repositories

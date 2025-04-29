@@ -29,14 +29,30 @@ function transferFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    (( ${#} != 6 )) && return 3;
+    (( ${#} < 2 )) && return 3;
 
-    operating_mode="${1}";
-    files_to_process="${2}";
-    target_host="${3}";
-    target_port="${4}";
-    target_user="${5}";
-    force_exec="${6}";
+    if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+        [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Target host is localhost or $(hostname -s) / $(hostname -f). Performing local transfer.";
+        fi
+
+        operating_mode="${1}";
+        files_to_process="${2}";
+    else
+        (( ${#} != 6 )) && return 3;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Target host is remote: ${target_host}. Performing remote transfer.";
+        fi
+
+        operating_mode="${1}";
+        files_to_process="${2}";
+        target_host="${3}";
+        target_port="${4}";
+        target_user="${5}";
+        force_exec="${6}";
+    fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "operating_mode -> ${operating_mode}";
@@ -76,7 +92,7 @@ function transferFiles()
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File transfer to host $(hostname -s) has completed successfully.";
+                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "File transfer to host $(hostname -s) has completed successfully.";
                     fi
                 fi
                 ;;
@@ -107,7 +123,7 @@ function transferFiles()
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File transfer to host $(hostname -s) has completed successfully.";
+                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "File transfer to host $(hostname -s) has completed successfully.";
                     fi
                 fi
                 ;;
@@ -190,7 +206,7 @@ function transferLocalFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -t files_to_process < <(printf %s ${file_listing});";
     fi
 
-    mapfile -t files_to_process < <(printf "%s" "${file_listing}");
+    mapfile -d "," -t files_to_process < <(printf "%s" "${file_listing}");
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}";
@@ -200,7 +216,7 @@ function transferLocalFiles()
 		return_code="${ret_code}"
 
         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File listing was null or empty. Please review logs.";
+            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "File listing was null or empty. Please review logs.";
         fi
     else
         for eligibleFile in "${files_to_process[@]}"; do
@@ -350,7 +366,7 @@ function transferRemoteFiles()
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -t files_to_process < <(printf %s ${file_list})";
         fi
 
-        mapfile -t files_to_process < <(printf "%s" "${file_list}");
+        mapfile -d "," -t files_to_process < <(printf "%s" "${file_list}");
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Populating batch file ${sftp_send_file}...";
@@ -440,7 +456,7 @@ function transferRemoteFiles()
     ## cleanup
     [[ -n "${cleanup_list}" ]] && unset -v cleanup_list;
 
-    cleanup_list="$(basename "${sftp_send_file}")|${TMPDIR:-${USABLE_TMP_DIR}}\n";
+    cleanup_list="$(basename "${sftp_send_file}")|${TMPDIR:-${USABLE_TMP_DIR}}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cleanup_list -> ${cleanup_list}";

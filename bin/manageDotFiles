@@ -40,7 +40,7 @@ if [[ -n "${SCRIPT_ROOT}/lib/system" ]] && [[ -d "${SCRIPT_ROOT}/lib/system" ]];
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found library directory ${SCRIPT_ROOT}/lib/system";
     fi
 
-    for SYSLIB in $(ls workspace/dotfiles/lib/dotfiles); do
+    for SYSLIB in $(ls "${SCRIPT_ROOT}/lib/system"); do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Library ${SYSLIB}";
         fi
@@ -48,11 +48,12 @@ if [[ -n "${SCRIPT_ROOT}/lib/system" ]] && [[ -d "${SCRIPT_ROOT}/lib/system" ]];
         [[ -z "${SYSLIB}" ]] && continue;
         [[ "${SYSLIB}" =~ ^\# ]] && continue;
 
-        if [[ -r "${SYSLIB}" ]] && [[ -s "${SYSLIB}" ]]; then source "${SYSLIB}"; fi
+        if [[ -r "${SCRIPT_ROOT}/lib/system/${SYSLIB}" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/${SYSLIB}" ]] && \
+            ! [[ "${SYSLIB}" =~ "cws-profile.sh" ]] && ! [[ "${SYSLIB}" =~ "logger.sh" ]]; then
+            source "${SCRIPT_ROOT}/lib/system/${SYSLIB}";
+        fi
     done
 fi
-
-## load the logger
 
 if [[ -r "${CONFIG_FILE_LOCATION}" ]]; then
     WORKING_CONFIG_FILE="${CONFIG_FILE_LOCATION}";
@@ -123,7 +124,8 @@ function main()
 
     case "${target_action}" in
         [Ii][Nn][Ss][Tt][Aa][Ll][Ll][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installLocalFiles";
                 fi
@@ -156,7 +158,7 @@ function main()
                 fi
 
                 [[ -n "${function_name}" ]] && unset -v function_name;
-compgen -A function;
+
                 validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
 
@@ -199,7 +201,8 @@ compgen -A function;
             fi
             ;;
         [Dd][Ee][Pp][Ll][Oo][Yy][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployLocalFiles";
                 fi
@@ -275,7 +278,8 @@ compgen -A function;
             fi
             ;;
         [Dd][Ee][Pp][Ll][Oo][Yy][Aa][Nn][Dd][Ii][Nn][Ss][Tt][Aa][Ll][Ll])
-            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployAndInstallLocalFiles";
                 fi
@@ -351,7 +355,8 @@ compgen -A function;
             fi
             ;;
         [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshLocalFiles";
                 fi
@@ -427,7 +432,8 @@ compgen -A function;
             fi
             ;;
         [Rr][Ee][Mm][Oo][Vv][Ee][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: removeLocalFiles";
                 fi
@@ -887,7 +893,7 @@ else
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found library directory ${DOTFILES_LIB_PATH}";
             fi
 
-            for DOTFILES_LIB in $(ls workspace/dotfiles/lib/dotfiles); do
+            for DOTFILES_LIB in $(ls ${DOTFILES_LIB_PATH}); do
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Library ${DOTFILES_LIB}";
                 fi
@@ -895,7 +901,7 @@ else
                 [[ -z "${DOTFILES_LIB}" ]] && continue;
                 [[ "${DOTFILES_LIB}" =~ ^\# ]] && continue;
 
-                if [[ -r "${DOTFILES_LIB}" ]] && [[ -s "${DOTFILES_LIB}" ]]; then source "${DOTFILES_LIB}"; fi
+                if [[ -r "${DOTFILES_LIB_PATH}/${DOTFILES_LIB}" ]] && [[ -s "${DOTFILES_LIB_PATH}/${DOTFILES_LIB}" ]]; then source "${DOTFILES_LIB_PATH}/${DOTFILES_LIB}"; fi
             done
         fi
 

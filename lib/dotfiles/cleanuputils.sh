@@ -28,14 +28,31 @@ function cleanupFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    (( ${#} != 6 )) && return 3;
 
-    operating_mode="${1}";
-    cleanup_file_list="${2}";
-    target_host="${3}";
-    target_port="${4}";
-    target_user="${5}";
-    force_exec="${6}";
+    (( ${#} < 2 )) && return 3;
+
+    if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
+        [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Target host is localhost or $(hostname -s) / $(hostname -f). Performing local cleanup.";
+        fi
+
+        operating_mode="${1}";
+        cleanup_file_list="${2}";
+    else
+        (( ${#} != 6 )) && return 3;
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Target host is remote: ${target_host}. Performing remote cleanup.";
+        fi
+
+        operating_mode="${1}";
+        cleanup_file_list="${2}";
+        target_host="${3}";
+        target_port="${4}";
+        target_user="${5}";
+        force_exec="${6}";
+    fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "operating_mode -> ${operating_mode}";
@@ -75,7 +92,7 @@ function cleanupFiles()
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Local file cleanup completed successfully.";
+                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Local file cleanup completed successfully.";
                     fi
                 fi
                 ;;
@@ -184,7 +201,7 @@ function cleanupLocalFiles()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: mapfile -d \",\" -t files_to_process < <(printf \"%s\" \"${requested_files}\")";
     fi
 
-    mapfile -t files_to_process < <(printf "%s" "${requested_files}");
+    mapfile -d "," -t files_to_process < <(printf "%s" "${requested_files}");
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "files_to_process -> ${files_to_process[*]}"; fi
 
@@ -196,8 +213,8 @@ function cleanupLocalFiles()
 
         [[ -z "${eligibleFile}" ]] && continue;
 
-        targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
-        targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
+        targetFile="$(cut -d "|" <<< "${eligibleFile}" -f 1)";
+        targetDir="$(cut -d "|" <<< "${eligibleFile}" -f 2)";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile -> ${targetFile}";
@@ -223,18 +240,18 @@ function cleanupLocalFiles()
                     (( error_count += 1 ));
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to remove directory ${targetDir:?}/${targetFile}. Please remove the directory manually.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove directory ${targetDir:?}/${targetFile}. Please remove the directory manually.";
                     fi
                 else
                     if [[ -e "${targetDir}/${targetFile}" ]] || [[ -w "${targetDir}/${targetFile}" ]]; then
                         (( error_count += 1 ))
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the directory manually.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the directory manually.";
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Directory ${targetDir:?}/${targetFile} successfully removed.";
+                            writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "Directory ${targetDir:?}/${targetFile} successfully removed.";
                         fi
                     fi
                 fi
@@ -255,18 +272,18 @@ function cleanupLocalFiles()
                     (( error_count += 1 ));
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the file manually.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the file manually.";
                     fi
                 else
                     if [[ -e "${targetDir}/${targetFile}" ]] || [[ -w "${targetDir}/${targetFile}" ]]; then
                         (( error_count += 1 ))
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the file manually.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to remove file ${targetDir:?}/${targetFile}. Please remove the file manually.";
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File ${targetDir:?}/${targetFile} successfully removed.";
+                            writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "File ${targetDir:?}/${targetFile} successfully removed.";
                         fi
                     fi
                 fi
@@ -377,7 +394,7 @@ function cleanupRemoteFiles()
             return_code="${ret_code}"
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to clear any existing content in ${file_cleanup_file}. Please review logs.";
+                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to clear any existing content in ${file_cleanup_file}. Please review logs.";
             fi
         else
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -456,7 +473,7 @@ function cleanupRemoteFiles()
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "File ${file_cleanup_file} successfully generated and transferred to ${target_host} as user ${target_user}.";
+                        writeLogEntry "FILE" "INFO" "${$}" "${cname}" "${LINENO}" "${function_name}" "File ${file_cleanup_file} successfully generated and transferred to ${target_host} as user ${target_user}.";
                     fi
                 fi
             fi

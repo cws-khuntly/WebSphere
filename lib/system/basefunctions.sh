@@ -208,16 +208,21 @@ function validateAndCopyKeysForHost
         return ${return_code};
     )
 
-    (( ${#} == 0 )) && usage;
+    (( ${#} != 2 )) && usage;
+
+    target_host="${1}";
+    target_port="${2}";
 
 	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
 		writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
 	fi
 
 	[[ -n "${cname}" ]] && unset -v cname;
 	[[ -n "${function_name}" ]] && unset -v function_name;
 	[[ -n "${ret_code}" ]] && unset -v ret_code;
-compgen -A function
+
 	validateHostAddress "${target_host}" "${target_port}";
 	ret_code="${?}";
 
