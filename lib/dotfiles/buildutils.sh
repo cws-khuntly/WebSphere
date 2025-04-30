@@ -33,7 +33,7 @@ function buildPackage()
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: tar --exclude-vcs --exclude=README.md --exclude=LICENSE.md --exclude=dotfiles.code-workspace --exclude log --exclude logs -C ${DOTFILES_BASE_PATH} -cf - ./*";
         fi
 echo "${DOTFILES_BASE_PATH}"
-        strace tar -C "${DOTFILES_BASE_PATH}" --exclude-vcs --exclude=README.md --exclude=LICENSE.md --exclude=dotfiles.code-workspace -cvf - ./* /var/tmp/file.tar | ${ARCHIVE_PROGRAM} > "${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}";
+        ( cd "${DOTFILES_BASE_PATH}"; tar --exclude-vcs --exclude=README.md --exclude=LICENSE.md --exclude=dotfiles.code-workspace -cvf - ./* )| ${ARCHIVE_PROGRAM} > "${TMPDIR:-${USABLE_TMP_DIR}}/${PACKAGE_NAME}.${ARCHIVE_FILE_EXTENSION}";
 return 1
         ret_code="${?}";
 
