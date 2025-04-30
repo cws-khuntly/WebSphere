@@ -17,21 +17,21 @@
 #==============================================================================
 
 ## get the available log config and load it
-if [[ -z "${LOGGING_PROPERTIES}" ]]; then
+if [[ -n "${LOGGING_PROPERTIES}" ]]; then
+    source "${LOGGING_PROPERTIES}";
+else
     if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then
-        LOGGING_PROPERTIES="/usr/local/etc/logging.properties"; ## if its here, use it
+        source "/usr/local/etc/logging.properties"; ## if its here, use it
     elif [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then
-        LOGGING_PROPERTIES="${HOME}/etc/system/logging.properties"; ## if its here, override the above and use it
+        source "${HOME}/etc/system/logging.properties"; ## if its here, override the above and use it
     elif [[ -r "${SCRIPT_ROOT}/etc/system/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/system/logging.properties" ]]; then
-        LOGGING_PROPERTIES="${SCRIPT_ROOT}/etc/system/logging.properties"; ## if its here, override the above and use it
+        source "${SCRIPT_ROOT}/etc/system/logging.properties"; ## if its here, override the above and use it
     else 
         printf "\e[00;31m%s\e[00;32m\n" "Unable to load logging configuration. Shutting down." >&2;
 
         exit 1;
     fi
 fi
-
-if [[ -n "${LOGGING_PROPERTIES}" ]] && [[ -r "${LOGGING_PROPERTIES}" ]] && [[ -s "${LOGGING_PROPERTIES}" ]]; then source "${LOGGING_PROPERTIES}"; fi
 
 if [[ -z "${LOGGING_LOADED}" ]] || [[ "${LOGGING_LOADED}" == "${_FALSE}" ]]; then
     printf "\e[00;31m%s\033[0m\n" "Failed to load logging configuration. No logging available!" >&2;

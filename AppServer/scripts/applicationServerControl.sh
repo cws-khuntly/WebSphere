@@ -281,7 +281,7 @@ function startApplicationServer()
 						writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from startServer.sh was non-zero. Return code -> ${ret_code}";
 					fi
 				else
-					if [[ -n $(grep ("ADMU0508I|STARTED") ${tmpfile}) ]]; then
+					if [[ -n "$(grep -E "(ADMU0508I|STARTED)" ${tmpfile})" ]]; then
 						if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
 							writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been started successfully.";
 							writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been started successfully.";
@@ -302,6 +302,7 @@ function startApplicationServer()
 					writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
 					writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
 				fi
+            fi
 		else
 			(( error_count += 1 ));
 
@@ -428,7 +429,7 @@ function stopApplicationServer()
 						writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from stopServer.sh was non-zero. Return code -> ${ret_code}";
 					fi
 				else
-					if [[ -n $(grep ("ADMU0509I|STOPPED") ${tmpfile}) ]]; then
+					if [[ -n "$(grep "(ADMU0509I|STOPPED)" ${tmpfile})" ]]; then
 						if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
 							writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been stopped successfully.";
 							writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been stopped successfully.";
@@ -449,6 +450,7 @@ function stopApplicationServer()
 					writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
 					writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
 				fi
+            fi
 		else
 			(( error_count += 1 ));
 

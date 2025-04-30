@@ -344,9 +344,8 @@ function backupServerFilesystem()
 
     case "${backup_filesystem}" in
         "${FILESYSTEM_BACKUP_WAS_ONLY}")
-            tar -C "${IBM_INSTALL_ROOT}" -cvf - "${FILESYSTEM_BACKUP_WAS_ONLY}" | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
+            ( cd "${IBM_INSTALL_ROOT}"; tar -cf - "${FILESYSTEM_BACKUP_WAS_ONLY}" ./* ) | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
                 > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WAS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
-
             ret_code="${?}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -362,9 +361,8 @@ function backupServerFilesystem()
             fi
             ;;
         "${FILESYSTEM_BACKUP_IHS_ONLY}")
-            tar -C "${IBM_INSTALL_ROOT}" -cvf - "${FILESYSTEM_BACKUP_IHS_ONLY}" | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
-                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WAS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
-
+            ( cd "${IBM_INSTALL_ROOT}"; tar -cf - "${FILESYSTEM_BACKUP_IHS_ONLY}" ./* ) | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
+                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_IHS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
             ret_code="${?}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -380,8 +378,8 @@ function backupServerFilesystem()
             fi
             ;;
         "${FILESYSTEM_BACKUP_WCT_ONLY}")
-            tar -C "${IBM_INSTALL_ROOT}" -cvf - "${FILESYSTEM_BACKUP_WCT_ONLY}" | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
-                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WAS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
+            ( cd "${IBM_INSTALL_ROOT}"; tar -cf - "${FILESYSTEM_BACKUP_WCT_ONLY}" ./* ) | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
+                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WCT_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
 
             ret_code="${?}";
 
@@ -398,9 +396,8 @@ function backupServerFilesystem()
             fi
             ;;
         "${FILESYSTEM_BACKUP_WPS_ONLY}")
-            tar -C "${IBM_INSTALL_ROOT}" -cvf - "${FILESYSTEM_BACKUP_WPS_ONLY}" | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
-                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WAS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
-
+            ( cd "${IBM_INSTALL_ROOT}"; tar -cf - "${FILESYSTEM_BACKUP_WCT_ONLY}" ./* ) | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
+                > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WCT_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
             ret_code="${?}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -421,8 +418,8 @@ function backupServerFilesystem()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "FILESYSTEM -> ${FILESYSTEM}";
                 fi
 
-                tar -C "${IBM_INSTALL_ROOT}" -cvf - "${FILESYSTEM}" | gzip > ${BACKUP_DIRECTORY}/$(printf "%s" "${FILESYSTEM}" | awk -F "/" '{print $NF}')-${backup_file_name}.tar.gz \
-                    > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM_BACKUP_WAS_ONLY}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
+                ( cd "${IBM_INSTALL_ROOT}"; tar -cf - "${FILESYSTEM}" ./* ) | gzip > ${BACKUP_DIRECTORY}/${backup_file_name}.tar.gz \
+                    > ${LOG_ROOT}/$(printf "%s" "${FILESYSTEM}" | awk -F "/" '{print $NF}')-backup.log 2>&1;
                 ret_code="${?}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -530,13 +527,13 @@ function augmentDeploymentManager()
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
 
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; the
-             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "${function_name} -> enter";
         fi
 
         printf "%s %s\n" "${FUNCNAME[1]}" "Creates a deployment manager profile." >&2;
         printf "%s %s\n" "Usage: ${FUNCNAME[1]}" "[ hostname ] [ admin username ] [ admin password ] [ cell name ] [ node name ] [ profile name ] [ profile path ]" >&2;
-        printf "    %s: %s\n" "<hostname>" "The fully qualified domain name for the deployment manager host. Defaults to the value provided by \$(hostname -f)" >&2;
+        printf "    %s: %s\n" "<hostname>" "The fully qualified domain name for the deployment manager host. Defaults to the value provided by $(hostname -f)" >&2;
         printf "    %s: %s\n" "<admin username>" "The administrative username for the deployment manager." >&2;
         printf "    %s: %s\n" "<admin password>" "The administrative password for the deployment manager." >&2;
         printf "    %s: %s\n" "<cell name>" "The name of the deployment manager cell. Defaults to dmgrCell01." >&2;

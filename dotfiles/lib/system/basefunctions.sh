@@ -208,9 +208,14 @@ function validateAndCopyKeysForHost
         return ${return_code};
     )
 
-    (( ${#} == 0 )) && usage;
+    (( ${#} != 2 )) && usage;
+
+    target_host="${1}";
+    target_port="${2}";
 
 	if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_host -> ${target_host}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_port -> ${target_port}";
 		writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: validateHostAddress ${target_host} ${target_port}";
 	fi
 
@@ -412,20 +417,3 @@ function waitForProcessFile
 
     return ${return_code};
 }
-
-if (( ${#} !=0 )); then
-    while (( ${#} > 0 )); do
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided Argument -> ${1}";
-        fi
-
-        (( ARG_COUNTER == ${#} )) && break;
-
-        buildCommand+="${1} ";
-
-        (( ARG_COUNTER += 1 ));
-    done
-
-    ${buildCommand};
-    return ${?};
-fi

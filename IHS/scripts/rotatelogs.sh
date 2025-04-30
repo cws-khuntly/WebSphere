@@ -90,7 +90,7 @@ function rotateLogsOnLocalFilesystem()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-    for ihs_instance in (${IHS_INSTANCES[*]}); do
+    for ihs_instance in ${IHS_INSTANCES[*]}; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ihs_instance -> ${ihs_instance}";
         fi
@@ -110,9 +110,10 @@ function rotateLogsOnLocalFilesystem()
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_name -> ${file_name}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ( cd ${IHS_LOGS_BASE}/${instance}; tar -cf - ./${file_name} ) | gzip > ${BACKUP_DIRECTORY}/${file_name}.tar.gz";
             fi
 
-            tar -C /opt/IBM/HTTPServer/logs/${instance} -cvf - ./${file_name} | gzip > /opt/IBM/backups/${file_name}.tar.gz
+            ( cd ${IHS_LOGS_BASE}/${instance}; tar -cf - ./${file_name} ) | gzip > ${BACKUP_DIRECTORY}/${file_name}.tar.gz
 
             [[ -n "${file_name}" ]] && unset -v file_name;
             [[ -n "${file_entry}" ]] && unset -v file_entry;
@@ -180,12 +181,12 @@ function rotateLogsOnRemoteFilesystem()
     fi
 
     ## TODO
-    for instance in (instance-list); do
+    for instance in ${IHS_INSTANCES[*]}; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "instance -> ${instance}";
         fi
 
-        file_list=$(find /opt/IBM/HTTPServer/logs/${instance}/ -type f -mtime +7);
+        file_list=$(find ${IHS_LOGS_BASE}/${instance}/ -type f -mtime +7);
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_list -> ${file_list}";
@@ -200,9 +201,10 @@ function rotateLogsOnRemoteFilesystem()
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "file_name -> ${file_name}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: ( cd ${IHS_LOGS_BASE}/${instance}; tar -cf - ./${file_name} ) | gzip > ${BACKUP_DIRECTORY}/${file_name}.tar.gz";
             fi
 
-            tar -C /opt/IBM/HTTPServer/logs/${instance} -cvf - ./${file_name} | gzip > /opt/IBM/backups/${file_name}.tar.gz
+            ( cd ${IHS_LOGS_BASE}/${instance}; tar -cf - ./${file_name} ) | gzip > ${BACKUP_DIRECTORY}/${file_name}.tar.gz
 
             [[ -n "${file_name}" ]] && unset -v file_name;
             [[ -n "${file_entry}" ]] && unset -v file_entry;

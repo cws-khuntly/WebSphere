@@ -433,12 +433,3 @@ function federateServerProfile()
 
     return ${return_code};
 }
-
-
-Cluster ->
-First Node:
-/opt/IBM/WebSphere/profiles/PPServices/bin/wsadmin.sh -lang jython -conntype SOAP -host <DMGR FQDN> -port 8879
- - server = AdminConfig.getid('/Cell:dmgrCell01/Node:<Node name>/Server:<Server Name>/')
- - AdminConfig.convertToCluster(server, '<Cluster Name>')
- - AdminConfig.save()
- - AdminNodeManagement.syncActiveNodes()
