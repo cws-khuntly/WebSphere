@@ -22,11 +22,11 @@ if [[ -n "${LOGGING_PROPERTIES}" ]]; then
 else
     if [[ -r "/usr/local/etc/logging.properties" ]] && [[ -s "/usr/local/etc/logging.properties" ]]; then
         source "/usr/local/etc/logging.properties"; ## if its here, use it
-    elif [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then
-        source "${HOME}/etc/system/logging.properties"; ## if its here, override the above and use it
     elif [[ -r "${SCRIPT_ROOT}/etc/system/logging.properties" ]] && [[ -s "${SCRIPT_ROOT}/etc/system/logging.properties" ]]; then
         source "${SCRIPT_ROOT}/etc/system/logging.properties"; ## if its here, override the above and use it
-    else 
+    elif [[ -r "${HOME}/etc/system/logging.properties" ]] && [[ -s "${HOME}/etc/system/logging.properties" ]]; then
+        source "${HOME}/etc/system/logging.properties"; ## if its here, override the above and use it
+    else
         printf "\e[00;31m%s\e[00;32m\n" "Unable to load logging configuration. Shutting down." >&2;
 
         exit 1;
