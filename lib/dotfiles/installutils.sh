@@ -69,10 +69,10 @@ function installFiles()
             [[ -n "${cname}" ]] && unset -v cname;
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
-echo "starting installLocalFiles"
+
             installLocalFiles;
             ret_code="${?}";
-echo "ending installLocalFiles"
+
             cname="installutils.sh";
             function_name="${cname}#${FUNCNAME[0]}";
 
@@ -159,7 +159,6 @@ echo "ending installLocalFiles"
 #==============================================================================
 function installLocalFiles()
 (
-    echo "installLocalFiles"
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
@@ -212,10 +211,9 @@ function installLocalFiles()
             if [[ -s "${INSTALL_CONF}" ]]; then
                 ## change the IFS
                 IFS="${MODIFIED_IFS}";
-echo "entering loop"
+
                 ## clean up home directory first
                 for entry in $(< "${INSTALL_CONF}"); do
-                    echo "start loop"
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "entry -> ${entry}";
                     fi
@@ -369,15 +367,13 @@ echo "entering loop"
                             ;;
                     esac
 
-                    echo "end loop"
-
                     [[ -n "${ret_code}" ]] && unset -v ret_code;
                     [[ -n "${entry_command}" ]] && unset -v entry_command;
                     [[ -n "${entry_source}" ]] && unset -v entry_source;
                     [[ -n "${entry_target}" ]] && unset -v entry_target;
                     [[ -n "${entry}" ]] && unset -v entry;
                 done
-echo "exiting loop"
+
                 ## restore the original ifs
                 IFS="${CURRENT_IFS}";
             else
