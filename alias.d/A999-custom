@@ -46,7 +46,6 @@ alias ipv4sort="sort -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4";
 alias minicom="sudo -u root minicom -s /dev/ttyS0";
 alias tailf="tail -f";
 alias telnet='nc -vz';
-alias tmux='tmux start-session -c \"while sleep 900; do echo "living"; done\"';
 
 ## script tracing
 alias enableDebug="ENABLE_DEBUG=\"${_TRUE}"\";
