@@ -25,13 +25,13 @@ FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
 DEFAULT_CONFIG_FILE="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
-if [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
-    source "/usr/local/bin/logger.sh"; ## if its here, use it
-elif [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
+if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
     source "${SCRIPT_ROOT}/lib/system/logger.sh"; ## if its here, override the above and use it
 elif [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]]; then
     source "${HOME}/lib/system/logger.sh"; ## if its here, override the above and use it
-else 
+elif [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
+    source "/usr/local/bin/logger.sh"; ## if its here, use it
+else
     printf "\e[00;31m%s\e[00;32m\n" "Unable to load logger. No logging enabled!" >&2;
 fi
 

@@ -226,25 +226,26 @@ function transferLocalFiles()
 
             [[ -z "${eligibleFile}" ]] && continue;
 
-            targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
-            targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
+            target_file="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
+            target_dir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile -> ${targetFile}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetDir -> ${targetDir}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_file -> ${target_file}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_dir -> ${target_dir}";
             fi
 
-            if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
-                if [[ -r "${targetFile}" ]]; then
+            if [[ -n "${target_dir}" ]] && [[ -n "${target_file}" ]]; then
+                if [[ -r "${target_file}" ]]; then
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cp ${targetFile} ${targetDir}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cp ${target_file} ${target_dir}";
                     fi
 
-                    if [[ ! -f "${targetFile}" ]]; then
-                        cp "${targetFile}" "${targetDir}";
+                    if [[ ! -f "${target_file}" ]]; then
+                        cmd_output=$(cp "${target_file}" "${target_dir}");
                         ret_code="${?}";
 
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmd_output -> ${cmd_output}";
                             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
                         fi
 
@@ -252,28 +253,28 @@ function transferLocalFiles()
                             (( error_count += 1 ))
 
                             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to copy source file ${targetFile} to ${targetDir}. Please review logs.";
+                                writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to copy source file ${target_file} to ${target_dir}. Please review logs.";
                             fi
                         fi
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetFile} is not readable. Skipping entry.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_file ${target_file} is not readable. Skipping entry.";
                     fi
 
                     continue;
                 fi
             else
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+                    writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_file ${target_dir}/${target_file} was null or empty. Skipping entry.";
                 fi
 
                 continue;
             fi
 
             [[ -n "${eligibleFile}" ]] && unset -v eligibleFile;
-            [[ -n "${targetFile}" ]] && unset -v targetFile;
-            [[ -n "${targetDir}" ]] && unset -v targetDir;
+            [[ -n "${target_file}" ]] && unset -v target_file;
+            [[ -n "${target_dir}" ]] && unset -v target_dir;
         done
     fi
 
@@ -386,31 +387,31 @@ function transferRemoteFiles()
 
                 [[ -z "${eligibleFile}" ]] && continue;
 
-                targetFile="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
-                targetDir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
+                target_file="$(awk -F "|" '{print $1}' <<< "${eligibleFile}")";
+                target_dir="$(awk -F "|" '{print $2}' <<< "${eligibleFile}")";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile -> ${targetFile}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetDir -> ${targetDir}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_file -> ${target_file}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_dir -> ${target_dir}";
                 fi
 
-                if [[ -n "${targetDir}" ]] && [[ -n "${targetFile}" ]]; then
+                if [[ -n "${target_dir}" ]] && [[ -n "${target_file}" ]]; then
                     if (( file_counter == 0 )); then
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >| ${sftp_send_file}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s %s %s\n\" put ${target_file} ${target_dir:?} >| ${sftp_send_file}";
                         fi
 
-                        { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >| "${sftp_send_file}";
+                        { printf "%s %s %s\n" "put" "${target_file}" "${target_dir:?}"; } >| "${sftp_send_file}";
                     else
                         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s %s %s\n\" put ${targetFile} ${targetDir:?} >> ${sftp_send_file}";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: printf \"%s %s %s\n\" put ${target_file} ${target_dir:?} >> ${sftp_send_file}";
                         fi
 
-                        { printf "%s %s %s\n" "put" "${targetFile}" "${targetDir:?}"; } >> "${sftp_send_file}";
+                        { printf "%s %s %s\n" "put" "${target_file}" "${target_dir:?}"; } >> "${sftp_send_file}";
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "targetFile ${targetDir}/${targetFile} was null or empty. Skipping entry.";
+                        writeLogEntry "FILE" "ERROR" "${$}" "${cname}" "${LINENO}" "${function_name}" "target_file ${target_dir}/${target_file} was null or empty. Skipping entry.";
                     fi
 
                     continue;
@@ -419,8 +420,8 @@ function transferRemoteFiles()
                 (( file_counter += 1 ));
 
                 [[ -n "${eligibleFile}" ]] && unset -v eligibleFile;
-                [[ -n "${targetFile}" ]] && unset -v targetFile;
-                [[ -n "${targetDir}" ]] && unset -v targetDir;
+                [[ -n "${target_file}" ]] && unset -v target_file;
+                [[ -n "${target_dir}" ]] && unset -v target_dir;
             done
 
             if [[ ! -s "${sftp_send_file}" ]] || (( file_counter != ${#files_to_process[*]} )); then

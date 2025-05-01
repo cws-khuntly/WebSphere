@@ -70,9 +70,21 @@ function mkcd()
         writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "directory_to_create -> ${directory_to_create}";
     fi
 
-    mkdir -pv "${directory_to_create}";
+    cmd_output=$(mkdir -pv "${directory_to_create}");
+    ret_code="${?}";
 
-    if [[ -d "${directory_to_create}" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmd_output -> ${cmd_output}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+    fi
+
+    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+        return_code="${ret_code}";
+
+        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "CONSOLE" "STDERR" "${$}" "${cname}" "${LINENO}" "${function_name}" "Failed to create directory ${directory_to_create}";
+        fi
+
         cd "${directory_to_create}";
 
         if [[ "${PWD}" != "${directory_to_create}" ]]; then
@@ -682,18 +694,20 @@ function shredit
     else
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}"; fi
 
-        cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}; ## TODO: make this a property
+        cmd_output=$(cryptsetup -d /dev/urandom -c aes-xts-plain create delete ${shred_file}); ## TODO: make this a property
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmd_output -> ${cmd_output}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: shred -vzn 0 /dev/mapper/delete";
         fi
 
-        shred -vz /dev/mapper/delete;
+        cmd_output=$(shred -vz /dev/mapper/delete);
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmd_output -> ${cmd_output}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: sync && sleep ${THREAD_TIMEOUT:-10}";
         fi
@@ -704,10 +718,11 @@ function shredit
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "EXEC: cryptsetup remove delete";
         fi
 
-        cryptsetup remove delete;
+        cmd_output=$(cryptsetup remove delete);
         ret_code=${?};
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "cmd_output -> ${cmd_output}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${cname}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
         fi
     fi
