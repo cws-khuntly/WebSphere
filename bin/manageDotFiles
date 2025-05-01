@@ -18,6 +18,13 @@
 
 trap 'set +v; set +x' INT TERM EXIT;
 
+## Application constants
+ARG_COUNTER=0;
+CNAME="$(basename "${BASH_SOURCE[0]}")";
+FUNCTION_NAME="${CNAME}#startup";
+SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
+DEFAULT_CONFIG_FILE="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
+
 if [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
     source "/usr/local/bin/logger.sh"; ## if its here, use it
 elif [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
@@ -30,13 +37,6 @@ fi
 
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-## Application constants
-ARG_COUNTER=0;
-CNAME="$(basename "${BASH_SOURCE[0]}")";
-FUNCTION_NAME="${CNAME}#startup";
-SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
-DEFAULT_CONFIG_FILE="${SCRIPT_ROOT}/etc/dotfiles/application.properties";
 
 #
 # load the system libs
@@ -95,6 +95,7 @@ function main()
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
     set +o noclobber;
+    cname="managedotfiles.sh";
     function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -133,14 +134,16 @@ function main()
             if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
                 [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installLocalFiles";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runInstallLocalFiles";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
-                installLocalFiles;
+                runInstallLocalFiles;
                 ret_code="${?}";
 
+                cname="managedotfiles.sh";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -154,6 +157,10 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runInstallLocalFiles has successfully completed.";
+                    fi
+
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
                     fi
@@ -163,10 +170,14 @@ function main()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
                 validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
+
+                cname="managedotfiles.sh";
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
@@ -179,13 +190,18 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                     fi
                 else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: installRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "validateAndCopyKeysForHost has successfully completed.";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runInstallRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    installRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+
+                    runInstallRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
+                    cname="managedotfiles.sh";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -199,6 +215,10 @@ function main()
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runInstallRemoteFiles has successfully completed.";
+                        fi
+
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
@@ -213,11 +233,13 @@ function main()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployLocalFiles";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
-                deployLocalFiles;
+                runDeployLocalFiles;
                 ret_code="${?}";
 
+                cname="managedotfiles.sh";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -231,6 +253,10 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runDeployLocalFiles has successfully completed.";
+                    fi
+
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
                     fi
@@ -240,10 +266,14 @@ function main()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
                 validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
+
+                cname="managedotfiles.sh";
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
@@ -256,13 +286,18 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                     fi
                 else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "validateAndCopyKeysForHost has successfully completed.";
                         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    deployRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+
+                    runDeployRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
+                    cname="managedotfiles.sh";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -276,6 +311,10 @@ function main()
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runDeployRemoteFiles has successfully completed.";
+                        fi
+
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
@@ -283,18 +322,20 @@ function main()
                 fi
             fi
             ;;
-        [Dd][Ee][Pp][Ll][Oo][Yy][Aa][Nn][Dd][Ii][Nn][Ss][Tt][Aa][Ll][Ll])
+        [Dd][Ee][Pp][Ll][Oo][Yy][Aa][Nn][Dd][Ii][Nn][Ss][Tt][Aa][Ll][Ll]|[Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
             if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
                 [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployAndInstallLocalFiles";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runDeployLocalFiles";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
-                deployAndInstallLocalFiles;
+                runDeployLocalFiles;
                 ret_code="${?}";
 
+                cname="managedotfiles.sh";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -308,38 +349,18 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
-                    fi
-                fi
-            else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
-                fi
-
-                [[ -n "${function_name}" ]] && unset -v function_name;
-
-                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
-                ret_code="${?}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    return_code="${ret_code}"
-
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
-                    fi
-                else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: deployAndInstallRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runDeployLocalFiles has successfully completed.";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runInstallLocalFiles";
                     fi
 
-                    deployAndInstallRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+
+                    runInstallLocalFiles;
                     ret_code="${?}";
 
+                    cname="managedotfiles.sh";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -350,28 +371,30 @@ function main()
                         return_code="${ret_code}"
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                         fi
                     else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runInstallLocalFiles has successfully completed.";
+                        fi
+
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
+                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Action ${target_action} on host $(hostname -s) as user ${LOGNAME} has completed.";
                         fi
                     fi
                 fi
-            fi
-            ;;
-        [Rr][Ee][Ll][Oo][Aa][Dd][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][Dd][Oo][Tt][Ff][Ii][Ll][Ee][Ss])
-            if [[ "${target_host}" == "localhost" ]] || [[ "${target_host}" == "localhost.localdomain" ]] || [[ "${target_host}" == "127.0.0.1" ]] || \
-                [[ "${target_host}" == "$(hostname -s)" ]] || [[ "${target_host}" == "$(hostname -f)" ]]; then
+            else
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshLocalFiles";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
-                refreshLocalFiles;
+                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
 
+                cname="managedotfiles.sh";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -382,41 +405,21 @@ function main()
                     return_code="${ret_code}"
 
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
-                    fi
-                else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
-                    fi
-                fi
-            else
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
-                fi
-
-                [[ -n "${function_name}" ]] && unset -v function_name;
-
-                validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
-                ret_code="${?}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                fi
-
-                if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                    return_code="${ret_code}"
-
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                     fi
                 else
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: refreshRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "validateAndCopyKeysForHost has successfully completed.";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runDeployRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    refreshRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+
+                    runDeployRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
+                    cname="managedotfiles.sh";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -431,7 +434,37 @@ function main()
                         fi
                     else
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runDeployRemoteFiles has successfully completed.";
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runInstallRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                        fi
+
+                        [[ -n "${cname}" ]] && unset -v cname;
+                        [[ -n "${function_name}" ]] && unset -v function_name;
+
+                        runInstallRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                        ret_code="${?}";
+
+                        cname="managedotfiles.sh";
+                        function_name="${CNAME}#${FUNCNAME[0]}";
+
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                        fi
+
+                        if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
+                            return_code="${ret_code}"
+
+                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
+                            fi
+                        else
+                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runInstallRemoteFiles has successfully completed.";
+                            fi
+
+                            if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                                writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Action ${target_action} on host ${target_host} as user ${target_user} has completed.";
+                            fi
                         fi
                     fi
                 fi
@@ -444,11 +477,13 @@ function main()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: removeLocalFiles";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
-                removeLocalFiles;
+                runRemoveLocalFiles;
                 ret_code="${?}";
 
+                cname="managedotfiles.sh";
                 function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -462,6 +497,10 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host $(hostname -s) as user ${LOGNAME}. Please review logs.";
                     fi
                 else
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runRemoveLocalFiles has successfully completed.";
+                    fi
+
                     if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                         writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host $(hostname -s) as user ${LOGNAME} has completed successfully.";
                     fi
@@ -471,10 +510,14 @@ function main()
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: validateAndCopyKeysForHost ${target_host} ${ssh_port_number}";
                 fi
 
+                [[ -n "${cname}" ]] && unset -v cname;
                 [[ -n "${function_name}" ]] && unset -v function_name;
 
                 validateAndCopyKeysForHost "${target_host}" "${ssh_port_number}";
                 ret_code="${?}";
+
+                cname="managedotfiles.sh";
+                function_name="${CNAME}#${FUNCNAME[0]}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
@@ -487,13 +530,18 @@ function main()
                         writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                     fi
                 else
-                    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: removeRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
+                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "validateAndCopyKeysForHost has successfully completed.";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: runRemoveRemoteFiles ${target_host} ${ssh_port_number} ${target_user} ${force_exec}";
                     fi
 
-                    removeRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
+                    [[ -n "${cname}" ]] && unset -v cname;
+                    [[ -n "${function_name}" ]] && unset -v function_name;
+
+                    runRemoveRemoteFiles "${target_host}" "${ssh_port_number}" "${target_user}" "${force_exec}";
                     ret_code="${?}";
 
+                    cname="managedotfiles.sh";
                     function_name="${CNAME}#${FUNCNAME[0]}";
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -507,6 +555,10 @@ function main()
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An error occurred while processing action ${target_action} on host ${target_host} as user ${target_user}. Please review logs.";
                         fi
                     else
+                        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "runRemoveRemoteFiles has successfully completed.";
+                        fi
+
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${target_action} on host ${target_host} as user ${target_user} has completed successfully.";
                         fi
