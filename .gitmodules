@@ -1,3 +1,6 @@
 [submodule "dotfiles"]
 	path = dotfiles
 	url = https://github.com/cws-khuntly/dotfiles.git
+[submodule "CCT"]
+	path = CCT
+	url = https://github.com/IBM/websphere-cct.git
