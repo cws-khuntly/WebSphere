@@ -19,12 +19,12 @@
 trap 'set +v; set +x' INT TERM EXIT;
 
 ## load the logger
-if [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
-    source "/usr/local/bin/logger.sh"; ## if its here, use it
+if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
+    source "${SCRIPT_ROOT}/lib/system/logger.sh"; ## if its here, override the above and use it
 elif [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]]; then
     source "${HOME}/lib/system/logger.sh"; ## if its here, override the above and use it
-elif [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
-    source "${SCRIPT_ROOT}/lib/system/logger.sh"; ## if its here, override the above and use it
+elif [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
+    source "/usr/local/bin/logger.sh"; ## if its here, use it
 else 
     printf "\e[00;31m%s\e[00;32m\n" "Unable to load logger. No logging enabled!" >&2;
 fi
@@ -799,6 +799,20 @@ else
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found library directory ${USER_LIB_PATH}";
         fi
+
+        for LIBENTRY in "${SCRIPT_ROOT}"/lib/*.sh; do
+            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "LIBENTRY -> ${LIBENTRY}";
+            fi
+
+            [[ -z "${LIBENTRY}" ]] && continue;
+
+            if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
+
+            [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
+        done
+
+        [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
 
         for LIBENTRY in "${USER_LIB_PATH}"/*.sh; do
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
