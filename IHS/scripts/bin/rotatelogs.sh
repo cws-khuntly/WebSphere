@@ -73,7 +73,6 @@ function rotateLogsOnLocalFilesystem()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="rotatelogs.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -163,7 +162,6 @@ function rotateLogsOnRemoteFilesystem()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="rotatelogs.sh";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -403,7 +401,6 @@ while (( ${#} > 0 )); do
             usage;
             RETURN_CODE="${?}";
 
-            set +o noclobber;
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then

@@ -38,7 +38,6 @@ function buildApplicationServerInstance()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="buildApplicationServerInstance";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -66,7 +65,6 @@ function buildApplicationServerInstance()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="buildApplicationServerInstance";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
@@ -180,7 +178,6 @@ function createServerProfile()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="createServerProfile";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -208,7 +205,6 @@ function createServerProfile()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="backupServerProfile";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
@@ -311,7 +307,6 @@ function federateServerProfile()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="federateServerProfile";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -339,7 +334,6 @@ function federateServerProfile()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="backupServerProfile";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;

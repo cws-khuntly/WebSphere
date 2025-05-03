@@ -38,7 +38,6 @@ function buildDeploymentManager()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="buildDeploymentManager";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -66,7 +65,6 @@ function buildDeploymentManager()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="buildDeploymentManager";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
@@ -204,7 +202,6 @@ function createDeploymentManager()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="createDeploymentManager";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -232,7 +229,6 @@ function createDeploymentManager()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="F02-misc";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;
@@ -339,7 +335,6 @@ function augmentDeploymentManager()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     cname="augmentDeploymentManager";
     function_name="${cname}#${FUNCNAME[0]}";
     return_code=0;
@@ -367,7 +362,6 @@ function augmentDeploymentManager()
         if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
         if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-        set +o noclobber;
         cname="F02-misc";
         function_name="${cname}#${FUNCNAME[1]}";
         return_code=3;

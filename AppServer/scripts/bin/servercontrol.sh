@@ -73,7 +73,6 @@ function main()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -117,7 +116,6 @@ function main()
                  writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: startApplicationServer ${profile_name} ${server_name} ${watch_for_file} ${sleep_count} ${retry_count}";
             fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -127,7 +125,6 @@ function main()
             [[ "${server_type}" =~ [Pp][Oo][Rr][Tt][Aa][Ll]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
             ret_code="${?}";
 
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -153,7 +150,6 @@ function main()
                  writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: stopApplicationServer ${profile_name} ${server_name} ${watch_for_file} ${sleep_count} ${retry_count}";
             fi
 
-            [[ -n "${CNAME}" ]] && unset -v CNAME;
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
@@ -162,7 +158,6 @@ function main()
             [[ "${server_type}" =~ [Aa][Pp][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn][Ss][Ee][Rr][Vv][Ee][Rr] ]] && stopApplicationServer "${profile_name}" "${server_name}";
             ret_code="${?}";
 
-            CNAME="$(basename "${BASH_SOURCE[0]}")";
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -334,7 +329,6 @@ while (( ${#} > 0 )); do
             usage;
             RETURN_CODE="${?}";
 
-            set +o noclobber;
             function_name="${CNAME}#${FUNCNAME[0]}";
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then

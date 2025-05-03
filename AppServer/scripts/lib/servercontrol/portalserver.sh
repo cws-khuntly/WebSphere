@@ -11,7 +11,6 @@ function startPortalServer()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
@@ -186,7 +185,6 @@ function stopPortalServer()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    set +o noclobber;
     function_name="${CNAME}#${FUNCNAME[0]}";
     return_code=0;
     error_count=0;
