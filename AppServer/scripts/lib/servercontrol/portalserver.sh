@@ -87,7 +87,7 @@ function startPortalServer()
                     tmpfile=$(mktemp --tmpdir="${TMPDIR:-${USABLE_TMP_DIR}}");
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
+                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "tmpfile -> ${tmpfile}";
                     fi
 
                     [[ -f "${tmpfile}" ]] && cat /dev/null >| ${tmpfile};
@@ -105,6 +105,7 @@ function startPortalServer()
 
                         if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                             writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server startup for ${appserver_name} timed out and was not successfully completed. Please review logs.";
+                        fi
                     else
                         if [[ -n "$(grep -E "(ADMU0508I|STARTED)" ${tmpfile})" ]]; then
                             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
