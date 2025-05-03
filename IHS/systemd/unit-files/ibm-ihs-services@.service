@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  ibm-ihs-server@.service
+#          FILE:  ibm-ihs-services@.service
 #         USAGE:  Install unit file using appropriate systemctl syntax. Example:
 #
-#                 systemctl enable ibm-ihs-server@<INSTANCE>
+#                 systemctl enable ibm-ihs-services@<INSTANCE>
 #     ARGUMENTS:  None
 #   DESCRIPTION:  systemd unit file for IBM HTTP Server
 #
@@ -19,6 +19,8 @@
 #==============================================================================
 [Unit]
 Description=IBM HTTP Server
+PartOf=ibm-ihs-services@%i.target
+ReloadPropagatedFrom=ibm-ihs-services@%i.target
 
 [Service]
 Type=forking

@@ -91,19 +91,21 @@ function main()
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-	(( ${#} < 2 )) && return 3;
+	(( ${#} < 4 )) && return 3;
 
-    profile_name="${1}";
-    server_name="${2}";
-    action_name="${3}";
-    watch_for_file="${4}";
-    sleep_count="${5}";
-    retry_count="${6}";
+    action_name="${1}";
+    profile_name="${2}";
+    server_name="${3}";
+    server_type="${4}";
+    watch_for_file="${5}";
+    sleep_count="${6}";
+    retry_count="${7}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "action_name -> ${action_name}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "server_name -> ${server_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "action_name -> ${action_name}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "server_type -> ${server_type}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_for_file -> ${watch_for_file}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "sleep_count -> ${sleep_count}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
@@ -119,7 +121,10 @@ function main()
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-            startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
+            [[ "${server_type}" =~ [Dd][Mm][Gg][Rr] ]] && startDeploymentManager;
+            [[ "${server_type}" =~ [Nn][Oo][Dd][Ee][Aa][Gg][Ee][Nn][Tt] ]] && startNodeAgent;
+            [[ "${server_type}" =~ [Aa][Pp][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
+            [[ "${server_type}" =~ [Pp][Oo][Rr][Tt][Aa][Ll]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
             ret_code="${?}";
 
             CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -152,7 +157,9 @@ function main()
             [[ -n "${function_name}" ]] && unset -v function_name;
             [[ -n "${ret_code}" ]] && unset -v ret_code;
 
-            stopApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
+            [[ "${server_type}" =~ [Dd][Mm][Gg][Rr] ]] && stopDeploymentManager;
+            [[ "${server_type}" =~ [Nn][Oo][Dd][Ee][Aa][Gg][Ee][Nn][Tt] ]] && stopNodeAgent;
+            [[ "${server_type}" =~ [Aa][Pp][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn][Ss][Ee][Rr][Vv][Ee][Rr] ]] && stopApplicationServer "${profile_name}" "${server_name}";
             ret_code="${?}";
 
             CNAME="$(basename "${BASH_SOURCE[0]}")";
@@ -163,7 +170,7 @@ function main()
             fi
 
             if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                (( error_count += 1 ))
+                return_code="${ret_code}";
 
                 if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Failed to stop server ${server_name} in profile ${profile_name}. Please review logs.";
@@ -177,7 +184,7 @@ function main()
             fi
             ;;
         *)
-            (( error_count += 1 ));
+            return_code=1;
 
             if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "An unknown action was provided. action_name -> ${action_name}";
@@ -185,373 +192,14 @@ function main()
             ;;
     esac
 
-    (( error_count == 0 )) && return_code="${error_count}";
-
+    [[ -n "${action_name}" ]] && unset -v action_name;
     [[ -n "${profile_name}" ]] && unset -v profile_name;
     [[ -n "${server_name}" ]] && unset -v server_name;
-    [[ -n "${action_name}" ]] && unset -v action_name;
+    [[ -n "${server_type}" ]] && unset -v server_type;
     [[ -n "${watch_for_file}" ]] && unset -v watch_for_file;
     [[ -n "${sleep_count}" ]] && unset -v sleep_count;
     [[ -n "${retry_count}" ]] && unset -v retry_count;
     [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch="$(date +"%s")"
-        runtime=$(( end_epoch - start_epoch ));
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-    fi
-
-    [[ -n "${error_count}" ]] && unset -v error_count;
-    [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    return ${return_code};
-)
-
-#======  FUNCTION  ============================================================
-#          NAME:  startApplicationServer
-#   DESCRIPTION:  Stops a provided WebSphere Application Server
-#    PARAMETERS:  WAS Profile name, WAS Application Server name
-#       RETURNS:  0 if no errors/timeouts occurred, otherwise dependent on variables
-#==============================================================================
-function startApplicationServer()
-(
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    function_name="${CNAME}#${FUNCNAME[0]}";
-    return_code=0;
-    error_count=0;
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch="$(date +"%s")";
-
-        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
-        fi
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
-    fi
-
-    (( ${#} < 2 )) && return 3;
-
-	profile_name="${1}";
-	appserver_name="${2}";
-    filewatch="${3}";
-
-    if [[ -n "${filewatch}" ]] && [[ -z "${4}" ]]; then wait_time="${DEFAULT_WAIT_TIME}"; else wait_time="${4}"; fi
-    if [[ -n "${filewatch}" ]] && [[ -z "${5}" ]]; then retry_count="${DEFAULT_RETRY_COUNT}"; else retry_count="${5}"; fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-		writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "appserver_name -> ${appserver_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "filewatch -> ${filewatch}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "wait_time -> ${wait_time}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
-    fi
-
-	if [[ -d "${PROFILE_ROOT}/${profile_name}" ]]; then
-		if [[ -s "${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh" ]]; then
-			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-				writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: ${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh";
-			fi
-
-			source ${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh;
-
-			if [[ -n "${USER_INSTALL_ROOT}" ]]; then
-				if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-					writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: ${USER_INSTALL_ROOT}/bin/startServer.sh ${appserver_name}";
-				fi
-
-				if [[ -n "${filewatch}" ]]; then
-                    waitForProcessFile "${filewatch}" "${wait_time}" "${retry_count}";
-                    ret_code="${?}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Process execution failed, ${filewatch} was not found after ${wait_time} over number of tries ${retry_count}";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Process execution failed, ${filewatch} was not found after ${wait_time} over number of tries ${retry_count}";
-                        fi
-
-                        (( error_count += 1 ));
-                    fi
-                fi
-
-                if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
-                    tmpfile=$(mktemp);
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    [[ -f "${tmpfile}" ]] && cat /dev/null >| ${tmpfile};
-
-                    ${USER_INSTALL_ROOT}/bin/startServer.sh ${appserver_name} | tee ${tmpfile};
-                    watchProvidedProcess ${!};
-                    ret_code=${?};
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        return_code="${ret_code}";
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from startServer.sh was non-zero. Return code -> ${ret_code}";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from startServer.sh was non-zero. Return code -> ${ret_code}";
-                        else
-                            if [[ -n "$(grep -E "(ADMU0508I|STARTED)" ${tmpfile})" ]]; then
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been started successfully.";
-                                    writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been started successfully.";
-                                fi
-                            else
-                                (( error_count != 1 ));
-
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} could not be started.";
-                                    writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} could not be started.";
-                                fi
-                            fi
-                        fi
-                    else
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server startup for ${appserver_name} timed out and was not successfully completed. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server startup for ${appserver_name} timed out and was not successfully completed. Please review logs.";
-                        fi
-                    fi
-                fi
-			else
-				(( error_count != 1 ));
-
-				if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-					writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
-					writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
-				fi
-            fi
-		else
-			(( error_count += 1 ));
-
-			if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-				writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Unable to locate setupCmdLine.sh in ${PROFILE_ROOT}/${profile_name}. Cannot continue.";
-				writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Unable to locate setupCmdLine.sh in ${PROFILE_ROOT}/${profile_name}. Cannot continue.";
-			fi
-		fi
-	else
-		if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-			writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided profile ${profile_name} does not exist in ${PROFILE_ROOT}";
-			writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided profile ${profile_name} does not exist in ${PROFILE_ROOT}";
-		fi
-	fi
-
-	[[ -f "${tmpfile}" ]] && rm -f "${tmpfile}";
-
-	[[ -n "${profile_name}" ]] && unset -v profile_name;
-	[[ -n "${appserver_name}" ]] && unset -v appserver_name;
-	[[ -n "${tmpfile}" ]] && unset -v tmpfile;
-    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-    (( error_count != 0 )) && return_code="${error_count}";
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> exit";
-    fi
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        end_epoch="$(date +"%s")"
-        runtime=$(( end_epoch - start_epoch ));
-
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} END: $(date -d "@${end_epoch}" +"${TIMESTAMP_OPTS}")";
-        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} TOTAL RUNTIME: $(( runtime / 60)) MINUTES, TOTAL ELAPSED: $(( runtime % 60)) SECONDS";
-    fi
-
-    [[ -n "${error_count}" ]] && unset -v error_count;
-    [[ -n "${function_name}" ]] && unset -v function_name;
-
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set +x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set +v; fi
-
-    return ${return_code};
-)
-
-
-#======  FUNCTION  ============================================================
-#          NAME:  stopApplicationServer
-#   DESCRIPTION:  Stops a provided WebSphere Application Server
-#    PARAMETERS:  WAS Profile name, WAS Application Server name
-#       RETURNS:  0 if no errors/timeouts occurred, otherwise dependent on variables
-#==============================================================================
-function stopApplicationServer()
-(
-    if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-    if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
-    set +o noclobber;
-    function_name="${CNAME}#${FUNCNAME[0]}";
-    return_code=0;
-    error_count=0;
-
-    if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        start_epoch="$(date +"%s")";
-
-        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} START: $(date -d @"${start_epoch}" +"${TIMESTAMP_OPTS}")";
-        fi
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "${function_name} -> enter";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
-    fi
-
-    (( ${#} < 2 )) && return 3;
-
-	profile_name="${1}";
-	appserver_name="${2}";
-    filewatch="${3}";
-
-    if [[ -n "${filewatch}" ]] && [[ -z "${4}" ]]; then wait_time="${DEFAULT_WAIT_TIME}"; else wait_time="${4}"; fi
-    if [[ -n "${filewatch}" ]] && [[ -z "${5}" ]]; then retry_count="${DEFAULT_RETRY_COUNT}"; else retry_count="${5}"; fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-		writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "appserver_name -> ${appserver_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "filewatch -> ${filewatch}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "wait_time -> ${wait_time}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
-    fi
-
-    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-		writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "appserver_name -> ${appserver_name}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
-    fi
-
-	if [[ -d "${PROFILE_ROOT}/${profile_name}" ]]; then
-		if [[ -s "${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh" ]]; then
-			if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-				writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: ${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh";
-			fi
-
-			source ${PROFILE_ROOT}/${profile_name}/bin/setupCmdLine.sh;
-
-			if [[ -n "${USER_INSTALL_ROOT}" ]]; then
-				if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-					writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "EXEC: ${USER_INSTALL_ROOT}/bin/startServer.sh ${appserver_name}";
-				fi
-
-				if [[ -n "${watch_for_file}" ]] && [[ "${watch_for_file}" == "${_TRUE}" ]]; then
-                    waitForProcessFile "${PROCESS_WATCH_FILE}" "${wait_time}" "${retry_count}";
-                    ret_code="${?}";
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Process execution failed, ${PROCESS_WATCH_FILE} was not found after ${wait_time} over number of tries ${retry_count}";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Process execution failed, ${PROCESS_WATCH_FILE} was not found after ${wait_time} over number of tries ${retry_count}";
-                        fi
-
-                        (( error_count += 1 ));
-                    fi
-                fi
-
-                if [[ -z "${error_count}" ]] || (( error_count == 0 )); then
-                    tmpfile=$(mktemp);
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    [[ -f "${tmpfile}" ]] && cat /dev/null >| ${tmpfile};
-
-                    ${USER_INSTALL_ROOT}/bin/stopServer.sh ${appserver_name} | tee ${tmpfile};
-                    watchProvidedProcess ${!};
-                    ret_code=${?};
-
-                    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "ret_code -> ${ret_code}";
-                    fi
-
-                    if [[ -z "${ret_code}" ]] || (( ret_code != 0 )); then
-                        return_code="${ret_code}";
-
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from stopServer.sh was non-zero. Return code -> ${ret_code}";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Return code from stopServer.sh was non-zero. Return code -> ${ret_code}";
-                        else
-                            if [[ -n "$(grep -E "(ADMU0509I|STOPPED)" ${tmpfile})" ]]; then
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "INFO" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been stopped successfully.";
-                                    writeLogEntry "CONSOLE" "STDOUT" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} has been stopped successfully.";
-                                fi
-                            else
-                                (( error_count != 1 ));
-
-                                if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                                    writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} could not be stopped.";
-                                    writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server ${appserver_name} could not be stopped.";
-                                fi
-                            fi
-                        fi
-                    else
-                        if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                            writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server shutdown for ${appserver_name} timed out and was not successfully completed. Please review logs.";
-                            writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Server shutdown for ${appserver_name} timed out and was not successfully completed. Please review logs.";
-                        fi
-                    fi
-                fi
-			else
-				(( error_count != 1 ));
-
-				if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-					writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
-					writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Variable USER_INSTALL_ROOT is null. Please verify the profile name provided.";
-				fi
-            fi
-		else
-			(( error_count += 1 ));
-
-			if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-				writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Unable to locate setupCmdLine.sh in ${PROFILE_ROOT}/${profile_name}. Cannot continue.";
-				writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Unable to locate setupCmdLine.sh in ${PROFILE_ROOT}/${profile_name}. Cannot continue.";
-			fi
-		fi
-	else
-		if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-			writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided profile ${profile_name} does not exist in ${PROFILE_ROOT}";
-			writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided profile ${profile_name} does not exist in ${PROFILE_ROOT}";
-		fi
-	fi
-
-	[[ -f "${tmpfile}" ]] && rm -f "${tmpfile}";
-
-	[[ -n "${profile_name}" ]] && unset -v profile_name;
-	[[ -n "${appserver_name}" ]] && unset -v appserver_name;
-	[[ -n "${tmpfile}" ]] && unset -v tmpfile;
-    [[ -n "${ret_code}" ]] && unset -v ret_code;
-
-    (( error_count != 0 )) && return_code="${error_count}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "return_code -> ${return_code}";
@@ -598,23 +246,13 @@ function usage()
     printf "    %s: %s\n" "NOTE" "All configuration options are available in the configuration file, and may be overridden with the appropriate arguments." >&2;
     printf "    %s: %s\n" "Optional" "--config | -c <configuration file>: The location to an alternative configuration file for this utility. Default configuration file -> ${DEFAULT_CONFIG_FILE}" >&2;
     printf "        %s: %s\n" "NOTE" "While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options." >&2;
-    printf "    %s: %s\n" "Optional" "--profilename | -p <profile>: The target WebSphere Application Server profile. Default value -> ${DEFAULT_WAS_PROFILE}." >&2;
-    printf "    %s: %s\n" "Optional, required if a server name was not provided" "--serverlist </path/to/file | -l </path/to/file>: A list of servers to action against." >&2;
-    printf "            %s: %s\n" "server name" "The minimum required content, each server seperated by a newline." >&2;
-    printf "                %s: %s\n" "profile name" "The profile for the provided server. Seperated by a colon (\":\") from the server name. If not provided the default value is ${DEFAULT_PROFILE_NAME}" >&2;
-    printf "                %s: %s\n" "wait file" "A file to wait for prior to starting execution. Optional, if provided must be seperated by a colon (\":\") from the profile name. No default is provided" >&2;
-    printf "                %s: %s\n" "sleep time" "If a wait file is provided, the time to sleep between iterations looking for the file. Optional, if provided must be seperated by a colon (\":\") from the wait file. If not provided the default is ${DEFAULT_SLEEP_TIME}" >&2;
-    printf "                %s: %s\n" "retry count" "If a wait file is provided, the number of iterations to look for the file. Optional, if provided must be seperated by a colon (\":\") from the sleep count. If not provided the default is ${DEFAULT_RETRY_COUNT}" >&2;
-    printf "    %s: %s\n" "Optional, required if a server list was not provided" "--servername <server> | -s <server>: The WebSphere Application Server to action against." >&2;
-    printf "        %s: %s\n" "NOTE" "The argument for server name can be formatted in the following ways:" >&2;
-    printf "            %s: %s\n" "server name" "The minimum required content, each server seperated by the pipe character (\"|\")" >&2;
-    printf "                %s: %s\n" "profile name" "The profile for the provided server. Seperated by a colon (\":\") from the server name. If not provided the default value is ${DEFAULT_PROFILE_NAME}" >&2;
-    printf "                %s: %s\n" "wait file" "A file to wait for prior to starting execution. Optional, if provided must be seperated by a colon (\":\") from the profile name. No default is provided" >&2;
-    printf "                %s: %s\n" "sleep time" "If a wait file is provided, the time to sleep between iterations looking for the file. Optional, if provided must be seperated by a colon (\":\") from the wait file. If not provided the default is ${DEFAULT_SLEEP_TIME}" >&2;
-    printf "                %s: %s\n" "retry count" "If a wait file is provided, the number of iterations to look for the file. Optional, if provided must be seperated by a colon (\":\") from the sleep count. If not provided the default is ${DEFAULT_RETRY_COUNT}" >&2;
-    printf "    %s: %s\n" "Optional" "--wait </path/to/file> | -w </path/to/file>: Wait for a provided file to exist before executing the desired action." >&2;
-    printf "    %s: %s\n" "Optional, required of a file was provided to wait for" "--sleep <time> | -s <time>: Time to wait for the wait file to appear." >&2;
-    printf "    %s: %s\n" "Optional, required of a file was provided to wait for" "--retries <count> | -r <count>: How many times to check for the file." >&2;
+    printf "    %s: %s\n" "Optional" "--serverlist <entry-list | /path/to/file> | -l <entry-list | /path/to/file>: A list of servers to action against. This value may be specified in the configuration file." >&2;
+    printf "        %s: %s\n" "Formatting" "Multiple arguments must be separated with a space. The following formats are acceptible, and apply both to a list provided on the command line or contained within a file:" >&2;
+    printf "            %s: %s\n" "profilename:servername" "The minimum required information to action against. Default value -> ${DEFAULT_PROFILE_NAME}:${DEFAULT_SERVER_NAME}" >&2;
+    printf "            %s: %s\n" "profilename:servername:servertype" "Additionally specify the type of server. Default value -> ${DEFAULT_SERVER_TYPE}" >&2;
+    printf "            %s: %s\n" "profilename:servername:servertype:waitfile" "Additionally specify a file to wait for. No default is provided." >&2;
+    printf "            %s: %s\n" "profilename:servername:servertype:waitfile:sleep" "Additionally specify a time to sleep while waiting for the file. Only applicable if a file to wait for has been defined. Default value -> ${DEFAULT_SLEEP_TIME}" >&2;
+    printf "            %s: %s\n" "profilename:servername:servertype:waitfile:sleep:retries" "Additionally specify a retry count while waiting for the file. Only applicable if a file to wait for has been defined. Default value -> ${DEFAULT_RETRY_COUNT}" >&2;
     printf "    %s: %s\n" "Required" "--action | -a <action>: The type of process to execute. One of the following:" >&2;
     printf "        %s: %s\n" "start / startServer" "Starts the provided WebSphere Application Server" >&2;
     printf "        %s: %s\n" "stop / stopServer" "Stops the provided WebSphere Application Server" >&2;
@@ -667,17 +305,6 @@ while (( ${#} > 0 )); do
     fi
 
     case "${ARGUMENT_NAME}" in
-        profilename|p)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting TARGET_PROFILE...";
-            fi
-
-            TARGET_PROFILE="${ARGUMENT_VALUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
-            fi
-            ;;
         serverlist|l)
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting SERVER_LIST";
@@ -687,50 +314,6 @@ while (( ${#} > 0 )); do
 
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_LIST -> ${SERVER_LIST}";
-            fi
-            ;;
-        servername|s)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting TARGET_SERVER";
-            fi
-
-            TARGET_SERVER="${ARGUMENT_VALUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
-            fi
-            ;;
-        wait|w)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting WATCH_FOR_FILE";
-            fi
-
-            WATCH_FOR_FILE="${ARGUMENT_VALUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
-            fi
-            ;;
-        sleep|s)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting SLEEP_TIME";
-            fi
-
-            SLEEP_TIME="${ARGUMENT_VALUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
-            fi
-            ;;
-        retries|r)
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Setting RETRY_COUNT";
-            fi
-
-            RETRY_COUNT="${ARGUMENT_VALUE}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
             fi
             ;;
         action|a)
@@ -794,191 +377,92 @@ if [[ -n "${RETURN_CODE}" ]] && (( RETURN_CODE != 0 )); then
     fi
 else
     ## bring in any library scripts
-    ## we have this here because of the possibility of a different config file other than the default being used
-    if [[ -n "${USER_LIB_PATH}" ]] && [[ -d "${USER_LIB_PATH}" ]]; then
+    for LIBENTRY in "${SCRIPT_ROOT}"/lib/$(basename "${CNAME}" ".sh")/*.sh; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found library directory ${USER_LIB_PATH}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "LIBENTRY -> ${LIBENTRY}";
         fi
 
-        for LIBENTRY in "${SCRIPT_ROOT}"/lib/*.sh; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "LIBENTRY -> ${LIBENTRY}";
-            fi
+        [[ -z "${LIBENTRY}" ]] && continue;
 
-            [[ -z "${LIBENTRY}" ]] && continue;
-
-            if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
-
-            [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
-        done
+        if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
 
         [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
+    done
 
-        for LIBENTRY in "${USER_LIB_PATH}"/*.sh; do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "LIBENTRY -> ${LIBENTRY}";
-            fi
-
-            [[ -z "${LIBENTRY}" ]] && continue;
-
-            if [[ -r "${LIBENTRY}" ]] && [[ -s "${LIBENTRY}" ]]; then source "${LIBENTRY}"; fi
-
-            [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
-        done
-    fi
-
-    if [[ -n "${SERVER_LIST}" ]] && [[ -s "${SERVER_LIST}" ]]; then
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}";
-        fi
-
-        for SERVER_ENTRY in $(< "${SERVER_LIST}"); do
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_ENTRY -> ${SERVER_ENTRY}";
-            fi
-
-            [[ -z "${SERVER_ENTRY}" ]] && continue;
-            [[ "${SERVER_ENTRY}" =~ ^\# ]] && continue;
-
-            TARGET_SERVER="$(cut -d ":" -f 1 <<< "${SERVER_ENTRY}")";
-            TARGET_PROFILE="$(cut -d ":" -f 2 <<< "${SERVER_ENTRY}")";
-            WATCH_FOR_FILE="$(cut -d ":" -f 3 <<< "${SERVER_ENTRY}")";
-            SLEEP_TIME="$(cut -d ":" -f 4 <<< "${SERVER_ENTRY}")";
-            RETRY_COUNT="$(cut -d ":" -f 5 <<< "${SERVER_ENTRY}")";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
-            fi
-
-            [[ -z "${TARGET_SERVER}" ]] && TARGET_SERVER="${DEFAULT_SERVER_NAME}";
-            [[ -z "${TARGET_PROFILE}" ]] && TARGET_PROFILE="${DEFAULT_PROFILE_NAME}";
-
-            if [[ -n "${WATCH_FOR_FILE}" ]]; then
-                [[ -z "${SLEEP_TIME}" ]] && SLEEP_TIME="${DEFAULT_SLEEP_TIME}";
-                [[ -z "${RETRY_COUNT}" ]] && RETRY_COUNT="${DEFAULT_RETRY_COUNT}";
-            fi
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${SERVER_ENTRY} ${WATCH_FOR_FILE} ${SLEEP_TIME} ${RETRY_COUNT}";
-            fi
-
-            main "${TARGET_ACTION}" "${TARGET_PROFILE}" "${TARGET_SERVER}" "${WATCH_FOR_FILE}" "${SLEEP_TIME}" "${RETRY_COUNT}";
-            RET_CODE="${?}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
-            fi
-
-            if [[ -z "${RET_CODE}" ]] || (( RET_CODE != 0 )); then (( ERROR_COUNT +=1 )); fi
-
-            [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
-            [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
-            [[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
-            [[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
-            [[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
-            [[ -n "${SERVER_ENTRY}" ]] && unset -v SERVER_ENTRY;
-        done
+    if [[ -z "${SERVER_LIST}" ]]; then
+        TARGET_ENTRIES="${DEFAULT_PROFILE_NAME}:${DEFAULT_SERVER_NAME}:${DEFAULT_SERVER_TYPE}:${DEFAULT_WATCH_FILE}:${DEFAULT_SLEEP_TIME}:${DEFAULT_RETRY_COUNT}";
     else
-        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER}";
-        fi
-
-        if [[ "${TARGET_SERVER}" =~ "|" ]] && (( $(grep -o "|" <<< "${TARGET_SERVER}" | wc -l) != 1 )); then
-            mapfile -d "|" SERVER_LIST <<< "${TARGET_SERVER}";
-
+        if [[ -f "${SERVER_LIST}" ]]; then
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_LIST -> ${SERVER_LIST}";
+                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}";
             fi
 
-            for SERVER_ENTRY in $(${SERVER_LIST[@]}); do
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_ENTRY -> ${SERVER_ENTRY}";
-                fi
-
-                TARGET_SERVER="$(cut -d ":" -f 1 <<< "${SERVER_ENTRY}")";
-                TARGET_PROFILE="$(cut -d ":" -f 2 <<< "${SERVER_ENTRY}")";
-                WATCH_FOR_FILE="$(cut -d ":" -f 3 <<< "${SERVER_ENTRY}")";
-                SLEEP_TIME="$(cut -d ":" -f 4 <<< "${SERVER_ENTRY}")";
-                RETRY_COUNT="$(cut -d ":" -f 5 <<< "${SERVER_ENTRY}")";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
-                fi
-
-                if [[ -n "${WATCH_FOR_FILE}" ]]; then
-                    [[ -z "${SLEEP_TIME}" ]] && SLEEP_TIME="${DEFAULT_SLEEP_TIME}";
-                    [[ -z "${RETRY_COUNT}" ]] && RETRY_COUNT="${DEFAULT_RETRY_COUNT}";
-                fi
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER} ${WATCH_FOR_FILE} ${SLEEP_TIME} ${RETRY_COUNT}";
-                fi
-
-                main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}" "${WATCH_FOR_FILE}" "${SLEEP_TIME}" "${RETRY_COUNT}"
-                RET_CODE="${?}";
-
-                if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
-                fi
-
-                if [[ -z "${RET_CODE}" ]] || (( RET_CODE != 0 )); then (( ERROR_COUNT +=1 )); fi
-
-                [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
-                [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
-                [[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
-                [[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
-                [[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
-                [[ -n "${SERVER_ENTRY}" ]] && unset -v SERVER_ENTRY;
-            done
+            TARGET_ENTRIES="$(< "${SERVER_LIST}")";
         else
-            TARGET_SERVER="$(cut -d ":" -f 1 <<< "${SERVER_ENTRY}")";
-            TARGET_PROFILE="$(cut -d ":" -f 2 <<< "${SERVER_ENTRY}")";
-            WATCH_FOR_FILE="$(cut -d ":" -f 3 <<< "${SERVER_ENTRY}")";
-            SLEEP_TIME="$(cut -d ":" -f 4 <<< "${SERVER_ENTRY}")";
-            RETRY_COUNT="$(cut -d ":" -f 5 <<< "${SERVER_ENTRY}")";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
+            if [[ "${TARGET_ENTRIES}" =~ "|" ]] && (( $(grep -o "|" <<< "${TARGET_ENTRIES}" | wc -l) != 1 )); then
+                mapfile -d "|" TARGET_ENTRIES <<< "${TARGET_ENTRIES}";
+            else
+                TARGET_ENTRIES="${SERVER_LIST}";
             fi
-
-            if [[ -n "${WATCH_FOR_FILE}" ]]; then
-                [[ -z "${SLEEP_TIME}" ]] && SLEEP_TIME="${DEFAULT_SLEEP_TIME}";
-                [[ -z "${RETRY_COUNT}" ]] && RETRY_COUNT="${DEFAULT_RETRY_COUNT}";
-            fi
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${TARGET_SERVER} ${WATCH_FOR_FILE} ${SLEEP_TIME} ${RETRY_COUNT}";
-            fi
-
-            main "${TARGET_ACTION}" "${PROFILE_NAME}" "${TARGET_SERVER}" "${WATCH_FOR_FILE}" "${SLEEP_TIME}" "${RETRY_COUNT}"
-            RET_CODE="${?}";
-
-            if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
-            fi
-
-            if [[ -z "${RET_CODE}" ]] || (( RET_CODE != 0 )); then (( ERROR_COUNT +=1 )); fi
-
-            [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
-            [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
-            [[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
-            [[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
-            [[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
-            [[ -n "${SERVER_ENTRY}" ]] && unset -v SERVER_ENTRY;
         fi
     fi
+
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ENTRIES -> ${TARGET_ENTRIES}";
+    fi
+
+    for TARGET_ENTRY in $(${TARGET_ENTRIES}); do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ENTRY -> ${TARGET_ENTRY}";
+        fi
+
+        [[ -z "${TARGET_ENTRY}" ]] && continue;
+        [[ "${TARGET_ENTRY}" =~ ^\# ]] && continue;
+
+        TARGET_PROFILE="$(cut -d ":" -f 1 <<< "${TARGET_ENTRY}")";
+        TARGET_SERVER="$(cut -d ":" -f 2 <<< "${TARGET_ENTRY}")";
+        SERVER_TYPE="$(cut -d ":" -f 3 <<< "${TARGET_ENTRY}")";
+        WATCH_FOR_FILE="$(cut -d ":" -f 4 <<< "${TARGET_ENTRY}")";
+        SLEEP_TIME="$(cut -d ":" -f 5 <<< "${TARGET_ENTRY}")";
+        RETRY_COUNT="$(cut -d ":" -f 6 <<< "${TARGET_ENTRY}")";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_TYPE -> ${SERVER_TYPE}";
+        fi
+
+        if [[ -n "${WATCH_FOR_FILE}" ]]; then
+            [[ -z "${SLEEP_TIME}" ]] && SLEEP_TIME="${DEFAULT_SLEEP_TIME}";
+            [[ -z "${RETRY_COUNT}" ]] && RETRY_COUNT="${DEFAULT_RETRY_COUNT}";
+        fi
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${SERVER_ENTRY} ${SERVER_TYPE} ${WATCH_FOR_FILE} ${SLEEP_TIME} ${RETRY_COUNT}";
+        fi
+
+        main "${TARGET_ACTION}" "${TARGET_PROFILE}" "${TARGET_SERVER}" "${SERVER_TYPE}" "${WATCH_FOR_FILE}" "${SLEEP_TIME}" "${RETRY_COUNT}";
+        RET_CODE="${?}";
+
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RET_CODE -> ${RET_CODE}";
+        fi
+
+        if [[ -z "${RET_CODE}" ]] || (( RET_CODE != 0 )); then (( ERROR_COUNT +=1 )); fi
+
+        [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
+        [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
+        [[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
+        [[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
+        [[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
+        [[ -n "${SERVER_TYPE}" ]] && unset -v SERVER_TYPE;
+        [[ -n "${TARGET_ENTRY}" ]] && unset -v TARGET_ENTRY;
+    done
 
     RETURN_CODE=${ERROR_COUNT};
 

@@ -1,9 +1,9 @@
 #==============================================================================
 #
-#          FILE:  ibm-was-services@.target
+#          FILE:  ibm-ihs-services.target
 #         USAGE:  Install unit file using appropriate systemctl syntax.
 #     ARGUMENTS:  None
-#   DESCRIPTION:  systemd service to contain IBM WebSphere application servers.
+#   DESCRIPTION:  systemd timer to contain IBM HTTP Servers.
 #
 #       OPTIONS:  ---
 #  REQUIREMENTS:  ---
@@ -16,14 +16,14 @@
 #      REVISION:  ---
 #==============================================================================
 [Unit]
-Description=IBM WAS Services
+Description=IBM IHS Services
 After=default.target
-Wants=ibm-was-nodeagent@%i.service
-Wants=ibm-was-services@%i.timer
-BindsTo=ibm-was-nodeagent@%i.service
-BindsTo=ibm-was-services@%i.timer
+Wants=ibm-ihs-admin@.service
+Wants=ibm-ihs-services@%i.timer
+BindsTo=ibm-ihs-admin@.service
+BindsTo=ibm-ihs-services@%i.timer
 
 [Install]
 WantedBy=default.target
-Also=ibm-was-nodeagent@%i.service
-Also=ibm-was-services@%i.timer
+Also=ibm-ihs-admin@.service
+Also=ibm-ihs-services@%i.timer

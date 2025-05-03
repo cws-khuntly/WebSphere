@@ -21,7 +21,7 @@ PartOf=ibm-was-services@%i.target
 ReloadPropagatedFrom=ibm-was-services@%i.target
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/nfs/software/workspace/WebSphere/AppServer/scripts/servercontrol.sh -c ${CONFIG_FILE} -a start
 ExecStop=/nfs/software/workspace/WebSphere/AppServer/scripts/servercontrol.sh -c ${CONFIG_FILE} -a stop
 SuccessExitStatus=0

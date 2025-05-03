@@ -1,5 +1,5 @@
 #
-# IHS/systemd
+# AppServer/systemd
 #
 
 systemd unit files, broken down into the following structure:

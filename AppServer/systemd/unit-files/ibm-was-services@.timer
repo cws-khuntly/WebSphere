@@ -23,7 +23,7 @@ Wants=ibm-was-services@%i.target
 BindsTo=ibm-was-services@%i.service
 
 [Timer]
-OnBootSec=90
+OnBootSec=180
 Persistent=true
 Unit=ibm-was-services@%i.service
 
