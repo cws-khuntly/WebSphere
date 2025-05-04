@@ -18,20 +18,6 @@
 
 trap 'set +v; set +x' INT TERM EXIT;
 
-## load the logger
-if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
-    source "${SCRIPT_ROOT}/lib/system/logger.sh"; ## if its here, override the above and use it
-elif [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]]; then
-    source "${HOME}/lib/system/logger.sh"; ## if its here, override the above and use it
-elif [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
-    source "/usr/local/bin/logger.sh"; ## if its here, use it
-else 
-    printf "\e[00;31m%s\e[00;32m\n" "Unable to load logger. No logging enabled!" >&2;
-fi
-
-if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
-if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
-
 ## Application constants
 ARG_COUNTER=0;
 ERROR_COUNT=0;
@@ -39,6 +25,40 @@ CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
 DEFAULT_CONFIG_FILE="${SCRIPT_ROOT}/properties/servercontrol.properties";
+
+## load the logger
+if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
+    source "${SCRIPT_ROOT}/lib/system/logger.sh"; ## if its here, override the above and use it
+elif [[ -r "${HOME}/lib/system/logger.sh" ]] && [[ -s "${HOME}/lib/system/logger.sh" ]]; then
+    source "${HOME}/lib/system/logger.sh"; ## if its here, override the above and use it
+elif [[ -r "/usr/local/bin/logger.sh" ]] && [[ -s "/usr/local/bin/logger.sh" ]]; then
+    source "/usr/local/bin/logger.sh"; ## if its here, use it
+else
+    printf "\e[00;31m%s\e[00;32m\n" "Unable to load logger. No logging enabled!" >&2;
+fi
+
+if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
+if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+if [[ -d "${SCRIPT_ROOT}/lib/system" ]]; then
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found library directory ${SCRIPT_ROOT}/lib/system";
+    fi
+
+    for SYSLIB in ${SCRIPT_ROOT}/lib/system/*.sh; do
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Library ${SYSLIB}";
+        fi
+
+        [[ -z "${SYSLIB}" ]] && continue;
+        [[ "${SYSLIB}" =~ ^\# ]] && continue;
+
+        if [[ -r "${SYSLIB}" ]] && [[ -s "${SYSLIB}" ]] && \
+            [[ "$(basename "${SYSLIB}")" != "cws-profile.sh" ]] && [[ "$(basename "${SYSLIB}")" != "logger.sh" ]]; then
+            source "${SYSLIB}";
+        fi
+    done
+fi
 
 if [[ -r "${DEFAULT_CONFIG_FILE}" ]]; then
     WORKING_CONFIG_FILE="${DEFAULT_CONFIG_FILE}";
@@ -384,28 +404,26 @@ else
     done
 
     if [[ -z "${SERVER_LIST}" ]]; then
-        TARGET_ENTRIES="${DEFAULT_PROFILE_NAME}:${DEFAULT_SERVER_NAME}:${DEFAULT_SERVER_TYPE}:${DEFAULT_WATCH_FILE}:${DEFAULT_SLEEP_TIME}:${DEFAULT_RETRY_COUNT}";
+        TARGET_ENTRIES=("${DEFAULT_PROFILE_NAME}:${DEFAULT_SERVER_NAME}:${DEFAULT_SERVER_TYPE}:${DEFAULT_WATCH_FILE}:${DEFAULT_SLEEP_TIME}:${DEFAULT_RETRY_COUNT}");
     else
         if [[ -f "${SERVER_LIST}" ]]; then
             if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                 writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Loading data from ${SERVER_LIST}";
             fi
 
-            TARGET_ENTRIES="$(< "${SERVER_LIST}")";
+            mapfile -t TARGET_ENTRIES < "${SERVER_LIST}";
         else
-            if [[ "${TARGET_ENTRIES}" =~ "|" ]] && (( $(grep -o "|" <<< "${TARGET_ENTRIES}" | wc -l) != 1 )); then
-                mapfile -d "|" TARGET_ENTRIES <<< "${TARGET_ENTRIES}";
-            else
-                TARGET_ENTRIES="${SERVER_LIST}";
+            if [[ "${SERVER_LIST}" =~ | ]] && (( $(grep -o "|" <<< "${SERVER_LIST}" | wc -l) != 1 )); then
+                mapfile -d "|" -t TARGET_ENTRIES <<< "${SERVER_LIST}";
             fi
         fi
     fi
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ENTRIES -> ${TARGET_ENTRIES}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ENTRIES -> ${TARGET_ENTRIES[*]}";
     fi
 
-    for TARGET_ENTRY in $(${TARGET_ENTRIES}); do
+    for TARGET_ENTRY in "${TARGET_ENTRIES[@]}"; do
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_ENTRY -> ${TARGET_ENTRY}";
         fi

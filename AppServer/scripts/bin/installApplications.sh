@@ -56,7 +56,7 @@ function installTargetApplication()
 
     #======  FUNCTION  ============================================================
     #          NAME:  usage
-    #   DESCRIPTION:  
+    #   DESCRIPTION:
     #    PARAMETERS:  None
     #       RETURNS:  0 regardless of result.
     #==============================================================================
@@ -87,7 +87,7 @@ function installTargetApplication()
         return ${return_code};
     )
 
-    (( ${#} != 1 )) && usage;
+    if (( ${#} != 1 )); then usage; exit ${?}; fi
 
     property_file="${1}";
 
@@ -205,7 +205,7 @@ function installRequestedApplication()
 
     #======  FUNCTION  ============================================================
     #          NAME:  usage
-    #   DESCRIPTION:  
+    #   DESCRIPTION:
     #    PARAMETERS:  None
     #       RETURNS:  0 regardless of result.
     #==============================================================================
@@ -242,7 +242,7 @@ function installRequestedApplication()
         return ${return_code};
     )
 
-    (( ${#} != 7 )) && usage;
+    if (( ${#} != 7 )); then usage; exit ${?}; fi
 
     [[ -z "${DMGR_HOST_NAME}" ]] && DMGR_HOST_NAME="$(hostname -f)";
     [[ -z "${DMGR_PROFILE_CELL}" ]] && DMGR_PROFILE_CELL="dmgrCell01";
@@ -332,7 +332,7 @@ function augmentDeploymentManager()
 
     #======  FUNCTION  ============================================================
     #          NAME:  usage
-    #   DESCRIPTION:  
+    #   DESCRIPTION:
     #    PARAMETERS:  None
     #       RETURNS:  0 regardless of result.
     #==============================================================================
@@ -369,7 +369,7 @@ function augmentDeploymentManager()
         return ${return_code};
     )
 
-    (( ${#} != 7 )) && usage;
+    if (( ${#} != 7 )); then usage; exit ${?}; fi
 
     [[ -z "${DMGR_HOST_NAME}" ]] && DMGR_HOST_NAME="$(hostname -f)";
     [[ -z "${DMGR_PROFILE_CELL}" ]] && DMGR_PROFILE_CELL="dmgrCell01";

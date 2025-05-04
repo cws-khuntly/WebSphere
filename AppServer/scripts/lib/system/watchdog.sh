@@ -62,9 +62,10 @@ function watchProvidedProcess()
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "Provided arguments: ${*}";
     fi
 
-	(( ${#} != 0 )) && usage;
+    if (( ${#} != 1 )); then usage; exit ${?}; fi
 
-	(( ${#} == 1 )) && process_id="${1}";
+	process_id="${1}";
+
 	(( ${#} == 2 || ${#} == 3 )) && process_time_wait="${2}" || process_time_wait="${DEFAULT_SLEEP_TIME}";
 	(( ${#} == 3 )) && process_end_count="${3}" || process_end_count="${DEFAULT_RETRY_COUNT}";
 
