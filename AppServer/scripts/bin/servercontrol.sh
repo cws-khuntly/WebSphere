@@ -24,7 +24,8 @@ ERROR_COUNT=0;
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
-DEFAULT_CONFIG_FILE="${SCRIPT_ROOT}/properties/servercontrol.properties";
+PRIMARY_CONFIG_FILE="${SCRIPT_ROOT}/etc/$(basename "${CNAME}" ".sh")/$(basename "${CNAME}" ".sh").properties";
+SECONDARY_CONFIG_FILE="${HOME}/workspace/WebSphere/AppServer/scripts/etc/$(basename "${CNAME}" ".sh")/$(basename "${CNAME}" ".sh").properties";
 
 ## load the logger
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
@@ -37,8 +38,53 @@ else
     printf "\e[00;31m%s\e[00;32m\n" "Unable to load logger. No logging enabled!" >&2;
 fi
 
+if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+    START_EPOCH="$(date +"%s")";
+
+    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "PERFORMANCE" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} START: $(date -d @"${START_EPOCH}" +"${TIMESTAMP_OPTS}")";
+    fi
+fi
+
 if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
 if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
+
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${CNAME} starting up... Process ID ${$}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> enter";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided arguments: ${*}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "CNAME -> ${CNAME}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "METHOD_NAME -> ${METHOD_NAME}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SCRIPT_ROOT -> ${SCRIPT_ROOT}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "PRIMARY_CONFIG_FILE -> ${PRIMARY_CONFIG_FILE}";
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SECONDARY_CONFIG_FILE -> ${SECONDARY_CONFIG_FILE}";
+fi
+
+for CONFIG_FILE in "${PRIMARY_CONFIG_FILE}" "${SECONDARY_CONFIG_FILE}"; do
+    if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "CONFIG_FILE -> ${CONFIG_FILE}";
+    fi
+
+    if [[ -r "${CONFIG_FILE}" ]] && [[ -s "${CONFIG_FILE}" ]]; then
+        if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Found configuration file ${CONFIG_FILE}";
+        fi
+
+        WORKING_CONFIG_FILE="${CONFIG_FILE}";
+        source "${WORKING_CONFIG_FILE}";
+    fi
+done
+
+if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}";
+fi
+
+if [[ -z "${WORKING_CONFIG_FILE}" ]]; then
+    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
+        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "No working configuration file was located. Shutting down.";
+        writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "No working configuration file was located. Shutting down.";
+    fi
+fi
 
 if [[ -d "${SCRIPT_ROOT}/lib/system" ]]; then
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -58,28 +104,6 @@ if [[ -d "${SCRIPT_ROOT}/lib/system" ]]; then
             source "${SYSLIB}";
         fi
     done
-fi
-
-if [[ -r "${DEFAULT_CONFIG_FILE}" ]]; then
-    WORKING_CONFIG_FILE="${DEFAULT_CONFIG_FILE}";
-
-    source "${WORKING_CONFIG_FILE}";
-else
-    if [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-        writeLogEntry "FILE" "ERROR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to read base configuration file ${DEFAULT_CONFIG_FILE}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
-        writeLogEntry "CONSOLE" "STDERR" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Unable to read base configuration file ${DEFAULT_CONFIG_FILE}. Please ensure the file exists and is readable, or specify an alternate configuration file using the --config/--c argument.";
-    fi
-fi
-
-if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${CNAME} starting up... Process ID ${$}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "${FUNCTION_NAME} -> enter";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "Provided arguments: ${*}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "CNAME -> ${CNAME}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "METHOD_NAME -> ${METHOD_NAME}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SCRIPT_ROOT -> ${SCRIPT_ROOT}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "DEFAULT_CONFIG_FILE -> ${DEFAULT_CONFIG_FILE}";
-    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WORKING_CONFIG_FILE -> ${WORKING_CONFIG_FILE}";
 fi
 
 #======  FUNCTION  ============================================================
@@ -259,7 +283,7 @@ function usage()
     printf "%s %s\n" "${function_name}" "Start/stop or restart a given WebSphere Application Server instance." >&2;
     printf "%s %s\n" "Usage: ${function_name}" "[ options ]" >&2;
     printf "    %s: %s\n" "NOTE" "All configuration options are available in the configuration file, and may be overridden with the appropriate arguments." >&2;
-    printf "    %s: %s\n" "Optional" "--config | -c <configuration file>: The location to an alternative configuration file for this utility. Default configuration file -> ${DEFAULT_CONFIG_FILE}" >&2;
+    printf "    %s: %s\n" "Optional" "--config | -c <configuration file>: The location to an alternative configuration file for this utility. Default configuration file -> ${PRIMARY_CONFIG_FILE}" >&2;
     printf "        %s: %s\n" "NOTE" "While this is an optional argument, it MUST be the first positional parameter to this application in order to properly load the various configuration options." >&2;
     printf "    %s: %s\n" "Optional" "--serverlist <entry-list | /path/to/file> | -l <entry-list | /path/to/file>: A list of servers to action against. This value may be specified in the configuration file." >&2;
     printf "        %s: %s\n" "Formatting" "Multiple arguments must be separated with a space. The following formats are acceptible, and apply both to a list provided on the command line or contained within a file:" >&2;

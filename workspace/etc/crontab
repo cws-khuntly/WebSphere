@@ -1,0 +1,30 @@
+#===  CONFIGURATION  ==========================================================
+#          FILE:  crontab
+#         USAGE:  crontab -e
+#   DESCRIPTION:  skeleton file for cron jobs.
+#
+#       OPTIONS:  N/A
+#  REQUIREMENTS:  bash 4+
+#          BUGS:  ---
+#         NOTES:  Edit user crontab with crontab -e and copy/paste this content
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
+
+# shellcheck shell=sh
+
+SHELL=/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+MAILTO=${LOGNAME}
+
+#=====================================================================#
+# General                                                             #
+#=====================================================================#
+#  Minute  |  Hour  |  Day of Month  |  Month  |  Weekday  |  Command #
+#=====================================================================#
+
+# periodic workspace refresh
+0 3 * * * rsync -avz --append --safe-links --delete --temp-dir=/var/tmp --blocking-io /nfs/software/workspace/WebSphere/workspace ${HOME}
