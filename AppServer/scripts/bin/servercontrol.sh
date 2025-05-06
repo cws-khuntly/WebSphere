@@ -19,13 +19,14 @@
 trap 'set +v; set +x' INT TERM EXIT;
 
 ## Application constants
-ARG_COUNTER=0;
-ERROR_COUNT=0;
+RET_CODE=0;
+RETURN_CODE=0;
+PACKAGE_NAME="servercontrol";
 CNAME="$(basename "${BASH_SOURCE[0]}")";
 FUNCTION_NAME="${CNAME}#startup";
 SCRIPT_ROOT="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && printf "%s" "${PWD}")")";
-PRIMARY_CONFIG_FILE="${SCRIPT_ROOT}/etc/$(basename "${CNAME}" ".sh")/$(basename "${CNAME}" ".sh").properties";
-SECONDARY_CONFIG_FILE="${HOME}/workspace/WebSphere/AppServer/scripts/etc/$(basename "${CNAME}" ".sh")/$(basename "${CNAME}" ".sh").properties";
+PRIMARY_CONFIG_FILE="${SCRIPT_ROOT}/etc/${PACKAGE_NAME}/${PACKAGE_NAME}.properties";
+SECONDARY_CONFIG_FILE="${HOME}/workspace/WebSphere/AppServer/scripts/etc/${PACKAGE_NAME}/${PACKAGE_NAME}.properties";
 
 ## load the logger
 if [[ -r "${SCRIPT_ROOT}/lib/system/logger.sh" ]] && [[ -s "${SCRIPT_ROOT}/lib/system/logger.sh" ]]; then
@@ -72,6 +73,8 @@ for CONFIG_FILE in "${PRIMARY_CONFIG_FILE}" "${SECONDARY_CONFIG_FILE}"; do
 
         WORKING_CONFIG_FILE="${CONFIG_FILE}";
         source "${WORKING_CONFIG_FILE}";
+
+        break;
     fi
 done
 
