@@ -9,14 +9,16 @@ jobs:
       contents: read
     strategy:
       matrix:
-        src: [ ./AppServer/wsadmin
+        source: [ ./AppServer/wsadmin/include ./AppServer/wsadmin/scripts ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          submodules: true
+          submodules: false
       - name: Run linter
-        uses: sunnysid3up/python-linter@master
+        uses: advanced-security/python-lint-code-scanning-action@v1
         with:
-          source: ./AppServer/wsadmin
+          linter: ruff
+          python-version: 2.7
+          source: ${{ matrix.source }}
