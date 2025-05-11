@@ -1,15 +1,19 @@
-fuckit - uses: astral-sh/ruff-action@v3
-  with:
-    src: "./src"
+name: Python Linter
+on: [push, pull_request]
 
-
-steps:
- - uses: actions/checkout@v4
- - name: Python Linter
-   uses: sunnysid3up/python-linter@master
-   with:
-     source: "src"
-     mypy-options: "--ignore-missing-imports --show-error-codes"
-     pylint-options: "--rcfile=setup.cfg"
-     isort-options: "-w 100"
-     django: true
+jobs:
+  scan:
+    name: Run python linter on wsadmin code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Run linter
+        uses: sunnysid3up/python-linter@master
+        with:
+          source: ./AppServer/scripts/wsadmin
