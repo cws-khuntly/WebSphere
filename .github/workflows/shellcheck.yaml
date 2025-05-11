@@ -1,0 +1,35 @@
+name: ShellCheck
+on: [push, pull_request]
+
+jobs:
+  scan:
+    name: ShellCheck Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        env:
+          SHELLCHECK_OPTS: '-s bash'
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Shellcheck Scan
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: 'error'
+          check_together: 'yes'
+          format: gcc
+        if: ${{ success() }}
+      - name: Shellcheck SARIF Scan
+        uses: reactive-firewall/shellcheck-scan@v1
+        with:
+          match: 'bin/* functions.d/* ./AppServer/scripts/bin/* ./AppServer/scripts/lib/* ./IHS/scripts/bin/* ./IHS/scripts/lib/* ./PortalServer/scripts/bin/* ./PortalServer/scripts/bin/* **/*.sh'
+          severity: 'error'
+          shell-format: 'bash'
+          publish-artifacts: true
+          format: gcc
+        if: ${{ success() }}
