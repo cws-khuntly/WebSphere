@@ -19,6 +19,12 @@ jobs:
       - name: Run linter
         uses: advanced-security/python-lint-code-scanning-action@v1
         with:
-          linter: ruff
+          linter: pylint
+          python-version: 2.7
+          source: ${{ matrix.source }}
+      - name: Run typechecker
+        uses: advanced-security/python-lint-code-scanning-action@v1
+        with:
+          linter: pytype
           python-version: 2.7
           source: ${{ matrix.source }}
