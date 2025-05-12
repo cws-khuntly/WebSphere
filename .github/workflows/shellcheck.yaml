@@ -9,6 +9,9 @@ jobs:
       security-events: write
       actions: read
       contents: read
+    strategy:
+      matrix:
+        match: [ bin/* functions.d/* ./AppServer/scripts/bin/* ./AppServer/scripts/lib/* ./IHS/scripts/bin/* ./IHS/scripts/lib/* ./PortalServer/scripts/bin/* ./PortalServer/scripts/bin/* **/*.sh ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,14 +25,14 @@ jobs:
         with:
           severity: 'error'
           check_together: 'yes'
-          format: gcc
+          format: 'gcc'
         if: ${{ success() }}
       - name: Shellcheck SARIF Scan
         uses: reactive-firewall/shellcheck-scan@v1
         with:
-          match: 'bin/* functions.d/* ./AppServer/scripts/bin/* ./AppServer/scripts/lib/* ./IHS/scripts/bin/* ./IHS/scripts/lib/* ./PortalServer/scripts/bin/* ./PortalServer/scripts/bin/* **/*.sh'
+          match: ${{ matrix.match }}
           severity: 'error'
           shell-format: 'bash'
           publish-artifacts: true
-          format: gcc
+          format: 'gcc'
         if: ${{ success() }}
