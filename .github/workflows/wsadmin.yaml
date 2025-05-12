@@ -8,6 +8,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      checks: write
     strategy:
       matrix:
         source: [ ./AppServer/wsadmin/include ./AppServer/wsadmin/scripts ]
