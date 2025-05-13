@@ -15,13 +15,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        env:
-          SHELLCHECK_OPTS: '-s bash'
         with:
           persist-credentials: false
-          submodules: true
+          submodules: false
       - name: Shellcheck Scan
         uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: '-x -s bash'
         with:
           severity: 'error'
           check_together: 'yes'
@@ -31,8 +31,8 @@ jobs:
         uses: reactive-firewall/shellcheck-scan@v1
         with:
           match: ${{ matrix.match }}
-          severity: 'error'
+          severity: 'warning'
           shell-format: 'bash'
           publish-artifacts: true
-          format: 'gcc'
+          format: 'json'
         if: ${{ success() }}
