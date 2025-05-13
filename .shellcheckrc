@@ -25,3 +25,8 @@ enable=check-unassigned-uppercase
 
 # require curly braces 
 enable=require-variable-braces
+
+#
+# a warning said to do this
+#
+check-extra-masked-returns
