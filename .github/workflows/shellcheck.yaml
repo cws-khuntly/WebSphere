@@ -23,7 +23,7 @@ jobs:
         env:
           SHELLCHECK_OPTS: '-x -s bash'
         with:
-          additional_files: './AppServer/scripts/bin/*'
+          additional_files: ${{ matrix.match }}
           severity: 'error'
           check_together: 'yes'
           format: 'gcc'
