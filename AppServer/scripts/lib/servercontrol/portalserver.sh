@@ -92,7 +92,7 @@ function startPortalServer()
                     [[ -f "${tmpfile}" ]] && cat /dev/null >| ${tmpfile};
 
                     ${USER_INSTALL_ROOT}/bin/startServer.sh "${appserver_name}" | tee ${tmpfile};
-                    watchProvidedProcess ${!} ${wait_time} ${retry_count};
+                    watchProcessID ${!} ${wait_time} ${retry_count};
                     ret_code=${?};
 
                     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
