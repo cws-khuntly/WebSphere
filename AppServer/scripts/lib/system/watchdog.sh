@@ -16,12 +16,12 @@
 #      REVISION:  ---
 #==============================================================================
 
-#======  FUNCTION  ============================================================;
-#          NAME:  watchProvidedProcess;
-#   DESCRIPTION:  Watches a provided process for a given amount of time;
-#    PARAMETERS:  None;
-#       RETURNS:  0 if no errors, 1 otherwise;
-#==============================================================================;
+#======  FUNCTION  ============================================================
+#          NAME:  watchProvidedProcess
+#   DESCRIPTION:  Watches a provided process for a given amount of time
+#    PARAMETERS:  None
+#       RETURNS:  0 if no errors, 1 otherwise
+#==============================================================================
 function watchForProcessID()
 {
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
