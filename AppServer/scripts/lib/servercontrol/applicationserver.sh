@@ -11,9 +11,18 @@ function startApplicationServer()
     if [[ -n "${ENABLE_VERBOSE}" ]] && [[ "${ENABLE_VERBOSE}" == "${_TRUE}" ]]; then set -x; fi
     if [[ -n "${ENABLE_TRACE}" ]] && [[ "${ENABLE_TRACE}" == "${_TRUE}" ]]; then set -v; fi
 
-    function_name="${CNAME}#${FUNCNAME[0]}";
-    return_code=0;
-    error_count=0;
+    local cname="servercontrol.sh";
+    local function_name="${CNAME}#${FUNCNAME[0]}";
+    local return_code=0;
+    local error_count=0;
+    local profile_name;
+    local appserver_name;
+    local watch_data;
+    local watch_type;
+    local watch_host;
+    local watch_port;
+    local wait_time;
+    local retry_count;
 
     if [[ -n "${ENABLE_PERFORMANCE}" ]] && [[ "${ENABLE_PERFORMANCE}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         start_epoch="$(date +"%s")";
@@ -39,7 +48,8 @@ function startApplicationServer()
     fi
 
     if (( ${#} >= 3 )); then
-        watch_type="${3}";
+        watch_data="${3}";
+        watch_type="$(cut -d ":" -f 1 <<< "${watch_data}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_type -> ${watch_type}";
@@ -47,30 +57,34 @@ function startApplicationServer()
 
         case "${watch_type}" in
             "[Ff][Ii][Ll][Ee]")
-                (( ${#} != 4 )) && return 3;
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) != 2 )) && return 3;
 
-                watch_file="${4}";
+                watch_file="$(cut -d ":" -f 2 <<< "${watch_data}")";
+
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) >= 3 )) && wait_time="$(cut -d ":" -f 3 <<< "${wait_data}")" || wait_time="${DEFAULT_WAS_WAIT}";
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) >= 4 )) && retry_count="$(cut -d ":" -f 4 <<< "${wait_data}")" || retry_count="${DEFAULT_RETRY_COUNT}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_file -> ${watch_file}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "wait_time -> ${wait_time}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
                 fi
-
-                (( ${#} <= 4 )) && wait_time="${DEFAULT_WAS_WAIT}" || wait_time="${5}";
-                (( ${#} <= 5 )) && wait_time="${DEFAULT_WAS_WAIT}" || wait_time="${6}";
                 ;;
             "[Tt][Cc][Pp]|[Uu][Dd][Pp]")
-                (( ${#} != 5 )) && return 3;
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) != 3 )) && return 3;
 
-                watch_host="${4}";
-                watch_port="${5}";
+                watch_host="$(cut -d ":" -f 2 <<< "${watch_data}")";
+                watch_port="$(cut -d ":" -f 3 <<< "${watch_data}")";
+
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) >= 3 )) && wait_time="$(cut -d ":" -f 3 <<< "${wait_data}")" || wait_time="${DEFAULT_WAS_WAIT}";
+                (( $(tr ":" "\n" <<< "${watch_data}" | wc -l) >= 4 )) && retry_count="$(cut -d ":" -f 4 <<< "${wait_data}")" || retry_count="${DEFAULT_RETRY_COUNT}";
 
                 if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
-                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_host -> ${watch_host}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_file -> ${watch_host}";
                     writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_port -> ${watch_port}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "wait_time -> ${wait_time}";
+                    writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
                 fi
-
-                (( ${#} <= 5 )) && wait_time="${DEFAULT_WAS_WAIT}" || wait_time="${6}";
-                (( ${#} <= 6 )) && wait_time="${DEFAULT_WAS_WAIT}" || wait_time="${7}";
                 ;;
         esac
     fi
