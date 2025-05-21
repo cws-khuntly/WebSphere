@@ -143,18 +143,14 @@ function main()
     profile_name="${2}";
     server_name="${3}";
     server_type="${4}";
-    watch_for_file="${5}";
-    sleep_count="${6}";
-    retry_count="${7}";
+    watch_data="${5}";
 
     if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "action_name -> ${action_name}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "profile_name -> ${profile_name}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "server_name -> ${server_name}";
         writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "server_type -> ${server_type}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_for_file -> ${watch_for_file}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "sleep_count -> ${sleep_count}";
-        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "retry_count -> ${retry_count}";
+        writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${function_name}" "watch_data -> ${watch_data}";
     fi
 
     case "${action_name}" in
@@ -168,8 +164,8 @@ function main()
 
             [[ "${server_type}" =~ [Dd][Mm][Gg][Rr] ]] && startDeploymentManager;
             [[ "${server_type}" =~ [Nn][Oo][Dd][Ee][Aa][Gg][Ee][Nn][Tt] ]] && startNodeAgent;
-            [[ "${server_type}" =~ [Aa][Pp][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
-            [[ "${server_type}" =~ [Pp][Oo][Rr][Tt][Aa][Ll]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_for_file}" "${sleep_count}" "${retry_count}";
+            [[ "${server_type}" =~ [Aa][Pp][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startApplicationServer "${profile_name}" "${server_name}" "${watch_data}";
+            [[ "${server_type}" =~ [Pp][Oo][Rr][Tt][Aa][Ll]_[Ss][Ee][Rr][Vv][Ee][Rr] ]] && startPortalServer "${profile_name}" "${server_name}" "${watch_data}";
             ret_code="${?}";
 
             function_name="${CNAME}#${FUNCNAME[0]}";
@@ -461,31 +457,21 @@ else
         TARGET_PROFILE="$(cut -d ":" -f 1 <<< "${TARGET_ENTRY}")";
         TARGET_SERVER="$(cut -d ":" -f 2 <<< "${TARGET_ENTRY}")";
         SERVER_TYPE="$(cut -d ":" -f 3 <<< "${TARGET_ENTRY}")";
-        WATCH_FOR_FILE="$(cut -d ":" -f 4 <<< "${TARGET_ENTRY}")";
-        SLEEP_TIME="$(cut -d ":" -f 5 <<< "${TARGET_ENTRY}")";
-        RETRY_COUNT="$(cut -d ":" -f 6 <<< "${TARGET_ENTRY}")";
+        WATCH_DATA="$(cut -d ":" -f 4 <<< "${TARGET_ENTRY}")";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_PROFILE -> ${TARGET_PROFILE}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "TARGET_SERVER -> ${TARGET_SERVER}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_FOR_FILE -> ${WATCH_FOR_FILE}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SERVER_TYPE -> ${SERVER_TYPE}";
-        fi
-
-        if [[ -n "${WATCH_FOR_FILE}" ]]; then
-            [[ -z "${SLEEP_TIME}" ]] && SLEEP_TIME="${DEFAULT_SLEEP_TIME}";
-            [[ -z "${RETRY_COUNT}" ]] && RETRY_COUNT="${DEFAULT_RETRY_COUNT}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "WATCH_DATA -> ${WATCH_DATA}";
         fi
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "SLEEP_TIME -> ${SLEEP_TIME}";
             writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "RETRY_COUNT -> ${RETRY_COUNT}";
-            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${SERVER_ENTRY} ${SERVER_TYPE} ${WATCH_FOR_FILE} ${SLEEP_TIME} ${RETRY_COUNT}";
+            writeLogEntry "FILE" "DEBUG" "${$}" "${CNAME}" "${LINENO}" "${FUNCTION_NAME}" "EXEC: main ${TARGET_ACTION} ${PROFILE_NAME} ${SERVER_ENTRY} ${SERVER_TYPE} ${WATCH_DATA}";
         fi
 
-        main "${TARGET_ACTION}" "${TARGET_PROFILE}" "${TARGET_SERVER}" "${SERVER_TYPE}" "${WATCH_FOR_FILE}" "${SLEEP_TIME}" "${RETRY_COUNT}";
+        main "${TARGET_ACTION}" "${TARGET_PROFILE}" "${TARGET_SERVER}" "${SERVER_TYPE}" "${WATCH_DATA}";
         RET_CODE="${?}";
 
         if [[ -n "${ENABLE_DEBUG}" ]] && [[ "${ENABLE_DEBUG}" == "${_TRUE}" ]] && [[ "${LOGGING_LOADED}" == "${_TRUE}" ]]; then
@@ -496,11 +482,7 @@ else
 
         [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
         [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
-        [[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
-        [[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
-        [[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
-        [[ -n "${SERVER_TYPE}" ]] && unset -v SERVER_TYPE;
-        [[ -n "${TARGET_ENTRY}" ]] && unset -v TARGET_ENTRY;
+        [[ -n "${WATCH_DATA}" ]] && unset -v WATCH_DATA;
     done
 
     RETURN_CODE=${ERROR_COUNT};
@@ -517,9 +499,7 @@ fi
 [[ -n "${SERVER_LIST}" ]] && unset -v SERVER_LIST;
 [[ -n "${TARGET_PROFILE}" ]] && unset -v TARGET_PROFILE;
 [[ -n "${TARGET_SERVER}" ]] && unset -v TARGET_SERVER;
-[[ -n "${WATCH_FOR_FILE}" ]] && unset -v WATCH_FOR_FILE;
-[[ -n "${SLEEP_TIME}" ]] && unset -v SLEEP_TIME;
-[[ -n "${RETRY_COUNT}" ]] && unset -v RETRY_COUNT;
+[[ -n "${WATCH_DATA}" ]] && unset -v WATCH_DATA;
 [[ -n "${TARGET_ACTION}" ]] && unset -v TARGET_ACTION;
 [[ -n "${LIBENTRY}" ]] && unset -v LIBENTRY;
 [[ -n "${USER_LIB_PATH}" ]] && unset -v USER_LIB_PATH;
