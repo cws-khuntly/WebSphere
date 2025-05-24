@@ -1,0 +1,18 @@
+#======  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+#=============================================================================
+---
+- name: Add DNS admin users
+  hosts: all
+  tasks:
+    - name: Add user accounts
+      include_role:
+        name: create_accounts
+
+- name: Install software
+  hosts: all
+  tasks:
+    - name: Install software
+      include_role:
+        name: install_software
