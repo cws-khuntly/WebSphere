@@ -3,3 +3,5 @@
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
+was_install_path: /opt/IBM/WebSphere/AppServer
+was_profiles_path: /opt/IBM/WebSphere/profiles
