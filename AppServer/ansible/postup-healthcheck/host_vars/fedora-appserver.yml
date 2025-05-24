@@ -1,8 +1,7 @@
 #=====  ANSIBLE   =============================================================
-#          NAME:  host_vars/all/host1.yml
+#          NAME:  host_vars/fedora-appserver.yml
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
-service_account: wasadm
 was_servers:
   - AppSrv01
