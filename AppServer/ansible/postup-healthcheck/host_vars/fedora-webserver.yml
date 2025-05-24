@@ -1,0 +1,8 @@
+#=====  ANSIBLE   =============================================================
+#          NAME:  host_vars/fedora-eebserver.yml
+#   DESCRIPTION:  Common variables that apply to this play
+#==============================================================================
+---
+server_list:
+  - admin
+  - AppSrv
