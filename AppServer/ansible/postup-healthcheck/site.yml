@@ -3,16 +3,10 @@
 #   DESCRIPTION:  Entry point for playbook
 #=============================================================================
 ---
-- name: Add DNS admin users
-  hosts: all
+- name: Run postup healthcheck
+  hosts: webservers
   tasks:
-    - name: Add user accounts
+    - name: postup
       include_role:
-        name: create_accounts
-
-- name: Install software
-  hosts: all
-  tasks:
-    - name: Install software
-      include_role:
-        name: install_software
+        name: postup
+        name: healthcheck
