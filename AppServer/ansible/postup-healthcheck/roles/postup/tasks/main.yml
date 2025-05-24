@@ -6,4 +6,5 @@
 - name: Verify systemd start
   tasks:
     include_tasks:
-      file: systemd.yml
+      - tasks/systemd.yml
+      - tasks/check-processtable.yml
