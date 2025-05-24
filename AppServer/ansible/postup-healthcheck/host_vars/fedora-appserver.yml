@@ -3,5 +3,5 @@
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
-servers:
+server_list:
   - AppSrv01
