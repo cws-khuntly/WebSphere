@@ -1,1 +1,5 @@
-# temp
+#=====  ANSIBLE   =============================================================
+#          NAME:  group_vars/all/main.yml
+#   DESCRIPTION:  Common variables that apply to this play
+#==============================================================================
+---

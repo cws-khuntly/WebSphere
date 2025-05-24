@@ -3,5 +3,7 @@
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
+service_account: wasadm
 server_list:
+  - nodeagent
   - AppSrv01

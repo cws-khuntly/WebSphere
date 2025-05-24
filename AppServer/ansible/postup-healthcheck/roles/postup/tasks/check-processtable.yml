@@ -1,0 +1,17 @@
+#======  ANSIBLE  ============================================================
+#          NAME:  tasks/check-processtable.yml
+#   DESCRIPTION:  Primary entry point for this play
+#==============================================================================
+---
+- name: Check if WAS is running
+  ansible.builtin.shell:
+    cmd: ps -ef | grep java | grep {{ item }} | grep -v grep
+  with_items: {{ server_list }}
+  register: was_processes
+  changed_when: false
+  failed_when: was_processes.stdout_lines | length == 0
+
+- name: Notify handler if failures occurred
+  ansible.builtin.notify:
+    - pid_check_failed
+  when: was_results.failed

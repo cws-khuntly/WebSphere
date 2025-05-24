@@ -1,9 +1,5 @@
 #======  ANSIBLE  ============================================================
-#          NAME:  host_vars/fedora-portalserver.yml
+#          NAME:  handlers/main.yml
 #   DESCRIPTION:  Handles installation of system configuration
 #==============================================================================
 ---
-service_account: wasadm
-server_list:
-  - Search01
-  - WebSphere_Portal

@@ -1,9 +1,8 @@
 #=====  ANSIBLE   =============================================================
-#          NAME:  group_vars/all/main.yml
+#          NAME:  host_vars/fedora-dmserver.yml
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
 service_account: wasadm
-install_path: /opt/IBM/WebSphere/AppServer
-profiles_path: /opt/IBM/WebSphere/profiles
-
+server_list:
+  - dmgr

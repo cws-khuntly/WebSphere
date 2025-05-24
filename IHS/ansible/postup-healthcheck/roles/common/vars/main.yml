@@ -3,7 +3,7 @@
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
-service_account: wasadm
-install_path: /opt/IBM/WebSphere/AppServer
-profiles_path: /opt/IBM/WebSphere/profiles
+service_account: ihsadm
+install_path: /opt/IBM/HTTPServer
+profiles_path: /opt/IBM/HTTPServer/conf.d
 
