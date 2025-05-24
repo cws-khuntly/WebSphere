@@ -3,6 +3,6 @@
 #   DESCRIPTION:  Handles installation of system configuration
 #==============================================================================
 ---
-was_servers:
+servers:
   - Search01
   - WebSphere_Portal
