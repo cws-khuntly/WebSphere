@@ -3,3 +3,6 @@
 #   DESCRIPTION:  Common variables that apply to this play
 #==============================================================================
 ---
+service_account: wasadm
+was_servers:
+  - AppSrv01
