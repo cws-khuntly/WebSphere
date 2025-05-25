@@ -1,7 +1,7 @@
-#======  ANSIBLE  ============================================================
-#          NAME:  host_vars/fedora-portalserver.yml
-#   DESCRIPTION:  Handles installation of system configuration
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
 service_account: wasadm
 server_list:

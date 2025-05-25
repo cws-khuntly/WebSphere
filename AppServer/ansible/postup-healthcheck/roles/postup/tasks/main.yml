@@ -1,10 +1,11 @@
-#======  ANSIBLE  ============================================================
-#          NAME:  tasks/main.yml
-#   DESCRIPTION:  Primary entry point for this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
-- name: Verify systemd start
-  tasks:
-    include_tasks:
-      - tasks/systemd.yml
-      - tasks/check-processtable.yml
+- name: Main entry point for postup
+  ansible.builtin.include_tasks:
+    file: "{{ item }}"
+  loop:
+    - systemd.yml
+    - check-processtable.yml

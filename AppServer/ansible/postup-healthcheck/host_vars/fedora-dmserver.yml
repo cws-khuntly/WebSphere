@@ -1,7 +1,7 @@
-#=====  ANSIBLE   =============================================================
-#          NAME:  host_vars/fedora-dmserver.yml
-#   DESCRIPTION:  Common variables that apply to this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
 service_account: wasadm
 server_list:

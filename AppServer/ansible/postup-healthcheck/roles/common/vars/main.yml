@@ -1,7 +1,7 @@
-#=====  ANSIBLE   =============================================================
-#          NAME:  group_vars/all/main.yml
-#   DESCRIPTION:  Common variables that apply to this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
 service_account: wasadm
 install_path: /opt/IBM/WebSphere/AppServer

@@ -1,7 +1,7 @@
-#======  ANSIBLE  ============================================================
-#          NAME:  tasks/main.yml
-#   DESCRIPTION:  Primary entry point for this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
 - name: Check if WebSphere Application Server nodeagent started
   ansible.builtin.systemd_service:
