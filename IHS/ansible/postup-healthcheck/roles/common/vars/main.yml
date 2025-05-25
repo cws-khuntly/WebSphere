@@ -4,6 +4,5 @@
 # ============================================================================
 ---
 service_account: wasadm
-install_path: /opt/IBM/WebSphere/AppServer
-profiles_path: /opt/IBM/WebSphere/profiles
-
+install_path: /opt/IBM/HTTPServer
+profiles_path: /opt/IBM/HTTPServer/conf.d

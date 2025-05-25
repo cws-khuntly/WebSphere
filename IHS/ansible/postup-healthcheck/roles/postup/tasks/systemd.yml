@@ -3,13 +3,13 @@
 #   DESCRIPTION:  Entry point for playbook
 # ============================================================================
 ---
-- name: Check if IBM HTTP Administration Server started
+- name: Check if IBM HTTP Administration Server nodeagent started
   ansible.builtin.systemd_service:
     name: ibm-ihs-admin.service
     state: started
   register: ihs_admin_status
 
-- name: IBM HTTP Administration Server status
+- name: IBM HTTP Administration status
   fail:
     msg: |
       Service ibm-ihs-admin.service is not running.
@@ -22,13 +22,13 @@
   ansible.builtin.systemd_service:
     name: ibm-ihs-services.target
     state: started
-  register: ihstarget_status
+  register: ihs_services_status
 
 - name: IBM HTTP Server target status
   fail:
     msg: |
       Service target ibm-ihs-services.target is not running.
       Output of `ibm-ihs-services.target`:
-      {{ ihstarget_status.stdout }}
-      {{ ihstarget_status.stderr }}
-  when: ihstarget_status | failed
+      {{ ihs_services_status.stdout }}
+      {{ ihs_services_status.stderr }}
+  when: ihs_services_status | failed

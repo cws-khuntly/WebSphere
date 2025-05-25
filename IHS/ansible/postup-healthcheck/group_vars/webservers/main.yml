@@ -2,8 +2,4 @@
 #          NAME:  site.yml
 #   DESCRIPTION:  Entry point for playbook
 # ============================================================================
-appservers:
-  hosts:
-    fedora-dmserver.mgmt.caspersbox.com:
-    fedora-appserver.mgmt.caspersbox.com:
-    fedora-portalserver.mgmt.caspersbox.com:
+---

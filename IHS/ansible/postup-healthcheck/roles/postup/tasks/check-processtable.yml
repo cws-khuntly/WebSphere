@@ -5,7 +5,7 @@
 ---
 - name: Check if IHS is running
   ansible.builtin.shell:
-    cmd: ps -ef | grep httpd | grep {{ item }} | grep -v grep
+    cmd: ps -ef | grep httpd | grep {{ install_path }} | grep {{ item }} | grep -v grep
   with_items: "{{ server_list }}"
   register: ihs_processes
   changed_when: false
@@ -14,4 +14,4 @@
 - name: Notify handler if failures occurred
   ansible.builtin.notify:
     - pid_check_failed
-  when: ihs_processes.failed
+  when: ihs_results.failed

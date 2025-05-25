@@ -7,7 +7,7 @@
 
   pre_tasks:
 
-  hosts: appservers
+  hosts: webservers
   roles:
     - postup
     - healthcheck
