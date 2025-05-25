@@ -1,34 +1,34 @@
-#======  ANSIBLE  ============================================================
-#          NAME:  tasks/systemd.yml
-#   DESCRIPTION:  Primary entry point for this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
-- name: Check if IBM HTTP Administration  Server is started
-  command: systemctl status ibm-ihs-admin.service
-  ignore_errors: yes
-  changed_when: false
-  register: service_ihsadm_status
+- name: Check if IBM HTTP Administration Server started
+  ansible.builtin.systemd_service:
+    name: ibm-ihs-admin.service
+    state: started
+  register: ihs_admin_status
 
 - name: IBM HTTP Administration Server status
   fail:
     msg: |
       Service ibm-ihs-admin.service is not running.
-      Output of `systemctl status inm-ihs-admin.service`:
-      {{ service_ihsadm_status.stdout }}
-      {{ service_nodeagent_status.stderr }}
-  when: service_ihsadm_status | failed
+      Output of `systemctl status ibm-ihs-admin.service`:
+      {{ ihs_admin_status.stdout }}
+      {{ ihs_admin_status.stderr }}
+  when: ihs_admin_status | failed
 
-- name: Check if IBM HTTP Server services target started
-  command: systemctl status ibm-ihs-services.target
-  ignore_errors: yes
-  changed_when: false
-  register: service_ihsservices_status
+- name: Check if IBM HTTP Server target started
+  ansible.builtin.systemd_service:
+    name: ibm-ihs-services.target
+    state: started
+  register: ihstarget_status
 
-- name: IBM HTTP Server services target status
+- name: IBM HTTP Server target status
   fail:
     msg: |
-      Service target ibm-was-services.target is not running.
+      Service target ibm-ihs-services.target is not running.
       Output of `ibm-ihs-services.target`:
-      {{ service_ihsservives_status.stdout }}
-      {{ service_wasprofile_status.stderr }}
-  when: service_ihservices_status | failed
+      {{ ihstarget_status.stdout }}
+      {{ ihstarget_status.stderr }}
+  when: ihstarget_status | failed

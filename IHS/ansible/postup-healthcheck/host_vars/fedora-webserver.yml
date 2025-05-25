@@ -1,9 +1,9 @@
-#=====  ANSIBLE   =============================================================
-#          NAME:  host_vars/fedora-eebserver.yml
-#   DESCRIPTION:  Common variables that apply to this play
-#==============================================================================
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
 ---
-service_account: ihsadm
+service_account: wasadm
 server_list:
-  - admin
-  - AppSrv
+  - nodeagent
+  - AppSrv01

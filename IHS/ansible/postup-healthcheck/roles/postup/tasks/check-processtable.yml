@@ -1,0 +1,17 @@
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
+---
+- name: Check if IHS is running
+  ansible.builtin.shell:
+    cmd: ps -ef | grep httpd | grep {{ item }} | grep -v grep
+  with_items: "{{ server_list }}"
+  register: ihs_processes
+  changed_when: false
+  failed_when: ihs_processes.stdout_lines | length == 0
+
+- name: Notify handler if failures occurred
+  ansible.builtin.notify:
+    - pid_check_failed
+  when: ihs_processes.failed
