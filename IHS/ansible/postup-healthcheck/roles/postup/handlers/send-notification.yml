@@ -14,4 +14,4 @@
     subject: "{{ message_subject }}"
     to: "{{ message_to }}"
   delegate_to: localhost
-  listen: pid-check-failed
+  listen: send-notification
