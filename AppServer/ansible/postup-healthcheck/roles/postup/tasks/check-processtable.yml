@@ -9,9 +9,8 @@
   with_items: "{{ server_list }}"
   register: was_processes
   changed_when: false
-  failed_when: was_processes.stdout_lines | length == 0
 
 - name: Notify handler if failures occurred
   ansible.builtin.notify:
     - pid_check_failed
-  when: was_results.failed
+  when: {{ was_processes.stdout_lines | length == 0 }}
