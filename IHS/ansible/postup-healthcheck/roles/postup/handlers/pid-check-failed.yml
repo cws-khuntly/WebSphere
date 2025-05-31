@@ -10,7 +10,7 @@
     port: 587
     username: "{{ smtp_username }}"
     password: "{{ smtp_password }}"
-    sender: "{{ smtp_username }}'
+    sender: "{{ smtp_username }}"
     subject: "{{ message_subject }}"
     to: "{{ message_to }}"
   delegate_to: localhost
