@@ -10,7 +10,7 @@
   register: nodeagent_status
 
 - name: WebSphere Application Server nodeagent status
-  fail:
+  ansible.builtin.fail:
     msg: |
       Service ibm-was-nodeagent is not running.
       Output of `systemctl status inm-was-nodeagent@{{ was_profile_name }}.service`:
@@ -25,7 +25,7 @@
   register: wasprofile_status
 
 - name: WebSphere Application Server target status
-  fail:
+  ansible.builtin.fail:
     msg: |
       Service target ibm-was-services@{{ was_profile_name }}.target is not running.
       Output of `ibm-was-services@{{ was_profile_name }}.target`:
