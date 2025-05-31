@@ -10,7 +10,7 @@
   register: ihs_admin_status
 
 - name: IBM HTTP Administration status
-  fail:
+  ansible.builtin.fail:
     msg: |
       Service ibm-ihs-admin.service is not running.
       Output of `systemctl status ibm-ihs-admin.service`:
@@ -25,7 +25,7 @@
   register: ihs_services_status
 
 - name: IBM HTTP Server target status
-  fail:
+  ansible.builtin.fail:
     msg: |
       Service target ibm-ihs-services.target is not running.
       Output of `ibm-ihs-services.target`:
