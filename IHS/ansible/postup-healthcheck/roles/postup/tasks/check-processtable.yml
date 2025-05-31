@@ -11,5 +11,9 @@
   changed_when: false
 
 - name: Send an alert if no processes are found
+  vars:
+    message_to: kmhuntly+alerts@gmail com
+    message_subject: "Post-boot process check for IHS failed"
+    message_body: "Post-boot process check for httpd on {{ target_hostname }} found no results"
   notify: pid-check-failed
   when: ihs_processes.pids is not defined
