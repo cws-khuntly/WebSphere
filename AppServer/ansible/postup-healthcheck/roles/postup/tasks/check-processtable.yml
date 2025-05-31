@@ -13,4 +13,4 @@
 - name: Notify handler if failures occurred
   ansible.builtin.notify:
     - pid_check_failed
-  when: {{ was_processes.stdout_lines | length == 0 }}
+  when: {{ was_processes | length == 0 }}
