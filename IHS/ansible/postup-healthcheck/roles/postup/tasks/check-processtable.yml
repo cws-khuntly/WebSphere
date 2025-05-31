@@ -4,13 +4,13 @@
 # ============================================================================
 ---
 - name: Check if IHS is running
-  ansible.builtin.shell:
-    cmd: ps -ef | grep httpd | grep {{ item }} | grep -v grep
+  community.general.pids:
+    pattern: "(httpd|{{ item }})"
   loop: "{{ server_list }}"
   register: ihs_processes
   changed_when: false
 
-- name: Notify handler if failures occurred
+- name: Send an alert if no processes are found
   ansible.builtin.notify:
     - pid_check_failed
-  when: {{ ihs_processes | length == 0 }}
+  when: ihs_processes.pids is not defined
