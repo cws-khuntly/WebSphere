@@ -1,8 +1,0 @@
-# =====  ANSIBLE  ============================================================
-#          NAME:  site.yml
-#   DESCRIPTION:  Entry point for playbook
-# ============================================================================
----
-common_service_account: wasadm
-conmon_install_path: /opt/IBM/WebSphere/AppServer
-common_profiles_path: /opt/IBM/WebSphere/profiles
