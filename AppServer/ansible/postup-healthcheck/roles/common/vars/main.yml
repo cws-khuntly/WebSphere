@@ -3,7 +3,6 @@
 #   DESCRIPTION:  Entry point for playbook
 # ============================================================================
 ---
-service_account: wasadm
-install_path: /opt/IBM/WebSphere/AppServer
-profiles_path: /opt/IBM/WebSphere/profiles
-
+common_service_account: wasadm
+conmon_install_path: /opt/IBM/WebSphere/AppServer
+common_profiles_path: /opt/IBM/WebSphere/profiles
