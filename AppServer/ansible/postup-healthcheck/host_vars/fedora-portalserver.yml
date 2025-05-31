@@ -1,9 +1,0 @@
-# =====  ANSIBLE  ============================================================
-#          NAME:  site.yml
-#   DESCRIPTION:  Entry point for playbook
-# ============================================================================
----
-service_account: wasadm
-server_list:
-  - Search01
-  - WebSphere_Portal
