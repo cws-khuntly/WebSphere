@@ -6,9 +6,6 @@
 - name: Check if WAS is running
   community.general.pids:
     pattern: "(java|{{ item }})"
-  register: was_processes
-  ansible.builtin.shell:
-    cmd: ps -ef | grep java | grep {{ item }} | grep -v grep
   loop: "{{ server_list }}"
   register: was_processes
   changed_when: false
