@@ -6,7 +6,7 @@
 - name: Check if WAS is running
   ansible.builtin.shell:
     cmd: ps -ef | grep java | grep {{ item }} | grep -v grep
-  with_items: "{{ server_list }}"
+  loop: "{{ server_list }}"
   register: was_processes
   changed_when: false
 
