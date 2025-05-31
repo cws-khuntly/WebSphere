@@ -1,0 +1,8 @@
+# =====  ANSIBLE  ============================================================
+#          NAME:  site.yml
+#   DESCRIPTION:  Entry point for playbook
+# ============================================================================
+---
+service_account: ihsadm
+install_path: /opt/IBM/HTTPServer
+profiles_path: /opt/IBM/HTTPServer/conf.d
