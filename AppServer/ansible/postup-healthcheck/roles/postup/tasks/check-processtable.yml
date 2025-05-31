@@ -4,13 +4,16 @@
 # ============================================================================
 ---
 - name: Check if WAS is running
+  community.general.pids:
+    pattern: "(java|{{ item }})"
+  register: was_processes
   ansible.builtin.shell:
     cmd: ps -ef | grep java | grep {{ item }} | grep -v grep
   loop: "{{ server_list }}"
   register: was_processes
   changed_when: false
 
-- name: Notify handler if failures occurred
+- name: Send an alert if no processes are found
   ansible.builtin.notify:
     - pid_check_failed
-  when: {{ was_processes | length == 0 }}
+  when: was_processes.pids is not defined
