@@ -11,6 +11,5 @@
   changed_when: false
 
 - name: Send an alert if no processes are found
-  ansible.builtin.notify:
-    - pid_check_failed
+  notify: pid-check-failed
   when: was_processes.pids is not defined
