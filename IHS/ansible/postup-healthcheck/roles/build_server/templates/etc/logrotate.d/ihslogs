@@ -1,0 +1,51 @@
+#
+# ihs logs
+#
+/opt/IBM/HTTPServer/logs/access_log {
+    weekly
+    rotate 4
+    create
+    dateext
+    compress
+    notifempty
+    olddir /opt/IBM/HTTPServer/logs/archive
+    missingok
+    copytruncate
+}
+
+/opt/IBM/HTTPServer/logs/error_log {
+    weekly
+    rotate 4
+    create
+    dateext
+    compress
+    notifempty
+    olddir /opt/IBM/HTTPServer/logs/archive
+    missingok
+    copytruncate
+}
+
+/opt/IBM/HTTPServer/logs/{{ ihs_instance }}/access_log {
+    weekly
+    rotate 4
+    create
+    dateext
+    compress
+    notifempty
+    olddir /opt/IBM/HTTPServer/logs/{{ ihs_instance }}/archive
+    missingok
+    copytruncate
+}
+
+/opt/IBM/HTTPServer/logs/{{ ihs_instance }}/error_log {
+    weekly
+    rotate 4
+    create
+    dateext
+    compress
+    notifempty
+    olddir /opt/IBM/HTTPServer/logs/{{ ihs_instance }}/archive
+    missingok
+    copytruncate
+}
+
