@@ -176,7 +176,7 @@ def getAppWarName(filePath):
             debugLogger.log(logging.DEBUG, nameListing)
 
             for nameEntry in (nameListing):
-                if (nameEntry.lower().endswith(("war")) != -1):
+                if (nameEntry.lower().endswith((".war"))):
                     debugLogger.log(logging.DEBUG, str("Found war file {0}").format(nameEntry))
 
                     appWarName = nameEntry.lower()
