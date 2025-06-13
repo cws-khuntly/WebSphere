@@ -11,7 +11,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        match: [ bin/* functions.d/* ./AppServer/scripts/bin/* ./AppServer/scripts/lib/* ./IHS/scripts/bin/* ./IHS/scripts/lib/* ./PortalServer/scripts/bin/* ./PortalServer/scripts/bin/* **/*.sh ]
+        match: [ ./AppServer/scripts/bin/* ./AppServer/scripts/lib/* ./IHS/scripts/bin/* ./IHS/scripts/lib/* ./PortalServer/scripts/bin/* ./PortalServer/scripts/bin/* **/*.sh ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
