@@ -21,6 +21,8 @@ import logging
 import logging.config
 
 def configureLogging(logConfigFile):
+    defaultLogConfig = "../wsadmin/logging.properties"
+
     if (len(logConfigFile) != 0):
         if (os.path.exists(logConfigFile)) and (os.access(logConfigFile, os.R_OK)):
             try:
@@ -31,7 +33,17 @@ def configureLogging(logConfigFile):
         else:
             print("Unable to load logging configuration file. No logging enabled!")
         #endif
+    elif (len(defaultLogConfig) == 0):
+        if (os.path.exists(defaultLogConfig)) and (os.access(defaultLogConfig, os.R_OK)):
+            try:
+                logging.config.fileConfig(defaultLogConfig)
+            except Exception as e:
+                print(str("Failed to configure logging: {0}. No logging enabled!").format(str(e)))
+            #endtry
+        else:
+            print("Unable to load default logging configuration file. No logging enabled!")
+        #endif
     else:
-        print("No logging configuration file was provided. No logging enabled!")
-    #endif
+        print("Unable to load default logging configuration file. No logging enabled!")
+        #endif
 #enddef

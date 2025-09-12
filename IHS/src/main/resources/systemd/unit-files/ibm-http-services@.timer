@@ -1,0 +1,31 @@
+#==============================================================================
+#
+#          FILE:  ibm-http-services@.service
+#         USAGE:  Install unit file using appropriate systemctl syntax.
+#     ARGUMENTS:  None
+#   DESCRIPTION:  systemd service to contain IBM WebSphere HTTP servers.
+#
+#       OPTIONS:  ---
+#  REQUIREMENTS:  ---
+#          BUGS:  ---
+#         NOTES:  ---
+#        AUTHOR:  Kevin Huntly <kmhuntly@gmail.com>
+#       COMPANY:  ---
+#       VERSION:  1.0
+#       CREATED:  ---
+#      REVISION:  ---
+#==============================================================================
+[Unit]
+Description=IBM HTTP Services
+PartOf=ibm-http-services@%i.target
+ReloadPropagatedFrom=ibm-http-services@%i.target
+Wants=ibm-http-services@%i.target
+BindsTo=ibm-http-services@%i.service
+
+[Timer]
+OnBootSec=180
+Persistent=true
+Unit=ibm-http-services@%i.service
+
+[Install]
+WantedBy=ibm-http-services@%i.target
