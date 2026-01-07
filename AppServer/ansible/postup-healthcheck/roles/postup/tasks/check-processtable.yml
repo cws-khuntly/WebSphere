@@ -13,7 +13,9 @@
 - name: Send an alert if no processes are found
   vars:
     message_to: kmhuntly+alerts@gmail com
-    message_subject: "Post-boot process check for WASS failed"
+    message_subject: "Post-boot process check for WAS failed"
     message_body: "Post-boot process check for WAS on {{ target_hostname }} found no results"
+  ansible.builtin.debug:
+    msg: "Post-boot process check for WAS failed"
   notify: send-notification
   when: was_processes.pids is not defined
