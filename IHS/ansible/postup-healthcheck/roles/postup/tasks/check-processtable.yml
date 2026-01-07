@@ -7,7 +7,7 @@
   community.general.pids:
     pattern: "(httpd|{{ item }})"
   loop: "{{ server_list }}"
-  register: ihs_processes
+  register: postup_ihs_processes
   changed_when: false
 
 - name: Send an alert if no processes are found
@@ -16,4 +16,4 @@
     message_subject: "Post-boot process check for IHS failed"
     message_body: "Post-boot process check for httpd on {{ target_hostname }} found no results"
   notify: send-notification
-  when: ihs_processes.pids is not defined
+  when: postup_ihs_processes.pids is not defined
