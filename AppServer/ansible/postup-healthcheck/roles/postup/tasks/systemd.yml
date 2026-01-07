@@ -7,7 +7,7 @@
   ansible.builtin.systemd_service:
     name: ibm-was-nodeagent@{{ was_profile_name }}.service
     state: started
-  register: nodeagent_status
+  register: postup-nodeagent_status
 
 - name: WebSphere Application Server nodeagent status
   ansible.builtin.fail:
@@ -16,13 +16,13 @@
       Output of `systemctl status inm-was-nodeagent@{{ was_profile_name }}.service`:
       {{ service_nodeagent_status.stdout }}
       {{ service_nodeagent_status.stderr }}
-  when: nodeagent_status | failed
+  when: postup_nodeagent_status | failed
 
 - name: Check if WebSphere Application Server target started
   ansible.builtin.systemd_service:
     name: ibm-was-services@{{ was_profile_name }}.target
     state: started
-  register: wasprofile_status
+  register: postup_wasprofile_status
 
 - name: WebSphere Application Server target status
   ansible.builtin.fail:
@@ -31,4 +31,4 @@
       Output of `ibm-was-services@{{ was_profile_name }}.target`:
       {{ wasprofile_status.stdout }}
       {{ wasprofile_status.stderr }}
-  when: wasprofile_status | failed
+  when: postup_wasprofile_status | failed
