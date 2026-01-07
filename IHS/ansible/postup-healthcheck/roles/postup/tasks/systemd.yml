@@ -7,7 +7,7 @@
   ansible.builtin.systemd_service:
     name: ibm-ihs-admin.service
     state: started
-  register: ihs_admin_status
+  register: postup_ihs_admin_status
 
 - name: IBM HTTP Administration status
   ansible.builtin.fail:
@@ -16,13 +16,13 @@
       Output of `systemctl status ibm-ihs-admin.service`:
       {{ ihs_admin_status.stdout }}
       {{ ihs_admin_status.stderr }}
-  when: ihs_admin_status | failed
+  when: postup_ihs_admin_status | failed
 
 - name: Check if IBM HTTP Server target started
   ansible.builtin.systemd_service:
     name: ibm-ihs-services.target
     state: started
-  register: ihs_services_status
+  register: postup_ihs_services_status
 
 - name: IBM HTTP Server target status
   ansible.builtin.fail:
@@ -31,4 +31,4 @@
       Output of `ibm-ihs-services.target`:
       {{ ihs_services_status.stdout }}
       {{ ihs_services_status.stderr }}
-  when: ihs_services_status | failed
+  when: postup_ihs_services_status | failed
