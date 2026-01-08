@@ -1,0 +1,10 @@
+# =====  ANSIBLE  ============================================================
+#          NAME:  requirements.yml
+#   DESCRIPTION:  It's for the linter
+# ============================================================================
+---
+collections:
+  - name: ansible.posix
+  - name: community.crypto
+  - name: bitwarden.secrets
+  - name: google.cloud
