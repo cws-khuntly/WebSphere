@@ -3,6 +3,7 @@
     <variables>
         <variable name='sharedLocation' value='/opt/IBM/IMShared'/>
         <variable name='ihsInstallLocation' value='/opt/IBM/HTTPServer'/>
+        <variable name='serviceUser' value='ihsadm'/>
     </variables>
     <server>
         <repository location='/nfs/software/IBM/IHS/FP/FP22' temporary='true'/>
@@ -15,7 +16,7 @@
         <data key='user.ihs.http.server.service.name.key' value='IBMHTTPServerV9.0'/>
         <data key='user.ihs.http.server.service.name' value='none'/>
         <data key='user.ihs.win.serverServiceLogOnAsLocalSystem' value='true'/>
-        <data key='user.ihs.win.serverServiceUser' value='ihsadm'/>
+        <data key='user.ihs.win.serverServiceUser' value='${service user}'/>
         <data key='user.ihs.installHttpService' value='false'/>
     </profile>
     <install>
