@@ -3,6 +3,8 @@
     <variables>
         <variable name='sharedLocation' value='/opt/IBM/IMShared'/>
         <variable name='ihsInstallLocation' value='/opt/IBM/HTTPServer'/>
+        <variable name='serviceUser' value='ihsadm'/>
+        <variable name='servicePassword' value='<PASSWORD>'/>
     </variables>
     <server>
         <repository location='/nfs/software/IBM/IHS/Base' temporary='true'/>
@@ -13,10 +15,10 @@
         <data key='user.ihs.allowNonRootSilentInstall' value='false'/>
         <data key='user.ihs.httpPort' value='8080'/>
         <data key='user.ihs.http.server.service.name.key' value='IBMHTTPServerV9.0'/>
-        <data key='user.ihs.win.serverServicePassword' value='XjTveChg5ba6olBVMK/Reg=='/>
+        <data key='user.ihs.win.serverServicePassword' value='${service password}'/>
         <data key='user.ihs.http.server.service.name' value='IBM HTTP Server V9.0'/>
         <data key='user.ihs.win.serverServiceLogOnAsLocalSystem' value='true'/>
-        <data key='user.ihs.win.serverServiceUser' value='ihsadm'/>
+        <data key='user.ihs.win.serverServiceUser' value='${service user}'/>
     </profile>
     <install>
         <!-- IBM HTTP Server for WebSphere Application Server 9.0.5.0 -->
