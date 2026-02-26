@@ -4,19 +4,16 @@
 # ============================================================================
 ---
 - name: Run postup healthcheck
-
-  pre_tasks:
-
   hosts: appservers
   roles:
     - postup
     - healthcheck
 
-pre_tasks:
-  - name: Install galaxy collections
-    delegate_to: localhost
-    ansible.builtin.command:
-      cmd: "ansible-galaxy collection install -r {{ install.base_path }}/ansible/requirements.yml"
-    changed_when: true
+  pre_tasks:
+    - name: Install galaxy collections
+      delegate_to: localhost
+      ansible.builtin.command:
+        cmd: "ansible-galaxy collection install -r {{ install.base_path }}/ansible/requirements.yml"
+      changed_when: true
 
   post_tasks:
