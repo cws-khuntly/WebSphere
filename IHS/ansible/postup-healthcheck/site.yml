@@ -13,7 +13,7 @@
     - name: Install galaxy collections
       delegate_to: localhost
       ansible.builtin.command:
-        cmd: "ansible-galaxy collection install -r {{ install.base_path }}/ansible/requirements.yml"
+        cmd: "ansible-galaxy collection install -r ./requirements.yml"
       changed_when: true
 
   post_tasks:
