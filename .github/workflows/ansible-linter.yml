@@ -20,7 +20,7 @@ jobs:
         with:
           args: ""
           setup_python: "true"
-          working_directory: "WAS/ansible"
+          working_directory: "AppServer/ansible"
           requirements_file: ""
       - name: Run Ansible linter - IHS Playbook
         uses: ansible/ansible-lint@main
