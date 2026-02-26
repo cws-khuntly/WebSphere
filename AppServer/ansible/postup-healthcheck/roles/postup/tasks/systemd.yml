@@ -7,7 +7,7 @@
   ansible.builtin.systemd_service:
     name: ibm-was-nodeagent@{{ was_profile_name }}.service
     state: started
-  register: postup-nodeagent_status
+  register: postup_nodeagent_status
 
 - name: WebSphere Application Server nodeagent status
   ansible.builtin.fail:
