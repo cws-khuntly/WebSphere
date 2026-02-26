@@ -7,7 +7,7 @@
   community.general.pids:
     pattern: "(java|{{ item }})"
   loop: "{{ server_list }}"
-  register: was_processes
+  register: postup_was_processes
   changed_when: false
 
 - name: Send an alert if no processes are found
@@ -18,4 +18,4 @@
   ansible.builtin.debug:
     msg: "Post-boot process check for WAS failed"
   notify: send-notification
-  when: was_processes.pids is not defined
+  when: postup_was_processes.pids is not defined
